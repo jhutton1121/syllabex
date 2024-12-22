@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+        header a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        header a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Syallabex</h1>
+        <nav>
+            {% if latest_quiz %}
+                <a href="{% url 'quiz' latest_quiz.id %}">Take Quiz: {{ latest_quiz.title }}</a>
+            {% else %}
+                <p>No quizzes available at the moment.</p>
+            {% endif %}
+        </nav>
+    </header>
+    <main>
+        <h2>Syllabex Quiz Module</h2>
+        <p>Click the link above to take your quiz.</p>
+    </main>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ quiz.title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .question-container {
+            margin: 0 auto;
+            max-width: 600px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .feedback {
+            text-align: center;
+            padding: 10px;
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .correct {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .incorrect {
+            background-color: #FF6347;
+            color: white;
+        }
+        .submit-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .submit-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-header">
+        <h1>{{ quiz.title }}</h1>
+    </div>
+    <div class="question-container">
+        {% if current_question %}
+            <h2>{{ current_question.question_text }}</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <ul>
+                    {% for option in current_question.options.all %}
+                        <li>
+                            <label>
+                                <input type="radio" name="option" value="{{ option.id }}">
+                                {{ option.text }}
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <button type="submit" class="submit-button">Submit Answer</button>
+            </form>
+        {% else %}
+            <p>No questions available.</p>
+        {% endif %}
+
+        {% if feedback %}
+            <div class="feedback {% if is_correct %}correct{% else %}incorrect{% endif %}">
+                {{ feedback }}
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
