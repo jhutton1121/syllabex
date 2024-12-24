@@ -27,6 +27,8 @@ class Student(User):
     
     base_role = User.Role.STUDENT
 
+    student = StudentManager()
+
     class Meta:
         proxy = True
     
