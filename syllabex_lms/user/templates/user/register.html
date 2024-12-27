@@ -95,20 +95,28 @@
         <form method="post">
             {% csrf_token %}
             <div class="form-group">
-                <label for="id_first_name">First name</label>
-                <input type="text" id="id_first_name" name="first_name" required>
-            </div>
-            <div class="form-group">
-                <label for="id_last_name">Last name</label>
-                <input type="text" id="id_last_name" name="last_name" required>
+                <label for="id_username">Username</label>
+                <input type="text" id="id_username" name="username" required>
             </div>
             <div class="form-group">
                 <label for="id_email">Email address</label>
                 <input type="email" id="id_email" name="email" required>
             </div>
             <div class="form-group">
-                <label for="id_password">Password</label>
-                <input type="password" id="id_password" name="password" required>
+                <label for="id_password1">Password</label>
+                <input type="password" id="id_password1" name="password1" required>
+            </div>
+            <div class="form-group">
+                <label for="id_password2">Confirm Password</label>
+                <input type="password" id="id_password2" name="password2" required>
+            </div>
+            <div class="form-group">
+                <label for="id_role">Role</label>
+                <select id="id_role" name="role" required>
+                    {% for role in roles %}
+                        <option value="{{ role }}">{{ role }}</option>
+                    {% endfor %}
+                </select>
             </div>
             <button type="submit" class="btn">Create Account</button>
         </form>

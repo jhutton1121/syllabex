@@ -7,18 +7,14 @@ def register(request):
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            role = form.cleaned_data['role']
-            
-            # Redirect to specific profile creation based on role
-            if role == User.Role.STUDENT:
-                return redirect('student_profile', user_id=user.id)
-            elif role == User.Role.TEACHER:
-                return redirect('teacher_profile', user_id=user.id)
-            else:
-                return redirect('login')  # Admins don't need extra profiles
+            role = form.cleaned_data['role']           
+            return redirect('login')  # Admins don't need extra profiles
     else:
         form = UserRegistrationForm()
-    return render(request, 'user/register.html', {'form': form})
+    
+    roles = [choice[0] for choice in User.Role.choices]
+
+    return render(request, 'user/register.html', {'form': form, 'roles': roles})
 
 def student_profile(request, user_id):
     user = User.objects.get(id=user_id)
