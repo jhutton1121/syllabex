@@ -128,7 +128,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "user.User"
 
-LOGIN_REDIRECT_URL = "/home/"
+LOGIN_REDIRECT_URL = '/home/'
 
 MEDIA_ROOT = BASE_DIR / 'media'
 

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register | Syllabex</title>
+    <title>Login | Syllabex</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -73,15 +73,15 @@
         .btn:hover {
             background-color: #6841c1;
         }
-        .login-link {
+        .register-link {
             margin-top: 1rem;
             font-size: 0.9rem;
         }
-        .login-link a {
+        .register-link a {
             color: #7a4ddf;
             text-decoration: none;
         }
-        .login-link a:hover {
+        .register-link a:hover {
             text-decoration: underline;
         }
     </style>
@@ -91,7 +91,7 @@
         <div class="logo">
             <img src="{% static 'media/logo.png' %}" alt="Syllabex Logo">
         </div>
-        <p>Create your first Syllabex course generated from your syllabus.</p>
+        <p>Welcome back to Syllabex</p>
         <form method="post">
             {% csrf_token %}
             <div class="form-group">
@@ -99,29 +99,13 @@
                 <input type="text" id="id_username" name="username" required>
             </div>
             <div class="form-group">
-                <label for="id_email">Email address</label>
-                <input type="email" id="id_email" name="email" required>
+                <label for="id_password">Password</label>
+                <input type="password" id="id_password" name="password" required>
             </div>
-            <div class="form-group">
-                <label for="id_password1">Password</label>
-                <input type="password" id="id_password1" name="password1" required>
-            </div>
-            <div class="form-group">
-                <label for="id_password2">Confirm Password</label>
-                <input type="password" id="id_password2" name="password2" required>
-            </div>
-            <div class="form-group">
-                <label for="id_role">Role</label>
-                <select id="id_role" name="role" required>
-                    {% for role in roles %}
-                        <option value="{{ role }}">{{ role }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <button type="submit" class="btn">Create Account</button>
+            <button type="submit" class="btn">Login</button>
         </form>
-        <div class="login-link">
-            Already have an account? <a href="{% url 'user:login' %}">Login</a>
+        <div class="register-link">
+            Don't have an account? <a href="{% url 'user:register' %}">Register</a>
         </div>
     </div>
 </body>
