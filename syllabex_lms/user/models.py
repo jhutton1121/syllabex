@@ -39,11 +39,6 @@ class StudentProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     student_id = models.AutoField(primary_key=True)
 
-@receiver(post_save, sender=Student)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created and instance.role == "STUDENT":
-        StudentProfile.objects.create(user=instance)
-
 
 class TeacherManager(BaseUserManager):
     def get_queryset(self, *args, **kwargs):
@@ -73,6 +68,16 @@ class TeacherProfile(models.Model):
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         if instance.role == User.Role.STUDENT:
-            StudentProfile.objects.create(user=instance)
+            StudentProfile.objects.get_or_create(user=instance)
         elif instance.role == User.Role.TEACHER:
-            TeacherProfile.objects.create(user=instance)
+            TeacherProfile.objects.get_or_create(user=instance)
+
+@receiver(post_save, sender=Student)
+def create_student_profile(sender, instance, created, **kwargs):
+    if created:
+        StudentProfile.objects.get_or_create(user=instance)
+
+@receiver(post_save, sender=Teacher)
+def create_teacher_profile(sender, instance, created, **kwargs):
+    if created:
+        TeacherProfile.objects.get_or_create(user=instance)
