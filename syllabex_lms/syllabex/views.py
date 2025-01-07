@@ -18,4 +18,6 @@ def student_dashboard(request):
 def teacher_dashboard(request):
     if request.user.role != User.Role.TEACHER:
         raise PermissionDenied
-    return render(request, 'user_dashboards/teacher_dashboard.html')
+    courses = Course.objects.filter(teacher=request.user)
+
+    return render(request, 'user_dashboards/teacher_dashboard.html', {'courses': courses})
