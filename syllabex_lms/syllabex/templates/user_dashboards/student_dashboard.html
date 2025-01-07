@@ -59,7 +59,7 @@
         <div class="row">
             <!-- Sidebar -->
             <div class="col-md-3 sidebar">
-                <a href="/quiz/">
+                <a href="/assignments/">
                     <!-- Modern Icon for Quiz -->
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-question-circle" viewBox="0 0 16 16">
                         <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 13A6 6 0 1 1 8 2a6 6 0 0 1 0 12z"/>
@@ -72,7 +72,7 @@
             <!-- Main Content -->
             <div class="col-md-9 main-content">
                 <h2>Your Courses</h2>
-                {% if course.exists %}
+                {% if courses %}
                     {% for course in courses %}
                         <div class="course-card">
                             <h3>{{ course.name }}</h3>

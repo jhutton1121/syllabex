@@ -20,6 +20,11 @@ class AbstractAssignment(models.Model):
 
 class Quiz(AbstractAssignment):
     questions = models.ManyToManyField('Question', related_name= 'quizzes')
+    exclude = ('assignment_type')
+
+    def save_model(self, request, obj, form, change):
+        obj.assignment_type = 'quiz'
+        super().save_model(request, obj, form, change)
 
     def __str__(self):
         return self.title
