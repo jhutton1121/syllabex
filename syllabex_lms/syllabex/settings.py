@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'user',
     'quiz',
-    'core',
     'course',
 ]
 
@@ -58,7 +57,7 @@ ROOT_URLCONF = 'syllabex.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'syllabex/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

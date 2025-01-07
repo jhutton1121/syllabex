@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from user.models import User, create_user_profile
+from user.models import User
 from course.models import Course
 
 def home(request):
