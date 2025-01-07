@@ -15,8 +15,8 @@ class CourseAdmin(admin.ModelAdmin):
         # Get the base queryset
         qs = super().get_queryset(request)
         # You can annotate with quiz count if desired
-        return qs.prefetch_related('quizzes')
+        return qs.prefetch_related('assignment')
     
     def quizzes_count(self, obj):
-        return obj.quizzes.count()
+        return obj.assignments.filter(assignment_type='quiz').count()
     quizzes_count.short_description = 'Number of Quizzes'

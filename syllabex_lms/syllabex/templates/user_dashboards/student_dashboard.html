@@ -72,7 +72,7 @@
             <!-- Main Content -->
             <div class="col-md-9 main-content">
                 <h2>Your Courses</h2>
-                {% if courses.exists %}
+                {% if course.exists %}
                     {% for course in courses %}
                         <div class="course-card">
                             <h3>{{ course.name }}</h3>
