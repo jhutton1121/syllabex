@@ -9,15 +9,17 @@ body {
   justify-content: center;
   min-height: 100vh;
   margin: 0;
-  background-color: #f9f9f9; /* Light gray background */
+  background-color: #f9f9f9;
 }
 
 .container {
   text-align: center;
-  background: #fff; /* White background for the container */
+  background: #fff;
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 450px;
+  width: 100%;
 }
 
 .logo {
@@ -43,16 +45,24 @@ form {
 .form-group select {
   width: 100%;
   padding: 1rem;
-  padding-top: 1.5rem;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 1rem;
   box-sizing: border-box;
+  background-color: #fff;
+  color: #333;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #7a4ddf;
+  box-shadow: 0 0 4px rgba(122, 77, 223, 0.5);
 }
 
 .form-group label {
   position: absolute;
-  top: 0.8rem;
+  top: -0.5rem;
   left: 1rem;
   font-size: 0.9rem;
   color: #666;
