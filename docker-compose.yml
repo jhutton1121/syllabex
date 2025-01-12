@@ -20,4 +20,8 @@
       depends_on:
         - backend
       environment:
-        - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_INTERVAL=100
+      - WATCHPACK_POLLING=true  # Enable polling for Webpack/Next.js
+      - NEXT_WEBPACK_USEPOLLING=1  # Force webpack to use polling
+      - NODE_ENV=development

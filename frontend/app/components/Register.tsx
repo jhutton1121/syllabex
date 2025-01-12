@@ -98,7 +98,7 @@ const Register: React.FC = () => {
       <div className="logo">
         <img src="/media/logo.png" alt="Syllabex Logo" />
       </div>
-      <p>Create your first Syllabex course generated from your syllabus.</p>
+      <p className="register-heading">Register Today!</p>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="id_username">Username</label>
