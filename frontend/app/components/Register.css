@@ -1,0 +1,93 @@
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+body {
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  margin: 0;
+  background-color: #f9f9f9; /* Light gray background */
+}
+
+.container {
+  text-align: center;
+  background: #fff; /* White background for the container */
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+  margin-bottom: 1rem;
+}
+
+.logo img {
+  width: 150px;
+  height: auto;
+}
+
+form {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.form-group {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 1rem;
+  padding-top: 1.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.form-group label {
+  position: absolute;
+  top: 0.8rem;
+  left: 1rem;
+  font-size: 0.9rem;
+  color: #666;
+  background: #fff;
+  padding: 0 0.2rem;
+  transform: translateY(-50%);
+}
+
+.btn {
+  width: 100%;
+  padding: 0.8rem;
+  margin-top: 1rem;
+  background-color: #7a4ddf;
+  color: #fff;
+  font-weight: bold;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background-color: #6841c1;
+}
+
+.login-link {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.login-link a {
+  color: #7a4ddf;
+  text-decoration: none;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}

@@ -33,12 +33,16 @@ logs:  ## Tail logs from all services (Ctrl-C to exit)
 
 ## —— Django Commands (Run in the Backend Container) —————————————————
 
+.PHONY: startapp 
+startapp:
+	$(COMPOSE_CMD) run --rm $(BACKEND_SERVICE) python manage.py startapp $(APP) 
+
 .PHONY: migrate
 migrate:  ## Run Django migrations
 	$(COMPOSE_CMD) run --rm $(BACKEND_SERVICE) python manage.py migrate
 
 .PHONY: makemigrations
-makemigratoins:
+makemigrations:
 	$(COMPOSE_CMD) run --rm $(BACKEND_SERVICE) python manage.py makemigrations $(APP)
 
 .PHONY: createsuperuser

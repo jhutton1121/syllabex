@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-*_p@2*&dgb@0st-=9nsch6z1rs7)pcpr30_e=h0q32(298j(sg
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'backend', 'backend:8000', 'syllabex-backend:8000', 'syllabex-backend']
 
 
 # Application definition
@@ -37,10 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'rest_framework',
+    'user',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -48,6 +51,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # React development server URL
+    "http://localhost:8000",
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -100,6 +108,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'user.User'
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -122,3 +132,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
