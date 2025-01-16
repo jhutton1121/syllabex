@@ -53,6 +53,17 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+SIMPLE_JWT = {
+  # It will work instead of the default serializer(TokenObtainPairSerializer).
+  "TOKEN_OBTAIN_SERIALIZER": "user.serializers.UserTokenObtainPairSerializer",
+}
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React development server URL
     "http://localhost:8000",

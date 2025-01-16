@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 User = get_user_model()
 
@@ -39,3 +41,12 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 class RoleListSerializer(serializers.Serializer):
     roles = serializers.ListField(child=serializers.CharField())
+
+class UserTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        token['role'] = user.role
+
+        return token
