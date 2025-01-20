@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 import { JwtPayload } from "../types/jwtPayload"; 
 
+interface UserMeResponse {
+  username: string;
+  role: string; // e.g. "STUDENT", "TEACHER", "ADMIN"
+} 
 
 export default function Login() {
   const router = useRouter();
@@ -35,21 +39,35 @@ export default function Login() {
       const token = data.access as string;
 
       // Optionally store the token
-      // localStorage.setItem('token', token);
+      localStorage.setItem('token', token);
 
       // Decode the JWT to get user role (or other claims)
       const decoded: JwtPayload = jwtDecode<JwtPayload>(token);
       const userRole = decoded.role;
 
+      // 3) Fetch user info from /api/user/me/ using the JWT
+      const userRes = await fetch(`${API_BASE_URL}/api/user/me/`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (!userRes.ok) {
+        throw new Error(`Failed to fetch user data: status ${userRes.status}`);
+      }
+
+      const userData = (await userRes.json()) as UserMeResponse;
+      // Example userData => { username: "someuser", role: "TEACHER" }
+
       // Redirect based on role
-      switch (userRole) {
-        case "admin":
+      switch (userData.role) {
+        case "ADMIN":
           router.push("/admin-dashboard");
           break;
-        case "teacher":
+        case "TEACHER":
           router.push("/teacher-dashboard");
           break;
-        case "student":
+        case "STUDENT":
           router.push("/student-dashboard");
           break;
         default:
