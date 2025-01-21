@@ -27,6 +27,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  align-content: start;
   justify-content: center;
   min-height: 100vh;
   margin: 0;
@@ -52,10 +53,32 @@ a {
 }
 
 
+.top {
+  position:absolute;
+  left: 0;
+  right: 0;
+  height: 92px;
+}
+
+.left {
+  position:absolute;
+  left:0; 
+  top:92px; 
+  bottom: 0;
+  width: 178px;
+}
+
+.main {
+  position: absolute;
+  left:178px; 
+  top:92px; 
+  right:0; 
+  bottom:0;
+}
 
 .container {
   text-align: center;
-  background: #fff;
+  background: var(--background);
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -63,7 +86,9 @@ a {
   width: 100%;
 }
 
+
 .logo {
+  margin-top: 1rem;
   margin-bottom: 1rem;
 }
 
