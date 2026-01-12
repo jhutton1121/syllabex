@@ -97,6 +97,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     
     def validate(self, attrs):
         """Validate passwords match and role-specific fields"""
+        # #region agent log
+        import json
+        with open(r'c:\Users\John\VSCodeProjects\syllabex\.cursor\debug.log', 'a') as f:
+            f.write(json.dumps({'location':'serializers.py:98','message':'Validate called','data':{'role':attrs.get('role'),'hasDateOfBirth':'date_of_birth' in attrs,'dateOfBirthValue':str(attrs.get('date_of_birth')),'employeeId':attrs.get('employee_id')},'timestamp':__import__('time').time()*1000,'sessionId':'debug-session','hypothesisId':'A,C'}) + '\n')
+        # #endregion
         if attrs['password'] != attrs['password_confirm']:
             raise serializers.ValidationError({
                 "password": "Password fields didn't match."
@@ -118,10 +123,20 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
                     "employee_id": "Employee ID is required for teacher/admin registration."
                 })
         
+        # #region agent log
+        import json
+        with open(r'c:\Users\John\VSCodeProjects\syllabex\.cursor\debug.log', 'a') as f:
+            f.write(json.dumps({'location':'serializers.py:121','message':'Validation passed','data':{'role':role,'attrsKeys':list(attrs.keys())},'timestamp':__import__('time').time()*1000,'sessionId':'debug-session','hypothesisId':'A'}) + '\n')
+        # #endregion
         return attrs
     
     def create(self, validated_data):
         """Create user and associated profile"""
+        # #region agent log
+        import json
+        with open(r'c:\Users\John\VSCodeProjects\syllabex\.cursor\debug.log', 'a') as f:
+            f.write(json.dumps({'location':'serializers.py:123','message':'Create called','data':{'validatedDataKeys':list(validated_data.keys()),'role':validated_data.get('role')},'timestamp':__import__('time').time()*1000,'sessionId':'debug-session','hypothesisId':'D'}) + '\n')
+        # #endregion
         # Extract profile data
         role = validated_data.pop('role')
         password_confirm = validated_data.pop('password_confirm')
@@ -131,6 +146,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         department = validated_data.pop('department', '')
         permissions_level = validated_data.pop('permissions_level', 1)
         
+        # #region agent log
+        with open(r'c:\Users\John\VSCodeProjects\syllabex\.cursor\debug.log', 'a') as f:
+            f.write(json.dumps({'location':'serializers.py:136','message':'Profile data extracted','data':{'role':role,'employeeId':employee_id,'dateOfBirth':str(date_of_birth),'department':department},'timestamp':__import__('time').time()*1000,'sessionId':'debug-session','hypothesisId':'D'}) + '\n')
+        # #endregion
         # Create user
         user = User.objects.create_user(**validated_data)
         
@@ -142,11 +161,27 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
                 date_of_birth=date_of_birth
             )
         elif role == 'teacher':
-            TeacherProfile.objects.create(
-                user=user,
-                employee_id=employee_id,
-                department=department
-            )
+            # #region agent log
+            import json
+            with open(r'c:\Users\John\VSCodeProjects\syllabex\.cursor\debug.log', 'a') as f:
+                f.write(json.dumps({'location':'serializers.py:144','message':'Creating teacher profile','data':{'userId':user.id,'employeeId':employee_id,'department':department},'timestamp':__import__('time').time()*1000,'sessionId':'debug-session','hypothesisId':'B,D,E'}) + '\n')
+            # #endregion
+            try:
+                TeacherProfile.objects.create(
+                    user=user,
+                    employee_id=employee_id,
+                    department=department
+                )
+                # #region agent log
+                with open(r'c:\Users\John\VSCodeProjects\syllabex\.cursor\debug.log', 'a') as f:
+                    f.write(json.dumps({'location':'serializers.py:149','message':'Teacher profile created successfully','data':{'userId':user.id},'timestamp':__import__('time').time()*1000,'sessionId':'debug-session','hypothesisId':'B,E'}) + '\n')
+                # #endregion
+            except Exception as e:
+                # #region agent log
+                with open(r'c:\Users\John\VSCodeProjects\syllabex\.cursor\debug.log', 'a') as f:
+                    f.write(json.dumps({'location':'serializers.py:149','message':'Teacher profile creation FAILED','data':{'error':str(e),'errorType':type(e).__name__,'userId':user.id},'timestamp':__import__('time').time()*1000,'sessionId':'debug-session','hypothesisId':'B,E'}) + '\n')
+                # #endregion
+                raise
         elif role == 'admin':
             AdminProfile.objects.create(
                 user=user,
