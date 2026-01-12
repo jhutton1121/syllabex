@@ -10,6 +10,7 @@ import RegisterPage from './pages/RegisterPage';
 import StudentDashboard from './pages/StudentDashboard';
 import TeacherDashboard from './pages/TeacherDashboard';
 import CreateAssignment from './pages/CreateAssignment';
+import CreateCourse from './pages/CreateCourse';
 import TakeAssignment from './pages/TakeAssignment';
 
 function App() {
@@ -47,6 +48,14 @@ function App() {
               element={
                 <PrivateRoute allowedRoles={['teacher']}>
                   <TeacherDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/teacher/courses/create"
+              element={
+                <PrivateRoute allowedRoles={['teacher']}>
+                  <CreateCourse />
                 </PrivateRoute>
               }
             />
