@@ -55,18 +55,36 @@ const RegisterPage = () => {
     }
 
     try {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/0e9f23e3-2830-4e0f-950b-18a18264dff5',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'RegisterPage.js:57',message:'Registration attempt',data:{role:formData.role,hasDateOfBirth:!!formData.date_of_birth,dateOfBirthValue:formData.date_of_birth,employeeId:formData.employee_id},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A,C'})}).catch(()=>{});
-      // #endregion
-      await register(formData);
+      // Filter out empty/irrelevant fields based on role
+      const registrationData = {
+        email: formData.email,
+        password: formData.password,
+        password_confirm: formData.password_confirm,
+        role: formData.role,
+      };
+
+      // Add role-specific fields
+      if (formData.role === 'student') {
+        registrationData.student_id = formData.student_id;
+        // Only include date_of_birth if it has a value
+        if (formData.date_of_birth) {
+          registrationData.date_of_birth = formData.date_of_birth;
+        }
+      } else if (formData.role === 'teacher') {
+        registrationData.employee_id = formData.employee_id;
+        if (formData.department) {
+          registrationData.department = formData.department;
+        }
+      } else if (formData.role === 'admin') {
+        registrationData.employee_id = formData.employee_id;
+      }
+
+      await register(registrationData);
       setSuccess('Registration successful! Please login.');
       setTimeout(() => {
         navigate('/login');
       }, 2000);
     } catch (err) {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/0e9f23e3-2830-4e0f-950b-18a18264dff5',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'RegisterPage.js:64',message:'Registration error caught',data:{errorResponse:err.response?.data,status:err.response?.status,role:formData.role},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A,C,D'})}).catch(()=>{});
-      // #endregion
       const errorMessage = err.response?.data;
       if (typeof errorMessage === 'object') {
         const firstError = Object.values(errorMessage)[0];

@@ -1,0 +1,147 @@
+.subtitle {
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.dashboard-actions {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* Course Items */
+.courses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.course-item {
+  padding: 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.course-item h3 {
+  margin-bottom: 10px;
+  color: #333;
+  font-size: 18px;
+}
+
+.course-item p {
+  margin-bottom: 8px;
+  color: #666;
+}
+
+.course-meta {
+  font-size: 14px;
+  color: #888;
+}
+
+.course-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Assignment Items */
+.assignments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.assignment-item {
+  padding: 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.assignment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.assignment-header h4 {
+  margin: 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.assignment-type {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.type-quiz {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.type-test {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
+
+.type-homework {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.assignment-course {
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 5px;
+}
+
+.assignment-due {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.assignment-points {
+  color: #888;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.assignment-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-actions {
+    flex-direction: column;
+  }
+  
+  .dashboard-actions button {
+    width: 100%;
+  }
+}
