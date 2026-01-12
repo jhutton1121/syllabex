@@ -55,20 +55,42 @@ python -m venv venv
 pip install -r requirements.txt
 ```
 
-4. **Configure environment variables** (optional):
-   - Defaults work for development with SQLite
+4. **Configure database**:
+   
+   **Option A: SQLite (Quick Start)**
+   - No configuration needed - works out of the box
+   - Good for development and testing
+   
+   **Option B: PostgreSQL (Recommended for Production)**
+   - Install PostgreSQL on your system
+   - Create a database: `CREATE DATABASE syllabex_db;`
+   - Copy `env.template` to `.env` and configure:
+     ```
+     DB_ENGINE=django.db.backends.postgresql
+     DB_NAME=syllabex_db
+     DB_USER=postgres
+     DB_PASSWORD=your_password
+     DB_HOST=localhost
+     DB_PORT=5432
+     ```
+   - See `POSTGRESQL_SETUP.md` for detailed instructions
 
-5. **Run migrations**:
+5. **Verify database setup** (optional):
+```bash
+python setup_database.py
+```
+
+6. **Run migrations**:
 ```bash
 python manage.py migrate
 ```
 
-6. **Create a superuser**:
+7. **Create a superuser**:
 ```bash
 python manage.py createsuperuser
 ```
 
-7. **Run the development server**:
+8. **Run the development server**:
 ```bash
 python manage.py runserver
 ```
@@ -111,24 +133,50 @@ The API will be available at `http://localhost:8000/`
 
 ## Development
 
-### Create Migrations
+### Database Operations
+
+**Verify Database Setup**:
+```bash
+python setup_database.py
+```
+
+**Create Migrations**:
 ```bash
 python manage.py makemigrations
 ```
 
-### Apply Migrations
+**Apply Migrations**:
 ```bash
 python manage.py migrate
 ```
 
-### Run Tests
+**Check Migration Status**:
+```bash
+python manage.py showmigrations
+```
+
+**Access Database Shell**:
+```bash
+# Django ORM shell
+python manage.py shell
+
+# Direct database shell
+python manage.py dbshell
+```
+
+### Testing
+
+**Run Tests**:
 ```bash
 python manage.py test
 ```
 
-### Access Django Shell
+**Run Specific App Tests**:
 ```bash
-python manage.py shell
+python manage.py test users
+python manage.py test courses
+python manage.py test assignments
+python manage.py test gradebook
 ```
 
 ## Production Deployment

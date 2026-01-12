@@ -47,9 +47,8 @@ media/
 # Do not ignore app-specific static files
 !syllabex_lms/syllabex/static/
 
-# Migrations
-**/migrations/*.py
-!**/migrations/__init__.py
+# Note: Migrations should be committed to version control
+# They are essential for database schema management
 
 # Build directories
 build/
