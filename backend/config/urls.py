@@ -2,7 +2,7 @@
 URL configuration for config project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.1/topics/http/urls/
+    https://docs.djangoproject.com/en/4.2/topics/http/urls/
 Examples:
 Function views
     1. Add an import:  from my_app import views
@@ -16,8 +16,42 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.http import JsonResponse
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
+
+
+def api_root(request):
+    """API root endpoint with welcome message and available endpoints"""
+    return JsonResponse({
+        'message': 'Welcome to Syllabex API',
+        'version': '1.0.0',
+        'status': 'active',
+        'endpoints': {
+            'admin': '/admin/',
+            'api': {
+                'authentication': {
+                    'login': '/api/auth/login/',
+                    'refresh': '/api/auth/refresh/',
+                },
+                'note': 'Additional API endpoints will be available soon'
+            }
+        },
+        'documentation': 'See backend/README.md for setup and usage instructions'
+    })
+
 
 urlpatterns = [
+    path('', api_root, name='api_root'),  # Root endpoint
     path('admin/', admin.site.urls),
-    path('api/', include('user.urls', namespace='user')),
+    # JWT Authentication endpoints
+    path('api/auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    # App URLs (will be created later)
+    # path('api/users/', include('users.urls')),
+    # path('api/courses/', include('courses.urls')),
+    # path('api/assignments/', include('assignments.urls')),
+    # path('api/gradebook/', include('gradebook.urls')),
 ]
