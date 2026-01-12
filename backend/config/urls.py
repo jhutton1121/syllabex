@@ -49,9 +49,9 @@ urlpatterns = [
     # JWT Authentication endpoints
     path('api/auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    # App URLs (will be created later)
-    # path('api/users/', include('users.urls')),
-    # path('api/courses/', include('courses.urls')),
-    # path('api/assignments/', include('assignments.urls')),
-    # path('api/gradebook/', include('gradebook.urls')),
+    # App URLs
+    path('api/users/', include('users.urls')),
+    path('api/courses/', include('courses.urls')),
+    path('api/assignments/', include('assignments.urls')),
+    path('api/gradebook/', include('gradebook.urls')),
 ]
