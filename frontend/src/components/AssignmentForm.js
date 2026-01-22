@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import courseService from '../services/courseService';
 import assignmentService from '../services/assignmentService';
+import QuestionBuilder from './QuestionBuilder';
+import QuestionList from './QuestionList';
 import './AssignmentForm.css';
 
 const AssignmentForm = ({ assignment = null, isEdit = false }) => {
@@ -15,6 +17,10 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
     due_date: assignment?.due_date ? assignment.due_date.slice(0, 16) : '',
     points_possible: assignment?.points_possible || 100,
   });
+  const [questions, setQuestions] = useState(assignment?.questions || []);
+  const [showQuestionBuilder, setShowQuestionBuilder] = useState(false);
+  const [editingQuestion, setEditingQuestion] = useState(null);
+  const [editingIndex, setEditingIndex] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -32,11 +38,86 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
     fetchCourses();
   }, []);
 
+  // Load questions if editing
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      if (isEdit && assignment?.id) {
+        try {
+          const questionsData = await assignmentService.getQuestions(assignment.id);
+          setQuestions(questionsData || []);
+        } catch (err) {
+          console.error('Failed to load questions:', err);
+        }
+      }
+    };
+
+    fetchQuestions();
+  }, [isEdit, assignment?.id]);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handleAddQuestion = () => {
+    setEditingQuestion(null);
+    setEditingIndex(null);
+    setShowQuestionBuilder(true);
+  };
+
+  const handleEditQuestion = (question, index) => {
+    setEditingQuestion(question);
+    setEditingIndex(index);
+    setShowQuestionBuilder(true);
+  };
+
+  const handleSaveQuestion = (questionData) => {
+    if (editingIndex !== null) {
+      // Update existing question
+      const newQuestions = [...questions];
+      newQuestions[editingIndex] = { ...questionData, id: editingQuestion?.id };
+      setQuestions(newQuestions);
+    } else {
+      // Add new question
+      setQuestions([...questions, { ...questionData, order: questions.length }]);
+    }
+    setShowQuestionBuilder(false);
+    setEditingQuestion(null);
+    setEditingIndex(null);
+  };
+
+  const handleDeleteQuestion = (index) => {
+    if (window.confirm('Are you sure you want to delete this question?')) {
+      const newQuestions = questions.filter((_, i) => i !== index);
+      // Update order values
+      newQuestions.forEach((q, i) => {
+        q.order = i;
+      });
+      setQuestions(newQuestions);
+    }
+  };
+
+  const handleReorderQuestions = (fromIndex, toIndex) => {
+    const newQuestions = [...questions];
+    const [moved] = newQuestions.splice(fromIndex, 1);
+    newQuestions.splice(toIndex, 0, moved);
+    // Update order values
+    newQuestions.forEach((q, i) => {
+      q.order = i;
+    });
+    setQuestions(newQuestions);
+  };
+
+  const handleCancelQuestion = () => {
+    setShowQuestionBuilder(false);
+    setEditingQuestion(null);
+    setEditingIndex(null);
+  };
+
+  const getTotalQuestionPoints = () => {
+    return questions.reduce((sum, q) => sum + (q.points || 0), 0);
   };
 
   const handleSubmit = async (e) => {
@@ -52,11 +133,32 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
         due_date: new Date(formData.due_date).toISOString(),
       };
 
+      let assignmentId;
+
       if (isEdit) {
         await assignmentService.updateAssignment(assignment.id, submitData);
+        assignmentId = assignment.id;
+        
+        // Update questions - delete existing and add new ones
+        // For simplicity, we'll add new questions and update existing ones
+        for (const question of questions) {
+          if (question.id) {
+            await assignmentService.updateQuestion(question.id, question);
+          } else {
+            await assignmentService.addQuestion(assignmentId, question);
+          }
+        }
+        
         setSuccess('Assignment updated successfully!');
       } else {
-        await assignmentService.createAssignment(submitData);
+        const newAssignment = await assignmentService.createAssignment(submitData);
+        assignmentId = newAssignment.id;
+        
+        // Add questions to the new assignment
+        for (const question of questions) {
+          await assignmentService.addQuestion(assignmentId, question);
+        }
+        
         setSuccess('Assignment created successfully!');
       }
 
@@ -145,7 +247,7 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
               value={formData.description}
               onChange={handleChange}
               placeholder="Enter assignment description"
-              rows="6"
+              rows="4"
             />
           </div>
 
@@ -173,7 +275,44 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
                 required
                 min="0"
               />
+              {questions.length > 0 && (
+                <small className="form-hint">
+                  Total from questions: {getTotalQuestionPoints()} pts
+                </small>
+              )}
             </div>
+          </div>
+
+          {/* Questions Section */}
+          <div className="questions-section">
+            <div className="section-header">
+              <h3>Questions</h3>
+              {!showQuestionBuilder && (
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleAddQuestion}
+                >
+                  + Add Question
+                </button>
+              )}
+            </div>
+
+            {showQuestionBuilder ? (
+              <QuestionBuilder
+                question={editingQuestion}
+                onSave={handleSaveQuestion}
+                onCancel={handleCancelQuestion}
+                order={questions.length}
+              />
+            ) : (
+              <QuestionList
+                questions={questions}
+                onEdit={handleEditQuestion}
+                onDelete={handleDeleteQuestion}
+                onReorder={handleReorderQuestions}
+              />
+            )}
           </div>
 
           <div className="form-actions">

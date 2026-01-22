@@ -113,6 +113,74 @@ class Homework(Assignment):
         super().save(*args, **kwargs)
 
 
+class Question(models.Model):
+    """Question model for assignments"""
+    
+    TYPE_CHOICES = [
+        ('multiple_choice', 'Multiple Choice'),
+        ('numerical', 'Numerical'),
+        ('text_response', 'Text Response'),
+    ]
+    
+    assignment = models.ForeignKey(
+        Assignment,
+        on_delete=models.CASCADE,
+        related_name='questions',
+        db_index=True
+    )
+    question_type = models.CharField(
+        max_length=20,
+        choices=TYPE_CHOICES,
+        db_index=True
+    )
+    text = models.TextField()
+    points = models.IntegerField(default=1)
+    order = models.IntegerField(default=0)
+    correct_answer_numeric = models.FloatField(null=True, blank=True)
+    numeric_tolerance = models.FloatField(default=0)
+    
+    class Meta:
+        db_table = 'questions'
+        verbose_name = 'Question'
+        verbose_name_plural = 'Questions'
+        ordering = ['order']
+        indexes = [
+            models.Index(fields=['assignment']),
+            models.Index(fields=['question_type']),
+            models.Index(fields=['order']),
+        ]
+    
+    def __str__(self):
+        return f"Q{self.order}: {self.text[:50]}..."
+
+
+class Choice(models.Model):
+    """Choice model for multiple choice questions"""
+    
+    question = models.ForeignKey(
+        Question,
+        on_delete=models.CASCADE,
+        related_name='choices',
+        db_index=True
+    )
+    text = models.CharField(max_length=500)
+    is_correct = models.BooleanField(default=False)
+    order = models.IntegerField(default=0)
+    
+    class Meta:
+        db_table = 'choices'
+        verbose_name = 'Choice'
+        verbose_name_plural = 'Choices'
+        ordering = ['order']
+        indexes = [
+            models.Index(fields=['question']),
+            models.Index(fields=['order']),
+        ]
+    
+    def __str__(self):
+        return f"{self.text[:50]}{'...' if len(self.text) > 50 else ''}"
+
+
 class AssignmentSubmission(models.Model):
     """Student submission for assignments"""
     
@@ -128,7 +196,7 @@ class AssignmentSubmission(models.Model):
         related_name='submissions',
         db_index=True
     )
-    answer = models.TextField()
+    answer = models.TextField(blank=True, default='')
     submitted_at = models.DateTimeField(auto_now_add=True, db_index=True)
     is_late = models.BooleanField(default=False)
     
@@ -152,3 +220,94 @@ class AssignmentSubmission(models.Model):
         if not self.pk and self.assignment:
             self.is_late = timezone.now() > self.assignment.due_date
         super().save(*args, **kwargs)
+    
+    def calculate_score(self):
+        """Calculate total score from graded question responses"""
+        total = 0
+        for response in self.question_responses.filter(graded=True):
+            if response.points_earned is not None:
+                total += response.points_earned
+        return total
+
+
+class QuestionResponse(models.Model):
+    """Student response to individual questions"""
+    
+    submission = models.ForeignKey(
+        AssignmentSubmission,
+        on_delete=models.CASCADE,
+        related_name='question_responses',
+        db_index=True
+    )
+    question = models.ForeignKey(
+        Question,
+        on_delete=models.CASCADE,
+        related_name='responses',
+        db_index=True
+    )
+    response_text = models.TextField(blank=True, default='')
+    is_correct = models.BooleanField(null=True, blank=True)
+    points_earned = models.IntegerField(null=True, blank=True)
+    graded = models.BooleanField(default=False)
+    
+    class Meta:
+        db_table = 'question_responses'
+        verbose_name = 'Question Response'
+        verbose_name_plural = 'Question Responses'
+        unique_together = [['submission', 'question']]
+        indexes = [
+            models.Index(fields=['submission']),
+            models.Index(fields=['question']),
+            models.Index(fields=['graded']),
+        ]
+    
+    def __str__(self):
+        return f"Response to Q{self.question.order} by {self.submission.student.student_id}"
+    
+    def auto_grade(self):
+        """Automatically grade multiple choice and numerical questions"""
+        question = self.question
+        
+        if question.question_type == 'multiple_choice':
+            # Check if selected choice is correct
+            try:
+                selected_choice_id = int(self.response_text)
+                correct_choice = question.choices.filter(is_correct=True).first()
+                if correct_choice and selected_choice_id == correct_choice.id:
+                    self.is_correct = True
+                    self.points_earned = question.points
+                else:
+                    self.is_correct = False
+                    self.points_earned = 0
+                self.graded = True
+            except (ValueError, TypeError):
+                # Invalid response, mark as incorrect
+                self.is_correct = False
+                self.points_earned = 0
+                self.graded = True
+        
+        elif question.question_type == 'numerical':
+            # Check if answer is within tolerance
+            try:
+                student_answer = float(self.response_text)
+                correct_answer = question.correct_answer_numeric
+                tolerance = question.numeric_tolerance
+                
+                if correct_answer is not None and abs(student_answer - correct_answer) <= tolerance:
+                    self.is_correct = True
+                    self.points_earned = question.points
+                else:
+                    self.is_correct = False
+                    self.points_earned = 0
+                self.graded = True
+            except (ValueError, TypeError):
+                # Invalid response, mark as incorrect
+                self.is_correct = False
+                self.points_earned = 0
+                self.graded = True
+        
+        # Text responses are not auto-graded
+        # They remain with graded=False until manual grading
+        
+        self.save()
+        return self.graded
