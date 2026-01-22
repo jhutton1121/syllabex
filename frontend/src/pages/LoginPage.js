@@ -18,15 +18,11 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      const user = await login(email, password);
-      
-      // Redirect based on role
-      if (user.role === 'student') {
-        navigate('/student/dashboard');
-      } else if (user.role === 'teacher') {
-        navigate('/teacher/dashboard');
+      const userData = await login(email, password);
+      if (userData.is_admin) {
+        navigate('/admin');
       } else {
-        navigate('/');
+        navigate('/dashboard');
       }
     } catch (err) {
       setError(err.response?.data?.detail || 'Login failed. Please check your credentials.');
@@ -38,7 +34,10 @@ const LoginPage = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h1>Login to Syllabex</h1>
+        <div className="auth-header">
+          <h1>Welcome Back</h1>
+          <p>Sign in to your Syllabex account</p>
+        </div>
         
         {error && <div className="alert alert-error">{error}</div>}
         
@@ -51,7 +50,7 @@ const LoginPage = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="Enter your email"
+              placeholder="you@example.com"
             />
           </div>
           
@@ -63,17 +62,17 @@ const LoginPage = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              placeholder="Enter your password"
+              placeholder="Your password"
             />
           </div>
           
           <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
         
         <p className="auth-footer">
-          Don't have an account? <Link to="/register">Register here</Link>
+          Don't have an account? <Link to="/register">Create one</Link>
         </p>
       </div>
     </div>

@@ -1,5 +1,5 @@
 from django.db import models
-from users.models import StudentProfile, TeacherProfile
+from users.models import User
 
 
 class Course(models.Model):
@@ -8,13 +8,9 @@ class Course(models.Model):
     code = models.CharField(max_length=20, unique=True, db_index=True)
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    teacher = models.ForeignKey(
-        TeacherProfile, 
-        on_delete=models.CASCADE, 
-        related_name='courses',
-        db_index=True
-    )
     is_active = models.BooleanField(default=True, db_index=True)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -25,16 +21,44 @@ class Course(models.Model):
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['code']),
-            models.Index(fields=['teacher']),
             models.Index(fields=['is_active']),
         ]
     
     def __str__(self):
         return f"{self.code} - {self.name}"
+    
+    def get_instructors(self):
+        """Get all instructors for this course"""
+        return User.objects.filter(
+            memberships__course=self,
+            memberships__role='instructor',
+            memberships__status='active'
+        )
+    
+    def get_students(self):
+        """Get all students for this course"""
+        return User.objects.filter(
+            memberships__course=self,
+            memberships__role='student',
+            memberships__status='active'
+        )
+    
+    def get_active_student_count(self):
+        """Get count of active students"""
+        return self.memberships.filter(role='student', status='active').count()
+    
+    def get_active_instructor_count(self):
+        """Get count of active instructors"""
+        return self.memberships.filter(role='instructor', status='active').count()
 
 
-class CourseEnrollment(models.Model):
-    """Course enrollment linking students to courses"""
+class CourseMembership(models.Model):
+    """Course membership linking users to courses with roles"""
+    
+    ROLE_CHOICES = [
+        ('student', 'Student'),
+        ('instructor', 'Instructor'),
+    ]
     
     STATUS_CHOICES = [
         ('active', 'Active'),
@@ -42,37 +66,52 @@ class CourseEnrollment(models.Model):
         ('completed', 'Completed'),
     ]
     
-    student = models.ForeignKey(
-        StudentProfile, 
+    user = models.ForeignKey(
+        User, 
         on_delete=models.CASCADE, 
-        related_name='enrollments',
+        related_name='memberships',
         db_index=True
     )
     course = models.ForeignKey(
         Course, 
         on_delete=models.CASCADE, 
-        related_name='enrollments',
+        related_name='memberships',
         db_index=True
     )
-    enrolled_at = models.DateTimeField(auto_now_add=True)
+    role = models.CharField(
+        max_length=20,
+        choices=ROLE_CHOICES,
+        default='student',
+        db_index=True
+    )
     status = models.CharField(
         max_length=20, 
         choices=STATUS_CHOICES, 
         default='active',
         db_index=True
     )
+    enrolled_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        db_table = 'course_enrollments'
-        verbose_name = 'Course Enrollment'
-        verbose_name_plural = 'Course Enrollments'
-        unique_together = [['student', 'course']]
+        db_table = 'course_memberships'
+        verbose_name = 'Course Membership'
+        verbose_name_plural = 'Course Memberships'
+        unique_together = [['user', 'course']]
         ordering = ['-enrolled_at']
         indexes = [
-            models.Index(fields=['student']),
+            models.Index(fields=['user']),
             models.Index(fields=['course']),
+            models.Index(fields=['role']),
             models.Index(fields=['status']),
         ]
     
     def __str__(self):
-        return f"{self.student.student_id} enrolled in {self.course.code}"
+        return f"{self.user.email} - {self.role} in {self.course.code}"
+    
+    @property
+    def is_instructor(self):
+        return self.role == 'instructor'
+    
+    @property
+    def is_student(self):
+        return self.role == 'student'

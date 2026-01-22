@@ -1,68 +1,107 @@
 """Serializers for courses app"""
 from rest_framework import serializers
-from .models import Course, CourseEnrollment
-from users.models import TeacherProfile, StudentProfile
-from users.serializers import TeacherProfileSerializer, StudentProfileSerializer
+from .models import Course, CourseMembership
+from users.models import User
+from users.serializers import UserBasicSerializer
 
 
-class CourseSerializer(serializers.ModelSerializer):
-    """Serializer for Course model"""
+class CourseMembershipSerializer(serializers.ModelSerializer):
+    """Serializer for CourseMembership model"""
     
-    teacher_info = TeacherProfileSerializer(source='teacher', read_only=True)
-    teacher_id = serializers.PrimaryKeyRelatedField(
-        source='teacher',
-        queryset=TeacherProfile.objects.all(),
-        write_only=True,
-        required=False
-    )
-    enrollment_count = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = Course
-        fields = [
-            'id', 'code', 'name', 'description', 'teacher', 'teacher_info',
-            'teacher_id', 'is_active', 'created_at', 'updated_at', 'enrollment_count'
-        ]
-        read_only_fields = ['id', 'created_at', 'updated_at', 'teacher']
-    
-    def get_enrollment_count(self, obj):
-        """Get count of active enrollments"""
-        return obj.enrollments.filter(status='active').count()
-
-
-class CourseEnrollmentSerializer(serializers.ModelSerializer):
-    """Serializer for CourseEnrollment model"""
-    
-    student_info = StudentProfileSerializer(source='student', read_only=True)
-    course_info = CourseSerializer(source='course', read_only=True)
-    student_id = serializers.PrimaryKeyRelatedField(
-        source='student',
-        queryset=StudentProfile.objects.all(),
+    user_info = UserBasicSerializer(source='user', read_only=True)
+    user_id = serializers.PrimaryKeyRelatedField(
+        source='user',
+        queryset=User.objects.all(),
         write_only=True
     )
     course_id = serializers.PrimaryKeyRelatedField(
         source='course',
         queryset=Course.objects.all(),
-        write_only=True
+        write_only=True,
+        required=False
     )
     
     class Meta:
-        model = CourseEnrollment
+        model = CourseMembership
         fields = [
-            'id', 'student', 'student_info', 'student_id',
-            'course', 'course_info', 'course_id',
-            'enrolled_at', 'status'
+            'id', 'user', 'user_info', 'user_id',
+            'course', 'course_id', 'role', 'status', 'enrolled_at'
         ]
-        read_only_fields = ['id', 'enrolled_at', 'student', 'course']
+        read_only_fields = ['id', 'enrolled_at', 'user', 'course']
     
     def validate(self, attrs):
-        """Validate enrollment doesn't already exist"""
-        student = attrs.get('student')
+        """Validate membership doesn't already exist"""
+        user = attrs.get('user')
         course = attrs.get('course')
         
-        if CourseEnrollment.objects.filter(student=student, course=course).exists():
-            raise serializers.ValidationError(
-                "Student is already enrolled in this course."
-            )
+        # Only check for duplicates on create, not update
+        if not self.instance and user and course:
+            if CourseMembership.objects.filter(user=user, course=course).exists():
+                raise serializers.ValidationError(
+                    "User is already a member of this course."
+                )
         
         return attrs
+
+
+class CourseSerializer(serializers.ModelSerializer):
+    """Serializer for Course model"""
+    
+    student_count = serializers.SerializerMethodField()
+    instructor_count = serializers.SerializerMethodField()
+    instructors = serializers.SerializerMethodField()
+    user_role = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Course
+        fields = [
+            'id', 'code', 'name', 'description', 'is_active', 
+            'start_date', 'end_date',
+            'created_at', 'updated_at', 'student_count', 
+            'instructor_count', 'instructors', 'user_role'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+    
+    def get_student_count(self, obj):
+        """Get count of active students"""
+        return obj.get_active_student_count()
+    
+    def get_instructor_count(self, obj):
+        """Get count of active instructors"""
+        return obj.get_active_instructor_count()
+    
+    def get_instructors(self, obj):
+        """Get list of instructors for this course"""
+        instructors = obj.memberships.filter(role='instructor', status='active').select_related('user')
+        return [
+            {
+                'id': m.user.id,
+                'email': m.user.email,
+                'first_name': m.user.first_name,
+                'last_name': m.user.last_name
+            }
+            for m in instructors
+        ]
+    
+    def get_user_role(self, obj):
+        """Get the current user's role in this course"""
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return None
+        
+        membership = obj.memberships.filter(user=request.user, status='active').first()
+        return membership.role if membership else None
+
+
+class CourseDetailSerializer(CourseSerializer):
+    """Detailed serializer for Course model with members"""
+    
+    members = serializers.SerializerMethodField()
+    
+    class Meta(CourseSerializer.Meta):
+        fields = CourseSerializer.Meta.fields + ['members']
+    
+    def get_members(self, obj):
+        """Get all active members of the course"""
+        members = obj.memberships.filter(status='active').select_related('user')
+        return CourseMembershipSerializer(members, many=True).data
