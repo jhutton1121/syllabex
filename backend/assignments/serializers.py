@@ -3,7 +3,7 @@ from rest_framework import serializers
 from .models import Assignment, Quiz, Test, Homework, AssignmentSubmission, Question, Choice, QuestionResponse
 from courses.models import Course
 from courses.serializers import CourseSerializer
-from users.serializers import StudentProfileSerializer
+from users.serializers import UserBasicSerializer
 
 
 class ChoiceSerializer(serializers.ModelSerializer):
@@ -142,7 +142,7 @@ class AssignmentSubmissionSerializer(serializers.ModelSerializer):
     """Serializer for AssignmentSubmission model"""
     
     assignment_info = AssignmentSerializer(source='assignment', read_only=True)
-    student_info = StudentProfileSerializer(source='student', read_only=True)
+    student_info = UserBasicSerializer(source='student', read_only=True)
     assignment_id = serializers.PrimaryKeyRelatedField(
         source='assignment',
         queryset=Assignment.objects.all(),
@@ -173,24 +173,24 @@ class AssignmentSubmissionSerializer(serializers.ModelSerializer):
         """Validate submission"""
         # Get student from context (will be set in view)
         request = self.context.get('request')
-        if request and hasattr(request.user, 'student_profile'):
-            student = request.user.student_profile
+        if request and request.user.is_authenticated:
             assignment = attrs.get('assignment')
             
             # Check if student is enrolled in the course
-            if not assignment.course.enrollments.filter(
-                student=student, 
+            if not assignment.course.memberships.filter(
+                user=request.user, 
+                role='student',
                 status='active'
             ).exists():
                 raise serializers.ValidationError(
-                    "You must be enrolled in the course to submit this assignment."
+                    "You must be enrolled as a student in the course to submit this assignment."
                 )
             
             # Check if already submitted (for update check)
             if not self.instance:  # Only for new submissions
                 if AssignmentSubmission.objects.filter(
                     assignment=assignment, 
-                    student=student
+                    student=request.user
                 ).exists():
                     raise serializers.ValidationError(
                         "You have already submitted this assignment."

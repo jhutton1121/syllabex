@@ -7,11 +7,17 @@ import Navbar from './components/Navbar';
 // Pages
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import StudentDashboard from './pages/StudentDashboard';
-import TeacherDashboard from './pages/TeacherDashboard';
+import UserDashboard from './pages/UserDashboard';
+import CourseDetail from './pages/CourseDetail';
+import TakeAssignment from './pages/TakeAssignment';
 import CreateAssignment from './pages/CreateAssignment';
 import CreateCourse from './pages/CreateCourse';
-import TakeAssignment from './pages/TakeAssignment';
+
+// Admin Pages
+import AdminDashboard from './pages/AdminDashboard';
+import CourseManagement from './pages/admin/CourseManagement';
+import AdminCourseDetail from './pages/admin/AdminCourseDetail';
+import UserManagement from './pages/admin/UserManagement';
 
 function App() {
   return (
@@ -24,53 +30,94 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
-            {/* Student Routes */}
+            {/* User Dashboard */}
             <Route
-              path="/student/dashboard"
+              path="/dashboard"
               element={
-                <PrivateRoute allowedRoles={['student']}>
-                  <StudentDashboard />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/student/assignments/:id"
-              element={
-                <PrivateRoute allowedRoles={['student']}>
-                  <TakeAssignment />
+                <PrivateRoute>
+                  <UserDashboard />
                 </PrivateRoute>
               }
             />
 
-            {/* Teacher Routes */}
+            {/* Course Routes */}
             <Route
-              path="/teacher/dashboard"
+              path="/courses/:courseId"
               element={
-                <PrivateRoute allowedRoles={['teacher']}>
-                  <TeacherDashboard />
+                <PrivateRoute>
+                  <CourseDetail />
                 </PrivateRoute>
               }
             />
             <Route
-              path="/teacher/courses/create"
+              path="/courses/:courseId/assignments/:assignmentId"
               element={
-                <PrivateRoute allowedRoles={['teacher']}>
-                  <CreateCourse />
+                <PrivateRoute>
+                  <TakeAssignment />
                 </PrivateRoute>
               }
             />
             <Route
-              path="/teacher/assignments/create"
+              path="/courses/:courseId/assignments/create"
               element={
-                <PrivateRoute allowedRoles={['teacher']}>
+                <PrivateRoute>
                   <CreateAssignment />
                 </PrivateRoute>
               }
             />
 
+            {/* Admin Routes */}
+            <Route
+              path="/admin"
+              element={
+                <PrivateRoute requireAdmin>
+                  <AdminDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/courses"
+              element={
+                <PrivateRoute requireAdmin>
+                  <CourseManagement />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/courses/create"
+              element={
+                <PrivateRoute requireAdmin>
+                  <CreateCourse />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/courses/:courseId"
+              element={
+                <PrivateRoute requireAdmin>
+                  <AdminCourseDetail />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <PrivateRoute requireAdmin>
+                  <UserManagement />
+                </PrivateRoute>
+              }
+            />
+
+            {/* Legacy redirects - remove old student/teacher routes */}
+            <Route path="/student/dashboard" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/teacher/dashboard" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/student/assignments/:id" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/teacher/courses/create" element={<Navigate to="/admin/courses/create" replace />} />
+            <Route path="/teacher/assignments/create" element={<Navigate to="/dashboard" replace />} />
+
             {/* Default Route */}
-            <Route path="/" element={<Navigate to="/login" />} />
-            <Route path="*" element={<Navigate to="/login" />} />
+            <Route path="/" element={<Navigate to="/dashboard" />} />
+            <Route path="*" element={<Navigate to="/dashboard" />} />
           </Routes>
         </div>
       </Router>

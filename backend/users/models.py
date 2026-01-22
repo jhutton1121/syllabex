@@ -33,6 +33,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     """Custom user model using email as username"""
     
     email = models.EmailField(unique=True, db_index=True)
+    first_name = models.CharField(max_length=100, blank=True)
+    last_name = models.CharField(max_length=100, blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
@@ -51,44 +53,25 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     def __str__(self):
         return self.email
-
-
-class StudentProfile(models.Model):
-    """Student profile linked to User"""
     
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile')
-    student_id = models.CharField(max_length=50, unique=True, db_index=True)
-    date_of_birth = models.DateField(null=True, blank=True)
-    enrollment_date = models.DateField(auto_now_add=True)
+    def get_full_name(self):
+        """Return the user's full name"""
+        full_name = f"{self.first_name} {self.last_name}".strip()
+        return full_name or self.email
     
-    class Meta:
-        db_table = 'student_profiles'
-        verbose_name = 'Student Profile'
-        verbose_name_plural = 'Student Profiles'
+    def is_admin(self):
+        """Check if user has admin profile"""
+        return hasattr(self, 'admin_profile')
     
-    def __str__(self):
-        return f"Student: {self.user.email} ({self.student_id})"
-
-
-class TeacherProfile(models.Model):
-    """Teacher profile linked to User"""
-    
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='teacher_profile')
-    employee_id = models.CharField(max_length=50, unique=True, db_index=True)
-    department = models.CharField(max_length=100, blank=True)
-    hire_date = models.DateField(auto_now_add=True)
-    
-    class Meta:
-        db_table = 'teacher_profiles'
-        verbose_name = 'Teacher Profile'
-        verbose_name_plural = 'Teacher Profiles'
-    
-    def __str__(self):
-        return f"Teacher: {self.user.email} ({self.employee_id})"
+    def get_course_role(self, course):
+        """Get user's role in a specific course"""
+        from courses.models import CourseMembership
+        membership = CourseMembership.objects.filter(user=self, course=course).first()
+        return membership.role if membership else None
 
 
 class AdminProfile(models.Model):
-    """Admin profile linked to User"""
+    """Admin profile linked to User for system administrators"""
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='admin_profile')
     employee_id = models.CharField(max_length=50, unique=True, db_index=True)

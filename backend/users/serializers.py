@@ -1,27 +1,7 @@
 """Serializers for user models"""
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
-from .models import User, StudentProfile, TeacherProfile, AdminProfile
-
-
-class StudentProfileSerializer(serializers.ModelSerializer):
-    """Serializer for student profile"""
-    
-    class Meta:
-        model = StudentProfile
-        fields = ['id', 'student_id', 'date_of_birth', 'enrollment_date']
-        read_only_fields = ['id', 'enrollment_date']
-
-
-class TeacherProfileSerializer(serializers.ModelSerializer):
-    """Serializer for teacher profile"""
-    
-    user_email = serializers.EmailField(source='user.email', read_only=True)
-    
-    class Meta:
-        model = TeacherProfile
-        fields = ['id', 'employee_id', 'department', 'hire_date', 'user_email']
-        read_only_fields = ['id', 'hire_date', 'user_email']
+from .models import User, AdminProfile
 
 
 class AdminProfileSerializer(serializers.ModelSerializer):
@@ -36,28 +16,29 @@ class AdminProfileSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for user with profile information"""
     
-    student_profile = StudentProfileSerializer(required=False, allow_null=True)
-    teacher_profile = TeacherProfileSerializer(required=False, allow_null=True)
     admin_profile = AdminProfileSerializer(required=False, allow_null=True)
-    role = serializers.SerializerMethodField()
+    is_admin = serializers.SerializerMethodField()
     
     class Meta:
         model = User
         fields = [
-            'id', 'email', 'is_active', 'created_at', 'updated_at',
-            'student_profile', 'teacher_profile', 'admin_profile', 'role'
+            'id', 'email', 'first_name', 'last_name', 'is_active', 
+            'created_at', 'updated_at', 'admin_profile', 'is_admin'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
     
-    def get_role(self, obj):
-        """Determine user role based on profile"""
-        if hasattr(obj, 'student_profile'):
-            return 'student'
-        elif hasattr(obj, 'teacher_profile'):
-            return 'teacher'
-        elif hasattr(obj, 'admin_profile'):
-            return 'admin'
-        return None
+    def get_is_admin(self, obj):
+        """Check if user has admin profile"""
+        return hasattr(obj, 'admin_profile')
+
+
+class UserBasicSerializer(serializers.ModelSerializer):
+    """Basic serializer for user - minimal info"""
+    
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'first_name', 'last_name']
+        read_only_fields = ['id']
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -74,80 +55,48 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         required=True,
         style={'input_type': 'password'}
     )
-    role = serializers.ChoiceField(
-        choices=['student', 'teacher', 'admin'],
-        write_only=True,
-        required=True
-    )
     
-    # Profile-specific fields
-    student_id = serializers.CharField(required=False, allow_blank=True)
+    # Optional admin profile fields
+    make_admin = serializers.BooleanField(required=False, default=False, write_only=True)
     employee_id = serializers.CharField(required=False, allow_blank=True)
-    date_of_birth = serializers.DateField(required=False, allow_null=True)
-    department = serializers.CharField(required=False, allow_blank=True)
     permissions_level = serializers.IntegerField(required=False, default=1)
     
     class Meta:
         model = User
         fields = [
-            'email', 'password', 'password_confirm', 'role',
-            'student_id', 'employee_id', 'date_of_birth', 
-            'department', 'permissions_level'
+            'email', 'password', 'password_confirm', 'first_name', 'last_name',
+            'make_admin', 'employee_id', 'permissions_level'
         ]
     
     def validate(self, attrs):
-        """Validate passwords match and role-specific fields"""
+        """Validate passwords match and admin fields"""
         if attrs['password'] != attrs['password_confirm']:
             raise serializers.ValidationError({
                 "password": "Password fields didn't match."
             })
         
-        role = attrs['role']
-        
-        # Validate student fields
-        if role == 'student':
-            if not attrs.get('student_id'):
-                raise serializers.ValidationError({
-                    "student_id": "Student ID is required for student registration."
-                })
-        
-        # Validate teacher/admin fields
-        if role in ['teacher', 'admin']:
-            if not attrs.get('employee_id'):
-                raise serializers.ValidationError({
-                    "employee_id": "Employee ID is required for teacher/admin registration."
-                })
+        # If making admin, employee_id is required
+        make_admin = attrs.get('make_admin', False)
+        if make_admin and not attrs.get('employee_id'):
+            raise serializers.ValidationError({
+                "employee_id": "Employee ID is required for admin registration."
+            })
         
         return attrs
     
     def create(self, validated_data):
-        """Create user and associated profile"""
-        # Extract profile data
-        role = validated_data.pop('role')
-        password_confirm = validated_data.pop('password_confirm')
-        student_id = validated_data.pop('student_id', None)
+        """Create user and optionally admin profile"""
+        # Extract admin data
+        validated_data.pop('password_confirm')
+        make_admin = validated_data.pop('make_admin', False)
         employee_id = validated_data.pop('employee_id', None)
-        date_of_birth = validated_data.pop('date_of_birth', None)
-        department = validated_data.pop('department', '')
         permissions_level = validated_data.pop('permissions_level', 1)
         
         # Create user
         user = User.objects.create_user(**validated_data)
         
-        # Create appropriate profile
-        if role == 'student':
-            StudentProfile.objects.create(
-                user=user,
-                student_id=student_id,
-                date_of_birth=date_of_birth
-            )
-        elif role == 'teacher':
-            TeacherProfile.objects.create(
-                user=user,
-                employee_id=employee_id,
-                department=department
-            )
-        elif role == 'admin':
+        # Create admin profile if requested
+        if make_admin and employee_id:
             AdminProfile.objects.create(
                 user=user,
                 employee_id=employee_id,

@@ -19,11 +19,11 @@ const assignmentService = {
 
   // Get assignment for student view (without correct answers)
   getAssignmentForStudent: async (id) => {
-    const response = await api.get(`/assignments/${id}/student_view/`);
+    const response = await api.get(`/assignments/${id}/student-view/`);
     return response.data;
   },
 
-  // Create assignment (Teachers only)
+  // Create assignment (Instructors only)
   createAssignment: async (assignmentData) => {
     const response = await api.post('/assignments/', assignmentData);
     return response.data;
@@ -50,7 +50,7 @@ const assignmentService = {
     return response.data;
   },
 
-  // Get submissions for assignment (Teachers only)
+  // Get submissions for assignment (Instructors only)
   getSubmissions: async (assignmentId) => {
     const response = await api.get(`/assignments/${assignmentId}/submissions/`);
     return response.data;
@@ -70,7 +70,7 @@ const assignmentService = {
     return response.data;
   },
 
-  // Add a question to an assignment (Teachers only)
+  // Add a question to an assignment (Instructors only)
   addQuestion: async (assignmentId, questionData) => {
     const response = await api.post(`/assignments/${assignmentId}/questions/`, questionData);
     return response.data;
@@ -82,13 +82,13 @@ const assignmentService = {
     return response.data;
   },
 
-  // Update a question (Teachers only)
+  // Update a question (Instructors only)
   updateQuestion: async (questionId, questionData) => {
     const response = await api.put(`/assignments/questions/${questionId}/`, questionData);
     return response.data;
   },
 
-  // Delete a question (Teachers only)
+  // Delete a question (Instructors only)
   deleteQuestion: async (questionId) => {
     const response = await api.delete(`/assignments/questions/${questionId}/`);
     return response.data;
@@ -104,9 +104,9 @@ const assignmentService = {
 
   // ===== Grading =====
 
-  // Grade a text response (Teachers only)
+  // Grade a text response (Instructors only)
   gradeResponse: async (submissionId, responseId, pointsEarned) => {
-    const response = await api.post(`/assignments/submissions/${submissionId}/grade_response/`, {
+    const response = await api.post(`/assignments/submissions/${submissionId}/grade-response/`, {
       response_id: responseId,
       points_earned: pointsEarned,
     });

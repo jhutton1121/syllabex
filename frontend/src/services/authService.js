@@ -51,17 +51,9 @@ const authService = {
     }
   },
 
-  // Get user role from token
-  getUserRole: () => {
-    const token = localStorage.getItem('access_token');
-    if (!token) return null;
-
-    try {
-      const decoded = jwtDecode(token);
-      return decoded.role;
-    } catch (error) {
-      return null;
-    }
+  // Get access token
+  getAccessToken: () => {
+    return localStorage.getItem('access_token');
   },
 };
 

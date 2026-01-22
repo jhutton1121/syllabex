@@ -8,11 +8,8 @@ const RegisterPage = () => {
     email: '',
     password: '',
     password_confirm: '',
-    role: 'student',
-    student_id: '',
-    employee_id: '',
-    date_of_birth: '',
-    department: '',
+    first_name: '',
+    last_name: '',
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -41,45 +38,8 @@ const RegisterPage = () => {
       return;
     }
 
-    // Validate role-specific fields
-    if (formData.role === 'student' && !formData.student_id) {
-      setError('Student ID is required for student registration');
-      setLoading(false);
-      return;
-    }
-
-    if ((formData.role === 'teacher' || formData.role === 'admin') && !formData.employee_id) {
-      setError('Employee ID is required for teacher/admin registration');
-      setLoading(false);
-      return;
-    }
-
     try {
-      // Filter out empty/irrelevant fields based on role
-      const registrationData = {
-        email: formData.email,
-        password: formData.password,
-        password_confirm: formData.password_confirm,
-        role: formData.role,
-      };
-
-      // Add role-specific fields
-      if (formData.role === 'student') {
-        registrationData.student_id = formData.student_id;
-        // Only include date_of_birth if it has a value
-        if (formData.date_of_birth) {
-          registrationData.date_of_birth = formData.date_of_birth;
-        }
-      } else if (formData.role === 'teacher') {
-        registrationData.employee_id = formData.employee_id;
-        if (formData.department) {
-          registrationData.department = formData.department;
-        }
-      } else if (formData.role === 'admin') {
-        registrationData.employee_id = formData.employee_id;
-      }
-
-      await register(registrationData);
+      await register(formData);
       setSuccess('Registration successful! Please login.');
       setTimeout(() => {
         navigate('/login');
@@ -100,12 +60,41 @@ const RegisterPage = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h1>Register for Syllabex</h1>
+        <div className="auth-header">
+          <h1>Create Account</h1>
+          <p>Join Syllabex LMS to get started</p>
+        </div>
         
         {error && <div className="alert alert-error">{error}</div>}
         {success && <div className="alert alert-success">{success}</div>}
         
         <form onSubmit={handleSubmit}>
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="first_name">First Name</label>
+              <input
+                id="first_name"
+                type="text"
+                name="first_name"
+                value={formData.first_name}
+                onChange={handleChange}
+                placeholder="John"
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="last_name">Last Name</label>
+              <input
+                id="last_name"
+                type="text"
+                name="last_name"
+                value={formData.last_name}
+                onChange={handleChange}
+                placeholder="Doe"
+              />
+            </div>
+          </div>
+
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
@@ -115,7 +104,7 @@ const RegisterPage = () => {
               value={formData.email}
               onChange={handleChange}
               required
-              placeholder="Enter your email"
+              placeholder="john@example.com"
             />
           </div>
           
@@ -128,7 +117,7 @@ const RegisterPage = () => {
               value={formData.password}
               onChange={handleChange}
               required
-              placeholder="Enter your password"
+              placeholder="At least 8 characters"
               minLength="8"
             />
           </div>
@@ -142,91 +131,23 @@ const RegisterPage = () => {
               value={formData.password_confirm}
               onChange={handleChange}
               required
-              placeholder="Confirm your password"
+              placeholder="Re-enter your password"
             />
           </div>
           
-          <div className="form-group">
-            <label htmlFor="role">Role</label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              required
-            >
-              <option value="student">Student</option>
-              <option value="teacher">Teacher</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-          
-          {formData.role === 'student' && (
-            <>
-              <div className="form-group">
-                <label htmlFor="student_id">Student ID</label>
-                <input
-                  id="student_id"
-                  type="text"
-                  name="student_id"
-                  value={formData.student_id}
-                  onChange={handleChange}
-                  required
-                  placeholder="Enter your student ID"
-                />
-              </div>
-              
-              <div className="form-group">
-                <label htmlFor="date_of_birth">Date of Birth</label>
-                <input
-                  id="date_of_birth"
-                  type="date"
-                  name="date_of_birth"
-                  value={formData.date_of_birth}
-                  onChange={handleChange}
-                />
-              </div>
-            </>
-          )}
-          
-          {(formData.role === 'teacher' || formData.role === 'admin') && (
-            <>
-              <div className="form-group">
-                <label htmlFor="employee_id">Employee ID</label>
-                <input
-                  id="employee_id"
-                  type="text"
-                  name="employee_id"
-                  value={formData.employee_id}
-                  onChange={handleChange}
-                  required
-                  placeholder="Enter your employee ID"
-                />
-              </div>
-              
-              {formData.role === 'teacher' && (
-                <div className="form-group">
-                  <label htmlFor="department">Department</label>
-                  <input
-                    id="department"
-                    type="text"
-                    name="department"
-                    value={formData.department}
-                    onChange={handleChange}
-                    placeholder="Enter your department"
-                  />
-                </div>
-              )}
-            </>
-          )}
-          
           <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
-            {loading ? 'Registering...' : 'Register'}
+            {loading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
+
+        <div className="auth-info">
+          <p className="info-text">
+            After registering, an administrator will add you to your courses.
+          </p>
+        </div>
         
         <p className="auth-footer">
-          Already have an account? <Link to="/login">Login here</Link>
+          Already have an account? <Link to="/login">Sign in</Link>
         </p>
       </div>
     </div>

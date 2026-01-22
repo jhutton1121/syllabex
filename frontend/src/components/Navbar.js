@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -15,25 +15,25 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <Link to="/" className="navbar-brand">
+        <Link to={user ? "/dashboard" : "/"} className="navbar-brand">
           Syllabex LMS
         </Link>
         
         <div className="navbar-menu">
           {user ? (
             <>
-              <Link to={user.role === 'student' ? '/student/dashboard' : '/teacher/dashboard'} className="navbar-link">
+              <Link to="/dashboard" className="navbar-link">
                 Dashboard
               </Link>
-              {user.role === 'teacher' && (
-                <Link to="/teacher/assignments" className="navbar-link">
-                  Assignments
+              {isAdmin() && (
+                <Link to="/admin" className="navbar-link admin-link">
+                  Admin
                 </Link>
               )}
               <span className="navbar-user">
-                {user.email} ({user.role})
+                {user.email}
               </span>
-              <button onClick={handleLogout} className="btn btn-secondary">
+              <button onClick={handleLogout} className="btn btn-logout">
                 Logout
               </button>
             </>

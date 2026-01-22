@@ -2,23 +2,31 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const PrivateRoute = ({ children, allowedRoles = [] }) => {
-  const { user, loading } = useAuth();
+const PrivateRoute = ({ children, requireAdmin = false }) => {
+  const { user, loading, isAdmin } = useAuth();
 
   if (loading) {
-    return <div className="loading">Loading...</div>;
+    return (
+      <div className="loading" style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '60vh',
+        color: '#64748b',
+        fontFamily: 'DM Sans, sans-serif'
+      }}>
+        Loading...
+      </div>
+    );
   }
 
   if (!user) {
     return <Navigate to="/login" />;
   }
 
-  // Check if user has required role - redirect to appropriate dashboard
-  if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-    // Redirect to user's appropriate dashboard instead of a non-existent unauthorized page
-    const redirectPath = user.role === 'student' ? '/student/dashboard' : 
-                         user.role === 'teacher' ? '/teacher/dashboard' : '/login';
-    return <Navigate to={redirectPath} replace />;
+  // Check if admin is required
+  if (requireAdmin && !isAdmin()) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;
