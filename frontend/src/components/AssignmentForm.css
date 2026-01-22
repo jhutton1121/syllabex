@@ -1,5 +1,5 @@
 .assignment-form-container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -8,6 +8,10 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
+}
+
+.form-row-3 {
+  grid-template-columns: 1fr 1fr 1fr;
 }
 
 .form-hint {
@@ -24,9 +28,34 @@
   margin-top: 30px;
 }
 
+/* Questions Section */
+.questions-section {
+  margin-top: 30px;
+  padding-top: 30px;
+  border-top: 2px solid var(--border-color, #2a2a4e);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.section-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary, #e0e0e0);
+}
+
 @media (max-width: 768px) {
   .form-row {
     grid-template-columns: 1fr;
+  }
+  
+  .form-row-3 {
+    grid-template-columns: 1fr 1fr;
   }
   
   .form-actions {
@@ -35,5 +64,21 @@
   
   .form-actions button {
     width: 100%;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+  
+  .section-header button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-row-3 {
+    grid-template-columns: 1fr;
   }
 }

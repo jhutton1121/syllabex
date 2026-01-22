@@ -3,8 +3,13 @@ from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Q
-from .models import Assignment, AssignmentSubmission
-from .serializers import AssignmentSerializer, AssignmentSubmissionSerializer
+from django.shortcuts import get_object_or_404
+from .models import Assignment, AssignmentSubmission, Question, Choice, QuestionResponse
+from .serializers import (
+    AssignmentSerializer, AssignmentSubmissionSerializer, 
+    QuestionSerializer, QuestionResponseSerializer,
+    QuestionResponseSubmitSerializer, AssignmentStudentSerializer
+)
 from courses.models import Course
 from users.permissions import IsTeacher, IsStudent, IsTeacherOrAdmin
 
@@ -12,7 +17,10 @@ from users.permissions import IsTeacher, IsStudent, IsTeacherOrAdmin
 class AssignmentViewSet(viewsets.ModelViewSet):
     """ViewSet for Assignment CRUD operations"""
     
-    queryset = Assignment.objects.select_related('course__teacher__user').prefetch_related('submissions')
+    queryset = Assignment.objects.select_related('course__teacher__user').prefetch_related(
+        'submissions',
+        'questions__choices'  # Prefetch questions and their choices to avoid N+1 queries
+    )
     serializer_class = AssignmentSerializer
     
     def get_permissions(self):
@@ -98,25 +106,49 @@ class AssignmentViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated, IsStudent])
     def submit(self, request, pk=None):
-        """Submit an assignment (Students only)"""
+        """Submit an assignment with question responses (Students only)"""
         assignment = self.get_object()
+        student = request.user.student_profile
         
-        # Create submission data
-        data = {
-            'assignment_id': assignment.id,
-            'answer': request.data.get('answer', '')
-        }
+        # Check enrollment
+        if not assignment.course.enrollments.filter(student=student, status='active').exists():
+            return Response(
+                {'error': 'You must be enrolled in the course to submit this assignment.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
         
-        serializer = AssignmentSubmissionSerializer(
-            data=data,
-            context={'request': request}
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save(
+        # Use get_or_create to handle race conditions atomically
+        submission, created = AssignmentSubmission.objects.get_or_create(
             assignment=assignment,
-            student=request.user.student_profile
+            student=student,
+            defaults={'answer': request.data.get('answer', '')}
         )
         
+        if not created:
+            return Response(
+                {'error': 'You have already submitted this assignment.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Process question responses
+        responses_data = request.data.get('responses', [])
+        for response_data in responses_data:
+            question_id = response_data.get('question_id')
+            response_text = response_data.get('response_text', '')
+            
+            try:
+                question = assignment.questions.get(id=question_id)
+                question_response = QuestionResponse.objects.create(
+                    submission=submission,
+                    question=question,
+                    response_text=response_text
+                )
+                # Auto-grade if applicable
+                question_response.auto_grade()
+            except Question.DoesNotExist:
+                continue
+        
+        serializer = AssignmentSubmissionSerializer(submission, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
     @action(detail=True, methods=['get'], permission_classes=[permissions.IsAuthenticated, IsTeacherOrAdmin])
@@ -132,10 +164,93 @@ class AssignmentViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_403_FORBIDDEN
                 )
         
-        submissions = assignment.submissions.select_related('student__user').order_by('-submitted_at')
+        submissions = assignment.submissions.select_related('student__user').prefetch_related(
+            'question_responses__question__choices'
+        ).order_by('-submitted_at')
         serializer = AssignmentSubmissionSerializer(submissions, many=True)
         
         return Response(serializer.data)
+    
+    @action(detail=True, methods=['get', 'post'], permission_classes=[permissions.IsAuthenticated, IsTeacher])
+    def questions(self, request, pk=None):
+        """List or add questions for an assignment (Teachers only)"""
+        assignment = self.get_object()
+        
+        # Verify teacher owns the course
+        if hasattr(request.user, 'teacher_profile'):
+            if assignment.course.teacher != request.user.teacher_profile:
+                return Response(
+                    {'error': 'You can only manage questions for your own assignments.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        
+        if request.method == 'GET':
+            questions = assignment.questions.prefetch_related('choices').order_by('order')
+            serializer = QuestionSerializer(questions, many=True)
+            return Response(serializer.data)
+        
+        elif request.method == 'POST':
+            serializer = QuestionSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(assignment=assignment)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    @action(detail=True, methods=['get'], permission_classes=[permissions.IsAuthenticated, IsStudent])
+    def student_view(self, request, pk=None):
+        """Get assignment with questions (without correct answers) for students"""
+        assignment = self.get_object()
+        serializer = AssignmentStudentSerializer(assignment)
+        return Response(serializer.data)
+
+
+class QuestionViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing individual questions"""
+    
+    queryset = Question.objects.select_related('assignment__course__teacher').prefetch_related('choices')
+    serializer_class = QuestionSerializer
+    permission_classes = [permissions.IsAuthenticated, IsTeacher]
+    
+    def get_queryset(self):
+        """Filter questions based on user role"""
+        user = self.request.user
+        queryset = super().get_queryset()
+        
+        # Teachers can only see questions from their own assignments
+        if hasattr(user, 'teacher_profile'):
+            queryset = queryset.filter(assignment__course__teacher=user.teacher_profile)
+        
+        return queryset.order_by('order')
+    
+    def perform_update(self, serializer):
+        """Validate teacher owns the assignment before updating question"""
+        question = self.get_object()
+        if hasattr(self.request.user, 'teacher_profile'):
+            if question.assignment.course.teacher != self.request.user.teacher_profile:
+                from rest_framework.exceptions import PermissionDenied
+                raise PermissionDenied("You can only update questions in your own assignments.")
+        serializer.save()
+    
+    def perform_destroy(self, instance):
+        """Validate teacher owns the assignment before deleting question"""
+        if hasattr(self.request.user, 'teacher_profile'):
+            if instance.assignment.course.teacher != self.request.user.teacher_profile:
+                from rest_framework.exceptions import PermissionDenied
+                raise PermissionDenied("You can only delete questions from your own assignments.")
+        instance.delete()
+    
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated, IsTeacher])
+    def reorder(self, request, pk=None):
+        """Update the order of a question"""
+        question = self.get_object()
+        new_order = request.data.get('order')
+        
+        if new_order is None:
+            return Response({'error': 'Order is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        question.order = new_order
+        question.save()
+        
+        return Response({'status': 'Order updated', 'order': question.order})
 
 
 class AssignmentSubmissionViewSet(viewsets.ModelViewSet):
@@ -144,6 +259,9 @@ class AssignmentSubmissionViewSet(viewsets.ModelViewSet):
     queryset = AssignmentSubmission.objects.select_related(
         'assignment__course__teacher__user',
         'student__user'
+    ).prefetch_related(
+        'question_responses__question__choices',  # Prefetch question choices for QuestionResponseSerializer
+        'assignment__questions'  # Prefetch for get_max_score() calculation
     )
     serializer_class = AssignmentSubmissionSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -170,3 +288,50 @@ class AssignmentSubmissionViewSet(viewsets.ModelViewSet):
             {'error': 'Use /api/assignments/{id}/submit/ to submit assignments'},
             status=status.HTTP_400_BAD_REQUEST
         )
+    
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated, IsTeacherOrAdmin])
+    def grade_response(self, request, pk=None):
+        """Grade a text response question (Teachers/Admins only)"""
+        submission = self.get_object()
+        
+        # Verify teacher owns the course
+        if hasattr(request.user, 'teacher_profile'):
+            if submission.assignment.course.teacher != request.user.teacher_profile:
+                return Response(
+                    {'error': 'You can only grade submissions for your own courses.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        
+        response_id = request.data.get('response_id')
+        points_earned = request.data.get('points_earned')
+        
+        if response_id is None or points_earned is None:
+            return Response(
+                {'error': 'response_id and points_earned are required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            question_response = submission.question_responses.get(id=response_id)
+        except QuestionResponse.DoesNotExist:
+            return Response(
+                {'error': 'Question response not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Validate points
+        max_points = question_response.question.points
+        if points_earned < 0 or points_earned > max_points:
+            return Response(
+                {'error': f'Points must be between 0 and {max_points}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Grade the response
+        question_response.points_earned = points_earned
+        question_response.is_correct = points_earned == max_points
+        question_response.graded = True
+        question_response.save()
+        
+        serializer = QuestionResponseSerializer(question_response)
+        return Response(serializer.data)
