@@ -17,7 +17,10 @@ from users.permissions import IsTeacher, IsStudent, IsTeacherOrAdmin
 class AssignmentViewSet(viewsets.ModelViewSet):
     """ViewSet for Assignment CRUD operations"""
     
-    queryset = Assignment.objects.select_related('course__teacher__user').prefetch_related('submissions')
+    queryset = Assignment.objects.select_related('course__teacher__user').prefetch_related(
+        'submissions',
+        'questions__choices'  # Prefetch questions and their choices to avoid N+1 queries
+    )
     serializer_class = AssignmentSerializer
     
     def get_permissions(self):
@@ -107,13 +110,6 @@ class AssignmentViewSet(viewsets.ModelViewSet):
         assignment = self.get_object()
         student = request.user.student_profile
         
-        # Check if already submitted
-        if AssignmentSubmission.objects.filter(assignment=assignment, student=student).exists():
-            return Response(
-                {'error': 'You have already submitted this assignment.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
         # Check enrollment
         if not assignment.course.enrollments.filter(student=student, status='active').exists():
             return Response(
@@ -121,12 +117,18 @@ class AssignmentViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        # Create submission
-        submission = AssignmentSubmission.objects.create(
+        # Use get_or_create to handle race conditions atomically
+        submission, created = AssignmentSubmission.objects.get_or_create(
             assignment=assignment,
             student=student,
-            answer=request.data.get('answer', '')
+            defaults={'answer': request.data.get('answer', '')}
         )
+        
+        if not created:
+            return Response(
+                {'error': 'You have already submitted this assignment.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
         # Process question responses
         responses_data = request.data.get('responses', [])
@@ -162,7 +164,9 @@ class AssignmentViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_403_FORBIDDEN
                 )
         
-        submissions = assignment.submissions.select_related('student__user').prefetch_related('question_responses__question').order_by('-submitted_at')
+        submissions = assignment.submissions.select_related('student__user').prefetch_related(
+            'question_responses__question__choices'
+        ).order_by('-submitted_at')
         serializer = AssignmentSubmissionSerializer(submissions, many=True)
         
         return Response(serializer.data)
@@ -255,7 +259,10 @@ class AssignmentSubmissionViewSet(viewsets.ModelViewSet):
     queryset = AssignmentSubmission.objects.select_related(
         'assignment__course__teacher__user',
         'student__user'
-    ).prefetch_related('question_responses__question')
+    ).prefetch_related(
+        'question_responses__question__choices',  # Prefetch question choices for QuestionResponseSerializer
+        'assignment__questions'  # Prefetch for get_max_score() calculation
+    )
     serializer_class = AssignmentSubmissionSerializer
     permission_classes = [permissions.IsAuthenticated]
     

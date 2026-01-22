@@ -9,15 +9,32 @@ import './AssignmentForm.css';
 const AssignmentForm = ({ assignment = null, isEdit = false }) => {
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
+  // Parse existing due_date into separate date and time
+  const getInitialDueDate = () => {
+    if (assignment?.due_date) {
+      return assignment.due_date.slice(0, 10); // YYYY-MM-DD
+    }
+    return '';
+  };
+  
+  const getInitialDueTime = () => {
+    if (assignment?.due_date) {
+      return assignment.due_date.slice(11, 16); // HH:MM
+    }
+    return '23:59'; // Default to end of day
+  };
+
   const [formData, setFormData] = useState({
     course_id: assignment?.course || '',
     type: assignment?.type || 'homework',
     title: assignment?.title || '',
     description: assignment?.description || '',
-    due_date: assignment?.due_date ? assignment.due_date.slice(0, 16) : '',
+    due_date: getInitialDueDate(),
+    due_time: getInitialDueTime(),
     points_possible: assignment?.points_possible || 100,
   });
   const [questions, setQuestions] = useState(assignment?.questions || []);
+  const [originalQuestionIds, setOriginalQuestionIds] = useState([]);
   const [showQuestionBuilder, setShowQuestionBuilder] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState(null);
   const [editingIndex, setEditingIndex] = useState(null);
@@ -45,6 +62,8 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
         try {
           const questionsData = await assignmentService.getQuestions(assignment.id);
           setQuestions(questionsData || []);
+          // Track original question IDs to detect deletions later
+          setOriginalQuestionIds(questionsData.map(q => q.id).filter(id => id !== undefined));
         } catch (err) {
           console.error('Failed to load questions:', err);
         }
@@ -127,10 +146,15 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
     setLoading(true);
 
     try {
-      // Convert due_date to ISO format
+      // Combine date and time, then convert to ISO format
+      const dueDateTimeString = `${formData.due_date}T${formData.due_time}`;
       const submitData = {
-        ...formData,
-        due_date: new Date(formData.due_date).toISOString(),
+        course_id: formData.course_id,
+        type: formData.type,
+        title: formData.title,
+        description: formData.description,
+        points_possible: formData.points_possible,
+        due_date: new Date(dueDateTimeString).toISOString(),
       };
 
       let assignmentId;
@@ -139,8 +163,20 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
         await assignmentService.updateAssignment(assignment.id, submitData);
         assignmentId = assignment.id;
         
-        // Update questions - delete existing and add new ones
-        // For simplicity, we'll add new questions and update existing ones
+        // Identify deleted questions by comparing original IDs with current IDs
+        const currentQuestionIds = questions.map(q => q.id).filter(id => id !== undefined);
+        const deletedQuestionIds = originalQuestionIds.filter(id => !currentQuestionIds.includes(id));
+        
+        // Delete removed questions
+        for (const questionId of deletedQuestionIds) {
+          try {
+            await assignmentService.deleteQuestion(questionId);
+          } catch (err) {
+            console.error(`Failed to delete question ${questionId}:`, err);
+          }
+        }
+        
+        // Update existing questions and add new ones
         for (const question of questions) {
           if (question.id) {
             await assignmentService.updateQuestion(question.id, question);
@@ -251,14 +287,26 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
             />
           </div>
 
-          <div className="form-row">
+          <div className="form-row form-row-3">
             <div className="form-group">
               <label htmlFor="due_date">Due Date *</label>
               <input
                 id="due_date"
-                type="datetime-local"
+                type="date"
                 name="due_date"
                 value={formData.due_date}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="due_time">Due Time *</label>
+              <input
+                id="due_time"
+                type="time"
+                name="due_time"
+                value={formData.due_time}
                 onChange={handleChange}
                 required
               />

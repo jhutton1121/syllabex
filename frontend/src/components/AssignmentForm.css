@@ -10,6 +10,10 @@
   gap: 20px;
 }
 
+.form-row-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
 .form-hint {
   display: block;
   margin-top: 5px;
@@ -50,6 +54,10 @@
     grid-template-columns: 1fr;
   }
   
+  .form-row-3 {
+    grid-template-columns: 1fr 1fr;
+  }
+  
   .form-actions {
     flex-direction: column;
   }
@@ -66,5 +74,11 @@
   
   .section-header button {
     width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-row-3 {
+    grid-template-columns: 1fr;
   }
 }
