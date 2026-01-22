@@ -236,6 +236,13 @@
   border-bottom: 1px solid #e2e8f0;
 }
 
+.header-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 .type-badge {
   padding: 0.3rem 0.75rem;
   border-radius: 6px;
@@ -266,6 +273,44 @@
   border-radius: 6px;
   font-size: 0.7rem;
   font-weight: 600;
+}
+
+/* Availability Badges */
+.availability-badge {
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.availability-badge.not-started {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.availability-badge.open {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.availability-badge.closed {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.editable-badge {
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: #e0e7ff;
+  color: #4f46e5;
+}
+
+/* Assignment card states */
+.assignment-card.not-started {
+  border-color: #fef3c7;
 }
 
 .assignment-card-body {

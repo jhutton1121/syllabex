@@ -203,18 +203,39 @@ const CourseDetail = () => {
               <div className="assignments-grid">
                 {sortedAssignments.map((assignment) => {
                   const dueDate = new Date(assignment.due_date);
+                  const startDate = assignment.start_date ? new Date(assignment.start_date) : null;
+                  const now = new Date();
                   const isOverdue = assignment.is_overdue;
+                  
+                  // Determine availability status
+                  const hasStarted = !startDate || startDate <= now;
+                  const isPastDue = dueDate < now;
+                  const isOpen = hasStarted && !isPastDue;
+                  const isNotStarted = !hasStarted;
+                  const isClosed = isPastDue;
+                  
+                  // For instructors: check if editable (before start date)
+                  const isEditable = !startDate || startDate > now;
                   
                   return (
                     <div 
                       key={assignment.id} 
-                      className={`assignment-card ${isOverdue ? 'overdue' : ''}`}
+                      className={`assignment-card ${isOverdue ? 'overdue' : ''} ${isNotStarted ? 'not-started' : ''}`}
                     >
                       <div className="assignment-card-header">
-                        <span className={`type-badge type-${assignment.type}`}>
-                          {assignment.type}
-                        </span>
-                        {isOverdue && <span className="overdue-badge">Past Due</span>}
+                        <div className="header-badges">
+                          <span className={`type-badge type-${assignment.type}`}>
+                            {assignment.type}
+                          </span>
+                          {/* Availability Badge */}
+                          {isNotStarted && <span className="availability-badge not-started">Not Started</span>}
+                          {isOpen && <span className="availability-badge open">Open</span>}
+                          {isClosed && <span className="availability-badge closed">Closed</span>}
+                          {/* Editable Badge for Instructors */}
+                          {isInstructor && isEditable && !isClosed && (
+                            <span className="editable-badge">✏️ Editable</span>
+                          )}
+                        </div>
                       </div>
                       <div className="assignment-card-body">
                         <h3>{assignment.title}</h3>
@@ -224,6 +245,19 @@ const CourseDetail = () => {
                       </div>
                       <div className="assignment-card-footer">
                         <div className="assignment-stats">
+                          {/* Start Date (if exists) */}
+                          {startDate && (
+                            <div className="stat">
+                              <span className="stat-label">Opens</span>
+                              <span className="stat-value">
+                                {startDate.toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                })}
+                              </span>
+                            </div>
+                          )}
                           <div className="stat">
                             <span className="stat-label">Due</span>
                             <span className={`stat-value ${isOverdue ? 'overdue' : ''}`}>
@@ -249,9 +283,10 @@ const CourseDetail = () => {
                           {isStudent ? (
                             <Link
                               to={`/courses/${courseId}/assignments/${assignment.id}`}
-                              className="btn btn-primary btn-sm"
+                              className={`btn btn-primary btn-sm ${isNotStarted ? 'disabled' : ''}`}
+                              style={isNotStarted ? { pointerEvents: 'none', opacity: 0.6 } : {}}
                             >
-                              View / Submit
+                              {isNotStarted ? 'Not Available' : 'View / Submit'}
                             </Link>
                           ) : (
                             <>
