@@ -2,6 +2,7 @@
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from .models import Assignment, AssignmentSubmission, Question, Choice, QuestionResponse
@@ -10,27 +11,26 @@ from .serializers import (
     QuestionSerializer, QuestionResponseSerializer,
     QuestionResponseSubmitSerializer, AssignmentStudentSerializer
 )
-from courses.models import Course
-from users.permissions import IsTeacher, IsStudent, IsTeacherOrAdmin
+from courses.models import Course, CourseMembership
+from users.permissions import IsInstructor, IsInstructorOrAdmin
 
 
 class AssignmentViewSet(viewsets.ModelViewSet):
     """ViewSet for Assignment CRUD operations"""
     
-    queryset = Assignment.objects.select_related('course__teacher__user').prefetch_related(
+    queryset = Assignment.objects.select_related('course').prefetch_related(
         'submissions',
-        'questions__choices'  # Prefetch questions and their choices to avoid N+1 queries
+        'questions__choices'
     )
     serializer_class = AssignmentSerializer
     
     def get_permissions(self):
         """Set permissions based on action"""
-        if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            permission_classes = [permissions.IsAuthenticated, IsTeacher]
-        elif self.action in ['submit']:
-            permission_classes = [permissions.IsAuthenticated, IsStudent]
+        if self.action in ['create', 'update', 'partial_update', 'destroy', 'questions']:
+            # Only instructors can modify assignments
+            permission_classes = [permissions.IsAuthenticated, IsInstructor]
         elif self.action in ['submissions']:
-            permission_classes = [permissions.IsAuthenticated, IsTeacherOrAdmin]
+            permission_classes = [permissions.IsAuthenticated, IsInstructorOrAdmin]
         else:
             permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
@@ -50,77 +50,62 @@ class AssignmentViewSet(viewsets.ModelViewSet):
         if assignment_type:
             queryset = queryset.filter(type=assignment_type)
         
-        # Students see assignments from their enrolled courses
-        if hasattr(user, 'student_profile'):
-            queryset = queryset.filter(
-                course__enrollments__student=user.student_profile,
-                course__enrollments__status='active'
-            ).distinct()
-        
-        # Teachers see assignments from their own courses
-        elif hasattr(user, 'teacher_profile'):
-            queryset = queryset.filter(course__teacher=user.teacher_profile)
-        
         # Admins see all assignments
-        return queryset.order_by('-due_date')
+        if hasattr(user, 'admin_profile'):
+            return queryset.order_by('-due_date')
+        
+        # Regular users see assignments from their enrolled courses
+        user_courses = user.memberships.filter(status='active').values_list('course_id', flat=True)
+        return queryset.filter(course_id__in=user_courses).order_by('-due_date')
     
-    def get_serializer(self, *args, **kwargs):
-        """Set course queryset in serializer based on user"""
-        serializer = super().get_serializer(*args, **kwargs)
-        if hasattr(serializer, 'fields') and 'course_id' in serializer.fields:
-            user = self.request.user
-            # Teachers can only create assignments for their own courses
-            if hasattr(user, 'teacher_profile'):
-                serializer.fields['course_id'].queryset = Course.objects.filter(
-                    teacher=user.teacher_profile
-                )
-            else:
-                serializer.fields['course_id'].queryset = Course.objects.all()
-        return serializer
+    def get_serializer_context(self):
+        """Add request to serializer context"""
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
     
     def perform_create(self, serializer):
-        """Validate teacher owns the course before creating assignment"""
+        """Validate user is instructor of the course before creating assignment"""
         course = serializer.validated_data.get('course')
-        if hasattr(self.request.user, 'teacher_profile'):
-            if course.teacher != self.request.user.teacher_profile:
-                from rest_framework.exceptions import PermissionDenied
-                raise PermissionDenied("You can only create assignments for your own courses.")
+        
+        if not self._is_course_instructor(self.request.user, course):
+            raise PermissionDenied("You can only create assignments for courses you instruct.")
+        
         serializer.save()
     
     def perform_update(self, serializer):
-        """Validate teacher owns the course before updating assignment"""
+        """Validate user is instructor of the course before updating assignment"""
         assignment = self.get_object()
-        if hasattr(self.request.user, 'teacher_profile'):
-            if assignment.course.teacher != self.request.user.teacher_profile:
-                from rest_framework.exceptions import PermissionDenied
-                raise PermissionDenied("You can only update assignments in your own courses.")
+        
+        if not self._is_course_instructor(self.request.user, assignment.course):
+            raise PermissionDenied("You can only update assignments in courses you instruct.")
+        
         serializer.save()
     
     def perform_destroy(self, instance):
-        """Validate teacher owns the course before deleting assignment"""
-        if hasattr(self.request.user, 'teacher_profile'):
-            if instance.course.teacher != self.request.user.teacher_profile:
-                from rest_framework.exceptions import PermissionDenied
-                raise PermissionDenied("You can only delete assignments from your own courses.")
+        """Validate user is instructor of the course before deleting assignment"""
+        if not self._is_course_instructor(self.request.user, instance.course):
+            raise PermissionDenied("You can only delete assignments from courses you instruct.")
+        
         instance.delete()
     
-    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated, IsStudent])
+    @action(detail=True, methods=['post'])
     def submit(self, request, pk=None):
         """Submit an assignment with question responses (Students only)"""
         assignment = self.get_object()
-        student = request.user.student_profile
+        user = request.user
         
-        # Check enrollment
-        if not assignment.course.enrollments.filter(student=student, status='active').exists():
+        # Check if user is a student in the course
+        if not self._is_course_student(user, assignment.course):
             return Response(
-                {'error': 'You must be enrolled in the course to submit this assignment.'},
+                {'error': 'You must be enrolled as a student in the course to submit this assignment.'},
                 status=status.HTTP_403_FORBIDDEN
             )
         
         # Use get_or_create to handle race conditions atomically
         submission, created = AssignmentSubmission.objects.get_or_create(
             assignment=assignment,
-            student=student,
+            student=user,
             defaults={'answer': request.data.get('answer', '')}
         )
         
@@ -151,38 +136,36 @@ class AssignmentViewSet(viewsets.ModelViewSet):
         serializer = AssignmentSubmissionSerializer(submission, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
-    @action(detail=True, methods=['get'], permission_classes=[permissions.IsAuthenticated, IsTeacherOrAdmin])
+    @action(detail=True, methods=['get'])
     def submissions(self, request, pk=None):
-        """List all submissions for an assignment (Teachers/Admins only)"""
+        """List all submissions for an assignment (Instructors/Admins only)"""
         assignment = self.get_object()
         
-        # Teachers can only view submissions for their own courses
-        if hasattr(request.user, 'teacher_profile'):
-            if assignment.course.teacher != request.user.teacher_profile:
-                return Response(
-                    {'error': 'You do not have permission to view submissions for this assignment'},
-                    status=status.HTTP_403_FORBIDDEN
-                )
+        # Check permission: admin or course instructor
+        if not self._is_course_instructor(request.user, assignment.course) and not hasattr(request.user, 'admin_profile'):
+            return Response(
+                {'error': 'You do not have permission to view submissions for this assignment'},
+                status=status.HTTP_403_FORBIDDEN
+            )
         
-        submissions = assignment.submissions.select_related('student__user').prefetch_related(
+        submissions = assignment.submissions.select_related('student').prefetch_related(
             'question_responses__question__choices'
         ).order_by('-submitted_at')
-        serializer = AssignmentSubmissionSerializer(submissions, many=True)
+        serializer = AssignmentSubmissionSerializer(submissions, many=True, context={'request': request})
         
         return Response(serializer.data)
     
-    @action(detail=True, methods=['get', 'post'], permission_classes=[permissions.IsAuthenticated, IsTeacher])
+    @action(detail=True, methods=['get', 'post'])
     def questions(self, request, pk=None):
-        """List or add questions for an assignment (Teachers only)"""
+        """List or add questions for an assignment (Instructors only)"""
         assignment = self.get_object()
         
-        # Verify teacher owns the course
-        if hasattr(request.user, 'teacher_profile'):
-            if assignment.course.teacher != request.user.teacher_profile:
-                return Response(
-                    {'error': 'You can only manage questions for your own assignments.'},
-                    status=status.HTTP_403_FORBIDDEN
-                )
+        # Verify user is an instructor of the course
+        if not self._is_course_instructor(request.user, assignment.course):
+            return Response(
+                {'error': 'You can only manage questions for assignments in courses you instruct.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
         
         if request.method == 'GET':
             questions = assignment.questions.prefetch_related('choices').order_by('order')
@@ -195,53 +178,100 @@ class AssignmentViewSet(viewsets.ModelViewSet):
             serializer.save(assignment=assignment)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
     
-    @action(detail=True, methods=['get'], permission_classes=[permissions.IsAuthenticated, IsStudent])
+    @action(detail=True, methods=['get'], url_path='student-view')
     def student_view(self, request, pk=None):
         """Get assignment with questions (without correct answers) for students"""
         assignment = self.get_object()
-        serializer = AssignmentStudentSerializer(assignment)
+        
+        # Check if user is a student or member of the course
+        if not self._is_course_member(request.user, assignment.course):
+            return Response(
+                {'error': 'You must be enrolled in the course to view this assignment.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        serializer = AssignmentStudentSerializer(assignment, context={'request': request})
         return Response(serializer.data)
+    
+    def _is_course_instructor(self, user, course):
+        """Check if user is an instructor of the course"""
+        if hasattr(user, 'admin_profile'):
+            return True
+        return course.memberships.filter(
+            user=user,
+            role='instructor',
+            status='active'
+        ).exists()
+    
+    def _is_course_student(self, user, course):
+        """Check if user is a student in the course"""
+        return course.memberships.filter(
+            user=user,
+            role='student',
+            status='active'
+        ).exists()
+    
+    def _is_course_member(self, user, course):
+        """Check if user is a member of the course (any role)"""
+        if hasattr(user, 'admin_profile'):
+            return True
+        return course.memberships.filter(
+            user=user,
+            status='active'
+        ).exists()
 
 
 class QuestionViewSet(viewsets.ModelViewSet):
     """ViewSet for managing individual questions"""
     
-    queryset = Question.objects.select_related('assignment__course__teacher').prefetch_related('choices')
+    queryset = Question.objects.select_related('assignment__course').prefetch_related('choices')
     serializer_class = QuestionSerializer
-    permission_classes = [permissions.IsAuthenticated, IsTeacher]
+    permission_classes = [permissions.IsAuthenticated, IsInstructor]
     
     def get_queryset(self):
         """Filter questions based on user role"""
         user = self.request.user
         queryset = super().get_queryset()
         
-        # Teachers can only see questions from their own assignments
-        if hasattr(user, 'teacher_profile'):
-            queryset = queryset.filter(assignment__course__teacher=user.teacher_profile)
+        # Admins see all questions
+        if hasattr(user, 'admin_profile'):
+            return queryset.order_by('order')
         
-        return queryset.order_by('order')
+        # Instructors see questions from their courses
+        instructor_courses = user.memberships.filter(
+            role='instructor',
+            status='active'
+        ).values_list('course_id', flat=True)
+        
+        return queryset.filter(
+            assignment__course_id__in=instructor_courses
+        ).order_by('order')
     
     def perform_update(self, serializer):
-        """Validate teacher owns the assignment before updating question"""
+        """Validate user is instructor of the course before updating question"""
         question = self.get_object()
-        if hasattr(self.request.user, 'teacher_profile'):
-            if question.assignment.course.teacher != self.request.user.teacher_profile:
-                from rest_framework.exceptions import PermissionDenied
-                raise PermissionDenied("You can only update questions in your own assignments.")
+        
+        if not self._is_course_instructor(self.request.user, question.assignment.course):
+            raise PermissionDenied("You can only update questions in courses you instruct.")
+        
         serializer.save()
     
     def perform_destroy(self, instance):
-        """Validate teacher owns the assignment before deleting question"""
-        if hasattr(self.request.user, 'teacher_profile'):
-            if instance.assignment.course.teacher != self.request.user.teacher_profile:
-                from rest_framework.exceptions import PermissionDenied
-                raise PermissionDenied("You can only delete questions from your own assignments.")
+        """Validate user is instructor of the course before deleting question"""
+        if not self._is_course_instructor(self.request.user, instance.assignment.course):
+            raise PermissionDenied("You can only delete questions from courses you instruct.")
+        
         instance.delete()
     
-    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated, IsTeacher])
+    @action(detail=True, methods=['post'])
     def reorder(self, request, pk=None):
         """Update the order of a question"""
         question = self.get_object()
+        
+        # Verify user is instructor of the course
+        if not self._is_course_instructor(request.user, question.assignment.course):
+            raise PermissionDenied("You can only reorder questions in courses you instruct.")
+        
         new_order = request.data.get('order')
         
         if new_order is None:
@@ -251,17 +281,27 @@ class QuestionViewSet(viewsets.ModelViewSet):
         question.save()
         
         return Response({'status': 'Order updated', 'order': question.order})
+    
+    def _is_course_instructor(self, user, course):
+        """Check if user is an instructor of the course"""
+        if hasattr(user, 'admin_profile'):
+            return True
+        return course.memberships.filter(
+            user=user,
+            role='instructor',
+            status='active'
+        ).exists()
 
 
 class AssignmentSubmissionViewSet(viewsets.ModelViewSet):
     """ViewSet for viewing and managing submissions"""
     
     queryset = AssignmentSubmission.objects.select_related(
-        'assignment__course__teacher__user',
-        'student__user'
+        'assignment__course',
+        'student'
     ).prefetch_related(
-        'question_responses__question__choices',  # Prefetch question choices for QuestionResponseSerializer
-        'assignment__questions'  # Prefetch for get_max_score() calculation
+        'question_responses__question__choices',
+        'assignment__questions'
     )
     serializer_class = AssignmentSubmissionSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -271,16 +311,26 @@ class AssignmentSubmissionViewSet(viewsets.ModelViewSet):
         user = self.request.user
         queryset = super().get_queryset()
         
-        # Students see only their own submissions
-        if hasattr(user, 'student_profile'):
-            queryset = queryset.filter(student=user.student_profile)
-        
-        # Teachers see submissions from their courses
-        elif hasattr(user, 'teacher_profile'):
-            queryset = queryset.filter(assignment__course__teacher=user.teacher_profile)
-        
         # Admins see all submissions
-        return queryset.order_by('-submitted_at')
+        if hasattr(user, 'admin_profile'):
+            return queryset.order_by('-submitted_at')
+        
+        # Users see their own submissions AND submissions from courses they instruct
+        instructor_courses = user.memberships.filter(
+            role='instructor',
+            status='active'
+        ).values_list('course_id', flat=True)
+        
+        return queryset.filter(
+            Q(student=user) |
+            Q(assignment__course_id__in=instructor_courses)
+        ).order_by('-submitted_at')
+    
+    def get_serializer_context(self):
+        """Add request to serializer context"""
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
     
     def create(self, request, *args, **kwargs):
         """Prevent direct creation - use assignment submit endpoint"""
@@ -289,18 +339,17 @@ class AssignmentSubmissionViewSet(viewsets.ModelViewSet):
             status=status.HTTP_400_BAD_REQUEST
         )
     
-    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated, IsTeacherOrAdmin])
+    @action(detail=True, methods=['post'], url_path='grade-response')
     def grade_response(self, request, pk=None):
-        """Grade a text response question (Teachers/Admins only)"""
+        """Grade a text response question (Instructors/Admins only)"""
         submission = self.get_object()
         
-        # Verify teacher owns the course
-        if hasattr(request.user, 'teacher_profile'):
-            if submission.assignment.course.teacher != request.user.teacher_profile:
-                return Response(
-                    {'error': 'You can only grade submissions for your own courses.'},
-                    status=status.HTTP_403_FORBIDDEN
-                )
+        # Verify user is instructor of the course or admin
+        if not self._is_course_instructor(request.user, submission.assignment.course):
+            return Response(
+                {'error': 'You can only grade submissions for courses you instruct.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
         
         response_id = request.data.get('response_id')
         points_earned = request.data.get('points_earned')
@@ -335,3 +384,13 @@ class AssignmentSubmissionViewSet(viewsets.ModelViewSet):
         
         serializer = QuestionResponseSerializer(question_response)
         return Response(serializer.data)
+    
+    def _is_course_instructor(self, user, course):
+        """Check if user is an instructor of the course"""
+        if hasattr(user, 'admin_profile'):
+            return True
+        return course.memberships.filter(
+            user=user,
+            role='instructor',
+            status='active'
+        ).exists()

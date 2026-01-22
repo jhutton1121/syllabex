@@ -1,14 +1,14 @@
 from django.db import models
-from courses.models import CourseEnrollment
+from courses.models import CourseMembership
 from assignments.models import Assignment
-from users.models import TeacherProfile
+from users.models import User
 
 
 class GradeEntry(models.Model):
     """Grade entry for student assignments"""
     
-    enrollment = models.ForeignKey(
-        CourseEnrollment, 
+    membership = models.ForeignKey(
+        CourseMembership, 
         on_delete=models.CASCADE, 
         related_name='grades',
         db_index=True
@@ -21,7 +21,7 @@ class GradeEntry(models.Model):
     )
     grade = models.DecimalField(max_digits=5, decimal_places=2)
     graded_by = models.ForeignKey(
-        TeacherProfile, 
+        User, 
         on_delete=models.SET_NULL, 
         null=True,
         related_name='grades_given'
@@ -33,16 +33,16 @@ class GradeEntry(models.Model):
         db_table = 'grade_entries'
         verbose_name = 'Grade Entry'
         verbose_name_plural = 'Grade Entries'
-        unique_together = [['enrollment', 'assignment']]
+        unique_together = [['membership', 'assignment']]
         ordering = ['-graded_at']
         indexes = [
-            models.Index(fields=['enrollment']),
+            models.Index(fields=['membership']),
             models.Index(fields=['assignment']),
             models.Index(fields=['graded_at']),
         ]
     
     def __str__(self):
-        return f"{self.enrollment.student.student_id} - {self.assignment.title}: {self.grade}"
+        return f"{self.membership.user.email} - {self.assignment.title}: {self.grade}"
     
     def calculate_letter_grade(self):
         """Calculate letter grade based on percentage"""

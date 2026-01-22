@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from courses.models import Course
-from users.models import StudentProfile
+from users.models import User
 
 
 class Assignment(models.Model):
@@ -191,7 +191,7 @@ class AssignmentSubmission(models.Model):
         db_index=True
     )
     student = models.ForeignKey(
-        StudentProfile, 
+        User, 
         on_delete=models.CASCADE, 
         related_name='submissions',
         db_index=True
@@ -213,7 +213,7 @@ class AssignmentSubmission(models.Model):
         ]
     
     def __str__(self):
-        return f"{self.student.student_id} - {self.assignment.title}"
+        return f"{self.student.email} - {self.assignment.title}"
     
     def save(self, *args, **kwargs):
         # Auto-calculate if submission is late
@@ -262,7 +262,7 @@ class QuestionResponse(models.Model):
         ]
     
     def __str__(self):
-        return f"Response to Q{self.question.order} by {self.submission.student.student_id}"
+        return f"Response to Q{self.question.order} by {self.submission.student.email}"
     
     def auto_grade(self):
         """Automatically grade multiple choice and numerical questions"""

@@ -2,26 +2,31 @@
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, PermissionDenied
 from django.db.models import Q
-from .models import Course, CourseEnrollment
-from .serializers import CourseSerializer, CourseEnrollmentSerializer
-from users.models import StudentProfile, TeacherProfile
-from users.permissions import IsTeacherOrAdmin, IsTeacher, IsAdmin, IsStudent
+from .models import Course, CourseMembership
+from .serializers import CourseSerializer, CourseDetailSerializer, CourseMembershipSerializer
+from users.models import User
+from users.permissions import IsAdmin, IsInstructorOrAdmin, IsCourseInstructorOrAdmin
 
 
 class CourseViewSet(viewsets.ModelViewSet):
     """ViewSet for Course CRUD operations"""
     
-    queryset = Course.objects.select_related('teacher__user').prefetch_related('enrollments')
+    queryset = Course.objects.prefetch_related('memberships__user')
     serializer_class = CourseSerializer
     
     def get_permissions(self):
         """Set permissions based on action"""
-        if self.action in ['create']:
-            permission_classes = [permissions.IsAuthenticated, IsTeacherOrAdmin]
+        if self.action == 'create':
+            # Only admins can create courses
+            permission_classes = [permissions.IsAuthenticated, IsAdmin]
         elif self.action in ['update', 'partial_update', 'destroy']:
-            permission_classes = [permissions.IsAuthenticated, IsTeacherOrAdmin]
+            # Admins can modify any course
+            permission_classes = [permissions.IsAuthenticated, IsAdmin]
+        elif self.action in ['add_member', 'remove_member', 'update_role']:
+            # Admins or course instructors can manage members
+            permission_classes = [permissions.IsAuthenticated]
         else:
             permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
@@ -31,131 +36,215 @@ class CourseViewSet(viewsets.ModelViewSet):
         user = self.request.user
         queryset = super().get_queryset()
         
-        # Students see only their enrolled courses
-        if hasattr(user, 'student_profile'):
-            return queryset.filter(
-                enrollments__student=user.student_profile,
-                enrollments__status='active'
-            ).distinct()
-        
-        # Teachers see their own courses
-        elif hasattr(user, 'teacher_profile'):
-            return queryset.filter(teacher=user.teacher_profile)
-        
         # Admins see all courses
-        return queryset
+        if hasattr(user, 'admin_profile'):
+            return queryset
+        
+        # Regular users see only their enrolled courses
+        return queryset.filter(
+            memberships__user=user,
+            memberships__status='active'
+        ).distinct()
     
-    def get_serializer(self, *args, **kwargs):
-        """Set teacher queryset in serializer"""
-        serializer = super().get_serializer(*args, **kwargs)
-        if hasattr(serializer, 'fields') and 'teacher_id' in serializer.fields:
-            serializer.fields['teacher_id'].queryset = TeacherProfile.objects.all()
-        return serializer
+    def get_serializer_class(self):
+        """Use detailed serializer for retrieve action"""
+        if self.action == 'retrieve':
+            return CourseDetailSerializer
+        return CourseSerializer
     
-    def perform_create(self, serializer):
-        """Automatically set teacher for course creation"""
-        # If user is a teacher, set them as the course teacher
-        if hasattr(self.request.user, 'teacher_profile'):
-            serializer.save(teacher=self.request.user.teacher_profile)
-        # If admin is creating, they must specify teacher_id
-        else:
-            teacher = serializer.validated_data.get('teacher')
-            if not teacher:
-                raise ValidationError(
-                    "Admin must specify teacher_id when creating a course."
-                )
-            serializer.save()
+    def get_serializer_context(self):
+        """Add request to serializer context"""
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
     
-    def perform_update(self, serializer):
-        """Validate teacher owns the course before updating"""
+    @action(detail=True, methods=['post'], url_path='members')
+    def add_member(self, request, pk=None):
+        """Add a member to a course (Admin or Course Instructor only)"""
         course = self.get_object()
         
-        # Teachers can only update their own courses
-        if hasattr(self.request.user, 'teacher_profile'):
-            if course.teacher != self.request.user.teacher_profile:
-                from rest_framework.exceptions import PermissionDenied
-                raise PermissionDenied("You can only update your own courses.")
-            # Teachers cannot change the course teacher
-            if 'teacher' in serializer.validated_data:
-                raise ValidationError("Teachers cannot reassign course ownership.")
-            serializer.save()
-        else:
-            # Admin is updating - ensure teacher is still set
-            teacher = serializer.validated_data.get('teacher', course.teacher)
-            if not teacher:
-                raise ValidationError("Course must have a teacher assigned.")
-            serializer.save()
-    
-    def perform_destroy(self, instance):
-        """Validate teacher owns the course before deleting"""
-        # Teachers can only delete their own courses
-        if hasattr(self.request.user, 'teacher_profile'):
-            if instance.teacher != self.request.user.teacher_profile:
-                from rest_framework.exceptions import PermissionDenied
-                raise PermissionDenied("You can only delete your own courses.")
-        instance.delete()
-    
-    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated, IsAdmin])
-    def enroll(self, request, pk=None):
-        """Enroll a student in a course (Admin only)"""
-        course = self.get_object()
-        student_id = request.data.get('student_id')
+        # Check permission: admin or course instructor
+        if not self._can_manage_course(request.user, course):
+            raise PermissionDenied("You don't have permission to manage this course.")
         
-        if not student_id:
+        user_id = request.data.get('user_id')
+        role = request.data.get('role', 'student')
+        
+        if not user_id:
             return Response(
-                {'error': 'student_id is required'},
+                {'error': 'user_id is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if role not in ['student', 'instructor']:
+            return Response(
+                {'error': 'role must be either "student" or "instructor"'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
         try:
-            student = StudentProfile.objects.get(pk=student_id)
-        except StudentProfile.DoesNotExist:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
             return Response(
-                {'error': 'Student not found'},
+                {'error': 'User not found'},
                 status=status.HTTP_404_NOT_FOUND
             )
         
-        # Check if already enrolled
-        if CourseEnrollment.objects.filter(student=student, course=course).exists():
+        # Check if already a member
+        if CourseMembership.objects.filter(user=user, course=course).exists():
             return Response(
-                {'error': 'Student is already enrolled in this course'},
+                {'error': 'User is already a member of this course'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        enrollment = CourseEnrollment.objects.create(student=student, course=course)
-        serializer = CourseEnrollmentSerializer(enrollment)
+        membership = CourseMembership.objects.create(
+            user=user, 
+            course=course,
+            role=role
+        )
+        serializer = CourseMembershipSerializer(membership)
         
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
-    @action(detail=True, methods=['get'], permission_classes=[permissions.IsAuthenticated, IsTeacherOrAdmin])
+    @action(detail=True, methods=['delete'], url_path='members/(?P<user_id>[^/.]+)')
+    def remove_member(self, request, pk=None, user_id=None):
+        """Remove a member from a course (Admin or Course Instructor only)"""
+        course = self.get_object()
+        
+        # Check permission: admin or course instructor
+        if not self._can_manage_course(request.user, course):
+            raise PermissionDenied("You don't have permission to manage this course.")
+        
+        try:
+            membership = CourseMembership.objects.get(user_id=user_id, course=course)
+        except CourseMembership.DoesNotExist:
+            return Response(
+                {'error': 'Member not found in this course'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Prevent removing the last instructor
+        if membership.role == 'instructor':
+            instructor_count = course.memberships.filter(role='instructor', status='active').count()
+            if instructor_count <= 1:
+                return Response(
+                    {'error': 'Cannot remove the last instructor from the course'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        membership.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    @action(detail=True, methods=['patch'], url_path='members/(?P<user_id>[^/.]+)/role')
+    def update_role(self, request, pk=None, user_id=None):
+        """Update a member's role in a course (Admin or Course Instructor only)"""
+        course = self.get_object()
+        
+        # Check permission: admin or course instructor
+        if not self._can_manage_course(request.user, course):
+            raise PermissionDenied("You don't have permission to manage this course.")
+        
+        new_role = request.data.get('role')
+        if new_role not in ['student', 'instructor']:
+            return Response(
+                {'error': 'role must be either "student" or "instructor"'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            membership = CourseMembership.objects.get(user_id=user_id, course=course)
+        except CourseMembership.DoesNotExist:
+            return Response(
+                {'error': 'Member not found in this course'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Prevent demoting the last instructor
+        if membership.role == 'instructor' and new_role == 'student':
+            instructor_count = course.memberships.filter(role='instructor', status='active').count()
+            if instructor_count <= 1:
+                return Response(
+                    {'error': 'Cannot demote the last instructor'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        membership.role = new_role
+        membership.save()
+        
+        serializer = CourseMembershipSerializer(membership)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['get'], url_path='students')
     def students(self, request, pk=None):
         """List students enrolled in a course"""
         course = self.get_object()
         
-        # Teachers can only view students in their own courses
-        if hasattr(request.user, 'teacher_profile'):
-            if course.teacher != request.user.teacher_profile:
-                return Response(
-                    {'error': 'You do not have permission to view students in this course'},
-                    status=status.HTTP_403_FORBIDDEN
-                )
+        # Check permission: admin, course instructor, or member of the course
+        if not self._can_view_course_members(request.user, course):
+            raise PermissionDenied("You don't have permission to view students in this course.")
         
-        enrollments = course.enrollments.filter(status='active').select_related('student__user')
-        serializer = CourseEnrollmentSerializer(enrollments, many=True)
+        memberships = course.memberships.filter(
+            role='student', 
+            status='active'
+        ).select_related('user')
+        serializer = CourseMembershipSerializer(memberships, many=True)
         
         return Response(serializer.data)
-
-
-class CourseEnrollmentViewSet(viewsets.ModelViewSet):
-    """ViewSet for CourseEnrollment operations"""
     
-    queryset = CourseEnrollment.objects.select_related('student__user', 'course__teacher__user')
-    serializer_class = CourseEnrollmentSerializer
+    @action(detail=True, methods=['get'], url_path='instructors')
+    def instructors(self, request, pk=None):
+        """List instructors in a course"""
+        course = self.get_object()
+        
+        memberships = course.memberships.filter(
+            role='instructor', 
+            status='active'
+        ).select_related('user')
+        serializer = CourseMembershipSerializer(memberships, many=True)
+        
+        return Response(serializer.data)
+    
+    def _can_manage_course(self, user, course):
+        """Check if user can manage course members"""
+        # Admins can manage any course
+        if hasattr(user, 'admin_profile'):
+            return True
+        
+        # Check if user is an instructor in this course
+        return course.memberships.filter(
+            user=user,
+            role='instructor',
+            status='active'
+        ).exists()
+    
+    def _can_view_course_members(self, user, course):
+        """Check if user can view course members"""
+        # Admins can view any course
+        if hasattr(user, 'admin_profile'):
+            return True
+        
+        # Check if user is a member of the course (instructor or student)
+        return course.memberships.filter(
+            user=user,
+            status='active'
+        ).exists()
+
+
+class CourseMembershipViewSet(viewsets.ModelViewSet):
+    """ViewSet for CourseMembership operations"""
+    
+    queryset = CourseMembership.objects.select_related('user', 'course')
+    serializer_class = CourseMembershipSerializer
     permission_classes = [permissions.IsAuthenticated, IsAdmin]
     
-    def get_serializer(self, *args, **kwargs):
-        """Set student queryset in serializer"""
-        serializer = super().get_serializer(*args, **kwargs)
-        if hasattr(serializer, 'fields') and 'student_id' in serializer.fields:
-            serializer.fields['student_id'].queryset = StudentProfile.objects.all()
-        return serializer
+    def get_queryset(self):
+        """Filter memberships based on user role"""
+        user = self.request.user
+        queryset = super().get_queryset()
+        
+        # Admins see all memberships
+        if hasattr(user, 'admin_profile'):
+            return queryset
+        
+        # Regular users see only their own memberships
+        return queryset.filter(user=user)

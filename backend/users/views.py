@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import User
 from .serializers import UserRegistrationSerializer, UserSerializer
+from .permissions import IsAdmin
 
 
 class UserRegistrationView(generics.CreateAPIView):
@@ -36,3 +37,33 @@ class CurrentUserView(APIView):
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
+
+
+class UserListView(generics.ListAPIView):
+    """API endpoint to list all users (Admin only)"""
+    queryset = User.objects.all().order_by('-created_at')
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        # Search by email or name
+        search = self.request.query_params.get('search')
+        if search:
+            queryset = queryset.filter(
+                email__icontains=search
+            ) | queryset.filter(
+                first_name__icontains=search
+            ) | queryset.filter(
+                last_name__icontains=search
+            )
+        
+        return queryset
+
+
+class UserDetailView(generics.RetrieveAPIView):
+    """API endpoint to get user details (Admin only)"""
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]

@@ -7,13 +7,13 @@ const courseService = {
     return response.data;
   },
 
-  // Get single course
+  // Get single course with details
   getCourse: async (id) => {
     const response = await api.get(`/courses/${id}/`);
     return response.data;
   },
 
-  // Create course (Teachers/Admins only)
+  // Create course (Admin only)
   createCourse: async (courseData) => {
     const response = await api.post('/courses/', courseData);
     return response.data;
@@ -31,10 +31,25 @@ const courseService = {
     return response.data;
   },
 
-  // Enroll student (Admins only)
-  enrollStudent: async (courseId, studentId) => {
-    const response = await api.post(`/courses/${courseId}/enroll/`, {
-      student_id: studentId,
+  // Add member to course (Admin or Instructor)
+  addMember: async (courseId, userId, role = 'student') => {
+    const response = await api.post(`/courses/${courseId}/members/`, {
+      user_id: userId,
+      role: role,
+    });
+    return response.data;
+  },
+
+  // Remove member from course
+  removeMember: async (courseId, userId) => {
+    const response = await api.delete(`/courses/${courseId}/members/${userId}/`);
+    return response.data;
+  },
+
+  // Update member role
+  updateMemberRole: async (courseId, userId, newRole) => {
+    const response = await api.patch(`/courses/${courseId}/members/${userId}/role/`, {
+      role: newRole,
     });
     return response.data;
   },
@@ -42,6 +57,18 @@ const courseService = {
   // Get students in course
   getCourseStudents: async (courseId) => {
     const response = await api.get(`/courses/${courseId}/students/`);
+    return response.data;
+  },
+
+  // Get instructors in course
+  getCourseInstructors: async (courseId) => {
+    const response = await api.get(`/courses/${courseId}/instructors/`);
+    return response.data;
+  },
+
+  // Get all memberships (admin only)
+  getMemberships: async () => {
+    const response = await api.get('/courses/memberships/');
     return response.data;
   },
 };
