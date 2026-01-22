@@ -84,9 +84,24 @@ class QuestionResponseSerializer(serializers.ModelSerializer):
         model = QuestionResponse
         fields = [
             'id', 'submission', 'question', 'question_info',
-            'response_text', 'is_correct', 'points_earned', 'graded'
+            'response_text', 'is_correct', 'points_earned', 'graded',
+            'teacher_remarks', 'graded_at'
         ]
-        read_only_fields = ['id', 'submission', 'is_correct', 'points_earned', 'graded']
+        read_only_fields = ['id', 'submission', 'is_correct', 'points_earned', 'graded', 'graded_at']
+
+
+class QuestionResponseStudentSerializer(serializers.ModelSerializer):
+    """Serializer for QuestionResponse model - student view (after due date only)"""
+    
+    question_info = QuestionStudentSerializer(source='question', read_only=True)
+    
+    class Meta:
+        model = QuestionResponse
+        fields = [
+            'id', 'question', 'question_info', 'response_text',
+            'is_correct', 'points_earned', 'graded', 'teacher_remarks'
+        ]
+        read_only_fields = fields
 
 
 class QuestionResponseSubmitSerializer(serializers.Serializer):
@@ -106,6 +121,10 @@ class AssignmentSerializer(serializers.ModelSerializer):
         write_only=True
     )
     is_overdue = serializers.SerializerMethodField()
+    has_started = serializers.SerializerMethodField()
+    is_available = serializers.SerializerMethodField()
+    is_editable = serializers.SerializerMethodField()
+    is_auto_gradable = serializers.SerializerMethodField()
     submission_count = serializers.SerializerMethodField()
     questions = QuestionSerializer(many=True, read_only=True)
     question_count = serializers.SerializerMethodField()
@@ -115,8 +134,9 @@ class AssignmentSerializer(serializers.ModelSerializer):
         model = Assignment
         fields = [
             'id', 'course', 'course_info', 'course_id', 'type', 'title',
-            'description', 'due_date', 'points_possible', 'created_at',
-            'updated_at', 'is_overdue', 'submission_count', 'questions',
+            'description', 'start_date', 'due_date', 'points_possible', 'created_at',
+            'updated_at', 'is_overdue', 'has_started', 'is_available', 'is_editable',
+            'is_auto_gradable', 'submission_count', 'questions',
             'question_count', 'total_question_points'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'course']
@@ -124,6 +144,22 @@ class AssignmentSerializer(serializers.ModelSerializer):
     def get_is_overdue(self, obj):
         """Check if assignment is past due date"""
         return obj.is_overdue()
+    
+    def get_has_started(self, obj):
+        """Check if assignment has started"""
+        return obj.has_started()
+    
+    def get_is_available(self, obj):
+        """Check if assignment is available for students"""
+        return obj.is_available_for_students()
+    
+    def get_is_editable(self, obj):
+        """Check if assignment can still be edited by teacher"""
+        return obj.is_editable_by_teacher()
+    
+    def get_is_auto_gradable(self, obj):
+        """Check if assignment is fully auto-gradable"""
+        return obj.is_auto_gradable()
     
     def get_submission_count(self, obj):
         """Get count of submissions"""
@@ -151,13 +187,16 @@ class AssignmentSubmissionSerializer(serializers.ModelSerializer):
     question_responses = QuestionResponseSerializer(many=True, read_only=True)
     total_score = serializers.SerializerMethodField()
     max_score = serializers.SerializerMethodField()
+    is_fully_graded = serializers.SerializerMethodField()
+    grading_status = serializers.SerializerMethodField()
     
     class Meta:
         model = AssignmentSubmission
         fields = [
             'id', 'assignment', 'assignment_info', 'assignment_id',
             'student', 'student_info', 'answer', 'submitted_at', 'is_late',
-            'question_responses', 'total_score', 'max_score'
+            'question_responses', 'total_score', 'max_score',
+            'is_fully_graded', 'grading_status'
         ]
         read_only_fields = ['id', 'submitted_at', 'is_late', 'assignment', 'student']
     
@@ -168,6 +207,14 @@ class AssignmentSubmissionSerializer(serializers.ModelSerializer):
     def get_max_score(self, obj):
         """Get maximum possible score from assignment questions"""
         return sum(q.points for q in obj.assignment.questions.all())
+    
+    def get_is_fully_graded(self, obj):
+        """Check if all questions have been graded"""
+        return obj.is_fully_graded()
+    
+    def get_grading_status(self, obj):
+        """Get grading status"""
+        return obj.get_grading_status()
     
     def validate(self, attrs):
         """Validate submission"""
@@ -199,28 +246,95 @@ class AssignmentSubmissionSerializer(serializers.ModelSerializer):
         return attrs
 
 
+class AssignmentSubmissionStudentSerializer(serializers.ModelSerializer):
+    """Serializer for student to view their own submission (shows grades only after due date)"""
+    
+    question_responses = serializers.SerializerMethodField()
+    total_score = serializers.SerializerMethodField()
+    max_score = serializers.SerializerMethodField()
+    can_view_grades = serializers.SerializerMethodField()
+    is_fully_graded = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = AssignmentSubmission
+        fields = [
+            'id', 'assignment', 'submitted_at', 'is_late',
+            'question_responses', 'total_score', 'max_score',
+            'can_view_grades', 'is_fully_graded'
+        ]
+        read_only_fields = fields
+    
+    def get_can_view_grades(self, obj):
+        """Check if student can view grades (after due date)"""
+        return obj.assignment.is_overdue()
+    
+    def get_question_responses(self, obj):
+        """Return question responses with grade info only if after due date"""
+        responses = obj.question_responses.all().order_by('question__order')
+        if obj.assignment.is_overdue():
+            return QuestionResponseStudentSerializer(responses, many=True).data
+        else:
+            # Before due date, just show that they answered
+            return [{
+                'id': r.id,
+                'question': r.question_id,
+                'response_text': r.response_text,
+                'graded': False,  # Hide grading status
+                'is_correct': None,
+                'points_earned': None,
+                'teacher_remarks': ''
+            } for r in responses]
+    
+    def get_total_score(self, obj):
+        """Get total score only if after due date"""
+        if obj.assignment.is_overdue():
+            return obj.calculate_score()
+        return None
+    
+    def get_max_score(self, obj):
+        """Get max score"""
+        return sum(q.points for q in obj.assignment.questions.all())
+    
+    def get_is_fully_graded(self, obj):
+        """Check if fully graded (only show after due date)"""
+        if obj.assignment.is_overdue():
+            return obj.is_fully_graded()
+        return None
+
+
 class AssignmentStudentSerializer(serializers.ModelSerializer):
     """Serializer for Assignment model - student view (hides correct answers)"""
     
     course_info = CourseSerializer(source='course', read_only=True)
     is_overdue = serializers.SerializerMethodField()
+    has_started = serializers.SerializerMethodField()
+    is_available = serializers.SerializerMethodField()
     questions = QuestionStudentSerializer(many=True, read_only=True)
     question_count = serializers.SerializerMethodField()
     total_question_points = serializers.SerializerMethodField()
+    my_submission = serializers.SerializerMethodField()
     
     class Meta:
         model = Assignment
         fields = [
             'id', 'course', 'course_info', 'type', 'title',
-            'description', 'due_date', 'points_possible', 'created_at',
-            'updated_at', 'is_overdue', 'questions', 'question_count',
-            'total_question_points'
+            'description', 'start_date', 'due_date', 'points_possible', 'created_at',
+            'updated_at', 'is_overdue', 'has_started', 'is_available', 
+            'questions', 'question_count', 'total_question_points', 'my_submission'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'course']
     
     def get_is_overdue(self, obj):
         """Check if assignment is past due date"""
         return obj.is_overdue()
+    
+    def get_has_started(self, obj):
+        """Check if assignment has started"""
+        return obj.has_started()
+    
+    def get_is_available(self, obj):
+        """Check if assignment is available for taking"""
+        return obj.is_available_for_students()
     
     def get_question_count(self, obj):
         """Get count of questions"""
@@ -229,3 +343,14 @@ class AssignmentStudentSerializer(serializers.ModelSerializer):
     def get_total_question_points(self, obj):
         """Get total points from all questions"""
         return sum(q.points for q in obj.questions.all())
+    
+    def get_my_submission(self, obj):
+        """Get the current user's submission if exists"""
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            try:
+                submission = obj.submissions.get(student=request.user)
+                return AssignmentSubmissionStudentSerializer(submission).data
+            except AssignmentSubmission.DoesNotExist:
+                return None
+        return None

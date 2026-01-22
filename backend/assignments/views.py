@@ -5,13 +5,16 @@ from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from .models import Assignment, AssignmentSubmission, Question, Choice, QuestionResponse
 from .serializers import (
     AssignmentSerializer, AssignmentSubmissionSerializer, 
     QuestionSerializer, QuestionResponseSerializer,
-    QuestionResponseSubmitSerializer, AssignmentStudentSerializer
+    QuestionResponseSubmitSerializer, AssignmentStudentSerializer,
+    AssignmentSubmissionStudentSerializer
 )
 from courses.models import Course, CourseMembership
+from gradebook.models import GradeEntry
 from users.permissions import IsInstructor, IsInstructorOrAdmin
 
 
@@ -80,12 +83,26 @@ class AssignmentViewSet(viewsets.ModelViewSet):
         if not self._is_course_instructor(self.request.user, assignment.course):
             raise PermissionDenied("You can only update assignments in courses you instruct.")
         
+        # Check if assignment is still editable (before start date)
+        if not assignment.is_editable_by_teacher():
+            raise PermissionDenied(
+                "This assignment has already started and cannot be modified. "
+                "You can only edit assignments before their start date."
+            )
+        
         serializer.save()
     
     def perform_destroy(self, instance):
         """Validate user is instructor of the course before deleting assignment"""
         if not self._is_course_instructor(self.request.user, instance.course):
             raise PermissionDenied("You can only delete assignments from courses you instruct.")
+        
+        # Check if assignment is still editable (before start date)
+        if not instance.is_editable_by_teacher():
+            raise PermissionDenied(
+                "This assignment has already started and cannot be deleted. "
+                "You can only delete assignments before their start date."
+            )
         
         instance.delete()
     
@@ -99,6 +116,19 @@ class AssignmentViewSet(viewsets.ModelViewSet):
         if not self._is_course_student(user, assignment.course):
             return Response(
                 {'error': 'You must be enrolled as a student in the course to submit this assignment.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Check if assignment is available (between start and due date)
+        if not assignment.has_started():
+            return Response(
+                {'error': 'This assignment is not yet available. Please wait until the start date.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        if assignment.is_overdue():
+            return Response(
+                {'error': 'This assignment is past its due date and no longer accepts submissions.'},
                 status=status.HTTP_403_FORBIDDEN
             )
         
@@ -133,8 +163,36 @@ class AssignmentViewSet(viewsets.ModelViewSet):
             except Question.DoesNotExist:
                 continue
         
+        # Create grade entry if fully auto-gradable
+        self._create_grade_entry_if_complete(submission)
+        
         serializer = AssignmentSubmissionSerializer(submission, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    def _create_grade_entry_if_complete(self, submission):
+        """Create grade entry if all questions are graded"""
+        if submission.is_fully_graded():
+            # Get the student's membership in the course
+            try:
+                membership = CourseMembership.objects.get(
+                    user=submission.student,
+                    course=submission.assignment.course,
+                    role='student',
+                    status='active'
+                )
+                
+                # Create or update the grade entry
+                GradeEntry.objects.update_or_create(
+                    membership=membership,
+                    assignment=submission.assignment,
+                    defaults={
+                        'grade': submission.calculate_score(),
+                        'graded_by': None,  # Auto-graded
+                        'comments': 'Auto-graded'
+                    }
+                )
+            except CourseMembership.DoesNotExist:
+                pass  # Student not enrolled, skip grade entry
     
     @action(detail=True, methods=['get'])
     def submissions(self, request, pk=None):
@@ -173,6 +231,13 @@ class AssignmentViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
         
         elif request.method == 'POST':
+            # Check if assignment is still editable (before start date)
+            if not assignment.is_editable_by_teacher():
+                return Response(
+                    {'error': 'This assignment has already started. You cannot add questions after the start date.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
             serializer = QuestionSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save(assignment=assignment)
@@ -254,12 +319,24 @@ class QuestionViewSet(viewsets.ModelViewSet):
         if not self._is_course_instructor(self.request.user, question.assignment.course):
             raise PermissionDenied("You can only update questions in courses you instruct.")
         
+        # Check if assignment is still editable (before start date)
+        if not question.assignment.is_editable_by_teacher():
+            raise PermissionDenied(
+                "This assignment has already started. You cannot modify questions after the start date."
+            )
+        
         serializer.save()
     
     def perform_destroy(self, instance):
         """Validate user is instructor of the course before deleting question"""
         if not self._is_course_instructor(self.request.user, instance.assignment.course):
             raise PermissionDenied("You can only delete questions from courses you instruct.")
+        
+        # Check if assignment is still editable (before start date)
+        if not instance.assignment.is_editable_by_teacher():
+            raise PermissionDenied(
+                "This assignment has already started. You cannot delete questions after the start date."
+            )
         
         instance.delete()
     
@@ -271,6 +348,12 @@ class QuestionViewSet(viewsets.ModelViewSet):
         # Verify user is instructor of the course
         if not self._is_course_instructor(request.user, question.assignment.course):
             raise PermissionDenied("You can only reorder questions in courses you instruct.")
+        
+        # Check if assignment is still editable (before start date)
+        if not question.assignment.is_editable_by_teacher():
+            raise PermissionDenied(
+                "This assignment has already started. You cannot reorder questions after the start date."
+            )
         
         new_order = request.data.get('order')
         
@@ -353,6 +436,7 @@ class AssignmentSubmissionViewSet(viewsets.ModelViewSet):
         
         response_id = request.data.get('response_id')
         points_earned = request.data.get('points_earned')
+        teacher_remarks = request.data.get('teacher_remarks', '')
         
         if response_id is None or points_earned is None:
             return Response(
@@ -380,10 +464,76 @@ class AssignmentSubmissionViewSet(viewsets.ModelViewSet):
         question_response.points_earned = points_earned
         question_response.is_correct = points_earned == max_points
         question_response.graded = True
+        question_response.teacher_remarks = teacher_remarks
+        question_response.graded_at = timezone.now()
         question_response.save()
+        
+        # Create grade entry if all questions are now graded
+        self._create_grade_entry_if_complete(submission, request.user)
         
         serializer = QuestionResponseSerializer(question_response)
         return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'], url_path='my-submissions')
+    def my_submissions(self, request):
+        """Get current user's submissions"""
+        submissions = AssignmentSubmission.objects.filter(
+            student=request.user
+        ).select_related(
+            'assignment__course'
+        ).prefetch_related(
+            'question_responses__question__choices',
+            'assignment__questions'
+        ).order_by('-submitted_at')
+        
+        serializer = AssignmentSubmissionStudentSerializer(submissions, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['get'], url_path='student-view')
+    def student_view(self, request, pk=None):
+        """Get a submission with student-appropriate view (grades only after due date)"""
+        submission = self.get_object()
+        
+        # Only allow students to view their own submissions
+        if submission.student != request.user and not self._is_course_instructor(request.user, submission.assignment.course):
+            return Response(
+                {'error': 'You can only view your own submissions.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # If student is viewing their own submission, use student serializer
+        if submission.student == request.user:
+            serializer = AssignmentSubmissionStudentSerializer(submission)
+        else:
+            # Instructors can see full details
+            serializer = AssignmentSubmissionSerializer(submission, context={'request': request})
+        
+        return Response(serializer.data)
+    
+    def _create_grade_entry_if_complete(self, submission, grader=None):
+        """Create grade entry if all questions are graded"""
+        if submission.is_fully_graded():
+            # Get the student's membership in the course
+            try:
+                membership = CourseMembership.objects.get(
+                    user=submission.student,
+                    course=submission.assignment.course,
+                    role='student',
+                    status='active'
+                )
+                
+                # Create or update the grade entry
+                GradeEntry.objects.update_or_create(
+                    membership=membership,
+                    assignment=submission.assignment,
+                    defaults={
+                        'grade': submission.calculate_score(),
+                        'graded_by': grader,
+                        'comments': 'Graded' if grader else 'Auto-graded'
+                    }
+                )
+            except CourseMembership.DoesNotExist:
+                pass  # Student not enrolled, skip grade entry
     
     def _is_course_instructor(self, user, course):
         """Check if user is an instructor of the course"""
