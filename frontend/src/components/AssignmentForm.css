@@ -4,14 +4,81 @@
   padding: 20px;
 }
 
+/* Loading Spinner */
+.loading-spinner-large {
+  width: 48px;
+  height: 48px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
 
+.form-row-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
 .form-row-3 {
   grid-template-columns: 1fr 1fr 1fr;
+}
+
+/* Alert styles for assignment form */
+.alert-warning {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #f59e0b;
+  border-left: 5px solid #f59e0b;
+  color: #92400e;
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+}
+
+.alert-warning strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.alert-warning p {
+  line-height: 1.6;
+  color: #78350f;
+}
+
+.alert-info {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border: 2px solid #3b82f6;
+  border-left: 5px solid #3b82f6;
+  color: #1e40af;
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.alert-info strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.alert-info p {
+  line-height: 1.6;
+  color: #1e3a8a;
 }
 
 .form-hint {
@@ -26,6 +93,28 @@
   display: flex;
   gap: 15px;
   margin-top: 30px;
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  font-weight: 600;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-warning:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.btn-warning:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Questions Section */
@@ -51,6 +140,10 @@
 
 @media (max-width: 768px) {
   .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-row-2 {
     grid-template-columns: 1fr;
   }
   

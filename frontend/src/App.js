@@ -12,6 +12,8 @@ import CourseDetail from './pages/CourseDetail';
 import TakeAssignment from './pages/TakeAssignment';
 import CreateAssignment from './pages/CreateAssignment';
 import CreateCourse from './pages/CreateCourse';
+import ViewSubmissions from './pages/ViewSubmissions';
+import GradeSubmission from './pages/GradeSubmission';
 
 // Admin Pages
 import AdminDashboard from './pages/AdminDashboard';
@@ -58,10 +60,34 @@ function App() {
               }
             />
             <Route
+              path="/courses/:courseId/assignments/:assignmentId/edit"
+              element={
+                <PrivateRoute>
+                  <CreateAssignment />
+                </PrivateRoute>
+              }
+            />
+            <Route
               path="/courses/:courseId/assignments/create"
               element={
                 <PrivateRoute>
                   <CreateAssignment />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/courses/:courseId/assignments/:assignmentId/submissions"
+              element={
+                <PrivateRoute>
+                  <ViewSubmissions />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/courses/:courseId/assignments/:assignmentId/submissions/:submissionId"
+              element={
+                <PrivateRoute>
+                  <GradeSubmission />
                 </PrivateRoute>
               }
             />

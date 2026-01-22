@@ -105,11 +105,24 @@ const assignmentService = {
   // ===== Grading =====
 
   // Grade a text response (Instructors only)
-  gradeResponse: async (submissionId, responseId, pointsEarned) => {
+  gradeResponse: async (submissionId, responseId, pointsEarned, teacherRemarks = '') => {
     const response = await api.post(`/assignments/submissions/${submissionId}/grade-response/`, {
       response_id: responseId,
       points_earned: pointsEarned,
+      teacher_remarks: teacherRemarks,
     });
+    return response.data;
+  },
+
+  // Get a single submission with all details
+  getSubmission: async (submissionId) => {
+    const response = await api.get(`/assignments/submissions/${submissionId}/`);
+    return response.data;
+  },
+
+  // Get student's view of their submission (with grades after due date)
+  getStudentSubmission: async (submissionId) => {
+    const response = await api.get(`/assignments/submissions/${submissionId}/student-view/`);
     return response.data;
   },
 };

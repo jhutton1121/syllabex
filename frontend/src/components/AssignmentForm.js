@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import courseService from '../services/courseService';
 import assignmentService from '../services/assignmentService';
 import QuestionBuilder from './QuestionBuilder';
@@ -8,7 +8,9 @@ import './AssignmentForm.css';
 
 const AssignmentForm = ({ assignment = null, isEdit = false }) => {
   const navigate = useNavigate();
+  const { courseId } = useParams();
   const [courses, setCourses] = useState([]);
+  
   // Parse existing due_date into separate date and time
   const getInitialDueDate = () => {
     if (assignment?.due_date) {
@@ -24,11 +26,34 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
     return '23:59'; // Default to end of day
   };
 
+  // Parse existing start_date into separate date and time
+  const getInitialStartDate = () => {
+    if (assignment?.start_date) {
+      return assignment.start_date.slice(0, 10); // YYYY-MM-DD
+    }
+    return '';
+  };
+  
+  const getInitialStartTime = () => {
+    if (assignment?.start_date) {
+      return assignment.start_date.slice(11, 16); // HH:MM
+    }
+    return '00:00'; // Default to start of day
+  };
+
+  // Check if assignment has already started (for edit warnings)
+  const hasAssignmentStarted = () => {
+    if (!assignment?.start_date) return true; // No start date means immediately available
+    return new Date(assignment.start_date) <= new Date();
+  };
+
   const [formData, setFormData] = useState({
-    course_id: assignment?.course || '',
+    course_id: assignment?.course || courseId || '',
     type: assignment?.type || 'homework',
     title: assignment?.title || '',
     description: assignment?.description || '',
+    start_date: getInitialStartDate(),
+    start_time: getInitialStartTime(),
     due_date: getInitialDueDate(),
     due_time: getInitialDueTime(),
     points_possible: assignment?.points_possible || 100,
@@ -139,10 +164,41 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
     return questions.reduce((sum, q) => sum + (q.points || 0), 0);
   };
 
+  const validateDates = () => {
+    // If start date is provided, validate it's before due date
+    if (formData.start_date && formData.due_date) {
+      const startDateTime = new Date(`${formData.start_date}T${formData.start_time}`);
+      const dueDateTime = new Date(`${formData.due_date}T${formData.due_time}`);
+      
+      if (startDateTime >= dueDateTime) {
+        setError('Start date must be before the due date');
+        return false;
+      }
+    }
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+
+    if (!validateDates()) {
+      return;
+    }
+
+    // Warn when updating a started assignment
+    if (isEdit && hasAssignmentStarted()) {
+      const confirmEdit = window.confirm(
+        '⚠️ Warning: This assignment has already started and may have student submissions.\n\n' +
+        'Changing questions or settings may affect student work and grades.\n\n' +
+        'Are you sure you want to save these changes?'
+      );
+      if (!confirmEdit) {
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
@@ -156,6 +212,14 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
         points_possible: formData.points_possible,
         due_date: new Date(dueDateTimeString).toISOString(),
       };
+
+      // Add start_date if provided
+      if (formData.start_date) {
+        const startDateTimeString = `${formData.start_date}T${formData.start_time}`;
+        submitData.start_date = new Date(startDateTimeString).toISOString();
+      } else {
+        submitData.start_date = null;
+      }
 
       let assignmentId;
 
@@ -199,7 +263,13 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
       }
 
       setTimeout(() => {
-        navigate('/teacher/dashboard');
+        // Navigate back to the course page if we have a courseId, otherwise to dashboard
+        const targetCourseId = formData.course_id || courseId;
+        if (targetCourseId) {
+          navigate(`/courses/${targetCourseId}`);
+        } else {
+          navigate('/dashboard');
+        }
       }, 2000);
     } catch (err) {
       const errorMessage = err.response?.data;
@@ -287,6 +357,71 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
             />
           </div>
 
+          {/* Start Date Warning for Edit Mode */}
+          {isEdit && hasAssignmentStarted() && (
+            <div className="alert alert-warning">
+              <strong>⚠️ Warning: Assignment Has Started</strong>
+              <p style={{ margin: '0.5rem 0 0', fontSize: '0.9rem' }}>
+                This assignment is already available to students. Modifying questions or settings may affect 
+                existing submissions and student work. Changes will be saved, but proceed with caution.
+              </p>
+            </div>
+          )}
+
+          {isEdit && !hasAssignmentStarted() && formData.start_date && (
+            <div className="alert alert-info">
+              <strong>✓ Safe to Edit</strong>
+              <p style={{ margin: '0.5rem 0 0', fontSize: '0.9rem' }}>
+                This assignment has not started yet. You can freely make changes until it opens on{' '}
+                {new Date(`${formData.start_date}T${formData.start_time}`).toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  month: 'long',
+                  day: 'numeric',
+                  year: 'numeric',
+                  hour: 'numeric',
+                  minute: '2-digit'
+                })}.
+              </p>
+            </div>
+          )}
+
+          {isEdit && !formData.start_date && (
+            <div className="alert alert-info">
+              <strong>ℹ️ No Start Date Set</strong>
+              <p style={{ margin: '0.5rem 0 0', fontSize: '0.9rem' }}>
+                This assignment is immediately available to students. Any changes you make will be visible right away.
+              </p>
+            </div>
+          )}
+
+          <div className="form-row form-row-2">
+            <div className="form-group">
+              <label htmlFor="start_date">Start Date (Optional)</label>
+              <input
+                id="start_date"
+                type="date"
+                name="start_date"
+                value={formData.start_date}
+                onChange={handleChange}
+              />
+              <small className="form-hint">
+                Leave empty to make immediately available
+              </small>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="start_time">Start Time</label>
+              <input
+                id="start_time"
+                type="time"
+                name="start_time"
+                value={formData.start_time}
+                onChange={handleChange}
+                disabled={!formData.start_date}
+              />
+            </div>
+          </div>
+
           <div className="form-row form-row-3">
             <div className="form-group">
               <label htmlFor="due_date">Due Date *</label>
@@ -364,8 +499,14 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
           </div>
 
           <div className="form-actions">
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Saving...' : isEdit ? 'Update Assignment' : 'Create Assignment'}
+            <button 
+              type="submit" 
+              className={`btn ${isEdit && hasAssignmentStarted() ? 'btn-warning' : 'btn-primary'}`}
+              disabled={loading}
+            >
+              {loading ? 'Saving...' : isEdit ? (
+                hasAssignmentStarted() ? '⚠️ Update Live Assignment' : 'Update Assignment'
+              ) : 'Create Assignment'}
             </button>
             <button
               type="button"
