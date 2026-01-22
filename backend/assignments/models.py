@@ -26,6 +26,7 @@ class Assignment(models.Model):
     )
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
+    start_date = models.DateTimeField(db_index=True, null=True, blank=True)
     due_date = models.DateTimeField(db_index=True)
     points_possible = models.IntegerField(default=100)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -39,6 +40,7 @@ class Assignment(models.Model):
         indexes = [
             models.Index(fields=['course']),
             models.Index(fields=['type']),
+            models.Index(fields=['start_date']),
             models.Index(fields=['due_date']),
         ]
     
@@ -48,6 +50,32 @@ class Assignment(models.Model):
     def is_overdue(self):
         """Check if assignment is past due date"""
         return timezone.now() > self.due_date
+    
+    def has_started(self):
+        """Check if assignment has started (past start date)"""
+        if self.start_date is None:
+            return True  # No start date means immediately available
+        return timezone.now() >= self.start_date
+    
+    def is_available_for_students(self):
+        """Check if assignment is within the available window for students"""
+        now = timezone.now()
+        started = self.start_date is None or now >= self.start_date
+        not_past_due = now <= self.due_date
+        return started and not_past_due
+    
+    def is_editable_by_teacher(self):
+        """Check if assignment can still be edited by teacher (before start date)"""
+        if self.start_date is None:
+            return True  # No start date means always editable
+        return timezone.now() < self.start_date
+    
+    def is_auto_gradable(self):
+        """Check if assignment consists only of auto-gradable questions"""
+        questions = self.questions.all()
+        if not questions.exists():
+            return False
+        return all(q.question_type in ['multiple_choice', 'numerical'] for q in questions)
 
 
 class QuizManager(models.Manager):
@@ -228,6 +256,25 @@ class AssignmentSubmission(models.Model):
             if response.points_earned is not None:
                 total += response.points_earned
         return total
+    
+    def is_fully_graded(self):
+        """Check if all question responses have been graded"""
+        total_questions = self.assignment.questions.count()
+        graded_responses = self.question_responses.filter(graded=True).count()
+        return total_questions > 0 and total_questions == graded_responses
+    
+    def get_grading_status(self):
+        """Get grading status: 'complete', 'partial', or 'pending'"""
+        total_questions = self.assignment.questions.count()
+        graded_responses = self.question_responses.filter(graded=True).count()
+        
+        if total_questions == 0:
+            return 'complete'  # No questions to grade
+        if graded_responses == 0:
+            return 'pending'
+        if graded_responses == total_questions:
+            return 'complete'
+        return 'partial'
 
 
 class QuestionResponse(models.Model):
@@ -249,6 +296,8 @@ class QuestionResponse(models.Model):
     is_correct = models.BooleanField(null=True, blank=True)
     points_earned = models.IntegerField(null=True, blank=True)
     graded = models.BooleanField(default=False)
+    teacher_remarks = models.TextField(blank=True, default='')
+    graded_at = models.DateTimeField(null=True, blank=True)
     
     class Meta:
         db_table = 'question_responses'
@@ -280,11 +329,13 @@ class QuestionResponse(models.Model):
                     self.is_correct = False
                     self.points_earned = 0
                 self.graded = True
+                self.graded_at = timezone.now()
             except (ValueError, TypeError):
                 # Invalid response, mark as incorrect
                 self.is_correct = False
                 self.points_earned = 0
                 self.graded = True
+                self.graded_at = timezone.now()
         
         elif question.question_type == 'numerical':
             # Check if answer is within tolerance
@@ -300,11 +351,13 @@ class QuestionResponse(models.Model):
                     self.is_correct = False
                     self.points_earned = 0
                 self.graded = True
+                self.graded_at = timezone.now()
             except (ValueError, TypeError):
                 # Invalid response, mark as incorrect
                 self.is_correct = False
                 self.points_earned = 0
                 self.graded = True
+                self.graded_at = timezone.now()
         
         # Text responses are not auto-graded
         # They remain with graded=False until manual grading
