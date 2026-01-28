@@ -23,6 +23,9 @@ import GradeSubmission from './pages/instructor/GradeSubmission';
 import CourseDetail from './pages/course/CourseDetail';
 import CreateCourse from './pages/course/CreateCourse';
 
+// Shared Pages
+import AccountPage from './pages/shared/AccountPage';
+
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
 import CourseManagement from './pages/admin/CourseManagement';
@@ -48,6 +51,16 @@ function App() {
               element={
                 <PrivateRoute>
                   <UserDashboard />
+                </PrivateRoute>
+              }
+            />
+
+            {/* Account Page */}
+            <Route
+              path="/account"
+              element={
+                <PrivateRoute>
+                  <AccountPage />
                 </PrivateRoute>
               }
             />

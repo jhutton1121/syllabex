@@ -31,12 +31,23 @@ class UserRegistrationView(generics.CreateAPIView):
 
 
 class CurrentUserView(APIView):
-    """API endpoint to get current authenticated user"""
+    """API endpoint to get and update current authenticated user"""
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
+
+    def patch(self, request):
+        """Update current user's profile information"""
+        user = request.user
+        serializer = UserSerializer(user, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserListView(generics.ListAPIView):
@@ -67,3 +78,43 @@ class UserDetailView(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated, IsAdmin]
+
+
+class ChangePasswordView(APIView):
+    """API endpoint to change user password"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        current_password = request.data.get('current_password')
+        new_password = request.data.get('new_password')
+
+        # Validation
+        if not current_password or not new_password:
+            return Response(
+                {'error': 'Both current_password and new_password are required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Check if current password is correct
+        if not user.check_password(current_password):
+            return Response(
+                {'error': 'Current password is incorrect'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Validate new password length
+        if len(new_password) < 8:
+            return Response(
+                {'error': 'New password must be at least 8 characters long'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Set new password
+        user.set_password(new_password)
+        user.save()
+
+        return Response(
+            {'message': 'Password changed successfully'},
+            status=status.HTTP_200_OK
+        )
