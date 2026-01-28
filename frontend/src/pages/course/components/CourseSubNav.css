@@ -1,0 +1,126 @@
+.course-sub-nav {
+  background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
+  border-radius: 12px;
+  padding: 1rem 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 80px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+
+.sub-nav-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sub-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.85);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.sub-nav-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.sub-nav-item.active {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+}
+
+.sub-nav-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.sub-nav-label {
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+/* Scrollbar styling */
+.course-sub-nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+.course-sub-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.course-sub-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.course-sub-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Mobile styles */
+@media (max-width: 1024px) {
+  .course-sub-nav {
+    position: relative;
+    top: 0;
+    max-height: none;
+    overflow-y: visible;
+    margin-bottom: 1.5rem;
+  }
+
+  .sub-nav-items {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .sub-nav-item {
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.75rem 1rem;
+    min-width: 100px;
+    text-align: center;
+  }
+
+  .sub-nav-icon {
+    font-size: 1.5rem;
+  }
+
+  .sub-nav-label {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .course-sub-nav {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .sub-nav-item {
+    min-width: 85px;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .sub-nav-icon {
+    font-size: 1.25rem;
+  }
+
+  .sub-nav-label {
+    font-size: 0.7rem;
+  }
+}

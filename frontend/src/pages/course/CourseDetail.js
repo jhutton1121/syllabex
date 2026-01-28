@@ -4,6 +4,11 @@ import { useAuth } from '../../context/AuthContext';
 import courseService from '../../services/courseService';
 import assignmentService from '../../services/assignmentService';
 import gradebookService from '../../services/gradebookService';
+import CourseSubNav from './components/CourseSubNav';
+import CourseSyllabus from './components/CourseSyllabus';
+import CourseQuizzes from './components/CourseQuizzes';
+import CourseTests from './components/CourseTests';
+import CourseCourseCalendar from './components/CourseCourseCalendar';
 import './CourseDetail.css';
 
 const CourseDetail = () => {
@@ -14,7 +19,7 @@ const CourseDetail = () => {
   const [assignments, setAssignments] = useState([]);
   const [students, setStudents] = useState([]);
   const [grades, setGrades] = useState(null);
-  const [activeTab, setActiveTab] = useState('assignments');
+  const [activeView, setActiveView] = useState('overview');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -101,6 +106,20 @@ const CourseDetail = () => {
     (a, b) => new Date(a.due_date) - new Date(b.due_date)
   );
 
+  // Calculate assignment counters
+  const now = new Date();
+  const totalAssignments = assignments.length;
+  const upcomingAssignments = assignments.filter(a => {
+    const dueDate = a.due_date ? new Date(a.due_date) : null;
+    const startDate = a.start_date ? new Date(a.start_date) : null;
+    const hasStarted = !startDate || startDate <= now;
+    return dueDate && dueDate >= now && hasStarted;
+  }).length;
+  const pastDueAssignments = assignments.filter(a => {
+    const dueDate = a.due_date ? new Date(a.due_date) : null;
+    return dueDate && dueDate < now;
+  }).length;
+
   return (
     <div className="course-detail-container">
       {/* Course Header */}
@@ -143,52 +162,98 @@ const CourseDetail = () => {
               <span className="meta-value">{course.instructor_count}</span>
             </div>
             <div className="meta-item">
-              <span className="meta-label">Assignments</span>
-              <span className="meta-value">{assignments.length}</span>
+              <span className="meta-label">Total Assignments</span>
+              <span className="meta-value">{totalAssignments}</span>
+            </div>
+            <div className="meta-item meta-upcoming">
+              <span className="meta-label">Upcoming</span>
+              <span className="meta-value">{upcomingAssignments}</span>
+            </div>
+            <div className="meta-item meta-pastdue">
+              <span className="meta-label">Past Due</span>
+              <span className="meta-value">{pastDueAssignments}</span>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Tabs */}
-      <nav className="course-tabs">
-        <button
-          className={`tab ${activeTab === 'assignments' ? 'active' : ''}`}
-          onClick={() => setActiveTab('assignments')}
-        >
-          Assignments
-        </button>
-        {isInstructor && (
-          <>
-            <button
-              className={`tab ${activeTab === 'students' ? 'active' : ''}`}
-              onClick={() => setActiveTab('students')}
-            >
-              Roster ({students.length})
-            </button>
-            <button
-              className={`tab ${activeTab === 'gradebook' ? 'active' : ''}`}
-              onClick={() => setActiveTab('gradebook')}
-            >
-              Gradebook
-            </button>
-          </>
-        )}
-        {isStudent && (
-          <button
-            className={`tab ${activeTab === 'grades' ? 'active' : ''}`}
-            onClick={() => setActiveTab('grades')}
-          >
-            My Grades
-          </button>
-        )}
-      </nav>
+      {/* Course Content with Sub-Navigation */}
+      <div className="course-content-layout">
+        <CourseSubNav
+          activeView={activeView}
+          onViewChange={setActiveView}
+          isInstructor={isInstructor}
+          isStudent={isStudent}
+        />
 
-      {/* Tab Content */}
-      <div className="tab-content">
-        {/* Assignments Tab */}
-        {activeTab === 'assignments' && (
-          <div className="assignments-tab">
+        <div className="course-main-content">
+          {/* Overview View */}
+          {activeView === 'overview' && (
+            <div className="overview-view">
+              <h2>Course Overview</h2>
+              {course.description && (
+                <div className="overview-section">
+                  <h3>About This Course</h3>
+                  <p>{course.description}</p>
+                </div>
+              )}
+              <div className="overview-stats">
+                <div className="stat-card">
+                  <div className="stat-icon">📝</div>
+                  <div className="stat-info">
+                    <div className="stat-number">{totalAssignments}</div>
+                    <div className="stat-label">Total Assignments</div>
+                  </div>
+                </div>
+                <div className="stat-card stat-upcoming">
+                  <div className="stat-icon">⏰</div>
+                  <div className="stat-info">
+                    <div className="stat-number">{upcomingAssignments}</div>
+                    <div className="stat-label">Upcoming</div>
+                  </div>
+                </div>
+                <div className="stat-card stat-pastdue">
+                  <div className="stat-icon">⚠️</div>
+                  <div className="stat-info">
+                    <div className="stat-number">{pastDueAssignments}</div>
+                    <div className="stat-label">Past Due</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Syllabus View */}
+          {activeView === 'syllabus' && (
+            <CourseSyllabus course={course} isInstructor={isInstructor} />
+          )}
+
+          {/* Quizzes View */}
+          {activeView === 'quizzes' && (
+            <CourseQuizzes
+              assignments={assignments}
+              courseId={courseId}
+              isInstructor={isInstructor}
+            />
+          )}
+
+          {/* Tests View */}
+          {activeView === 'tests' && (
+            <CourseTests
+              assignments={assignments}
+              courseId={courseId}
+              isInstructor={isInstructor}
+            />
+          )}
+
+          {/* Course Calendar View */}
+          {activeView === 'calendar' && (
+            <CourseCourseCalendar course={course} assignments={assignments} />
+          )}
+
+          {/* Assignments View */}
+          {activeView === 'assignments' && (
+            <div className="assignments-view">
             {sortedAssignments.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-icon">📝</div>
@@ -311,11 +376,11 @@ const CourseDetail = () => {
                 })}
               </div>
             )}
-          </div>
-        )}
+            </div>
+          )}
 
-        {/* Students Tab (Instructor only) */}
-        {activeTab === 'students' && isInstructor && (
+          {/* Roster View (Instructor only) */}
+          {activeView === 'roster' && isInstructor && (
           <div className="students-tab">
             {students.length === 0 ? (
               <div className="empty-state">
@@ -365,8 +430,8 @@ const CourseDetail = () => {
           </div>
         )}
 
-        {/* Gradebook Tab (Instructor only) */}
-        {activeTab === 'gradebook' && isInstructor && (
+          {/* Gradebook View (Instructor only) */}
+          {activeView === 'gradebook' && isInstructor && (
           <div className="gradebook-tab">
             {!grades || grades.students?.length === 0 ? (
               <div className="empty-state">
@@ -418,8 +483,8 @@ const CourseDetail = () => {
           </div>
         )}
 
-        {/* Student Grades Tab */}
-        {activeTab === 'grades' && isStudent && (
+          {/* Student Grades View */}
+          {activeView === 'grades' && isStudent && (
           <div className="student-grades-tab">
             {!grades || grades.length === 0 ? (
               <div className="empty-state">
@@ -447,6 +512,7 @@ const CourseDetail = () => {
             )}
           </div>
         )}
+        </div>
       </div>
     </div>
   );
