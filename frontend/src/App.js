@@ -25,6 +25,7 @@ import CreateCourse from './pages/course/CreateCourse';
 
 // Shared Pages
 import AccountPage from './pages/shared/AccountPage';
+import CalendarPage from './pages/shared/CalendarPage';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -61,6 +62,16 @@ function App() {
               element={
                 <PrivateRoute>
                   <AccountPage />
+                </PrivateRoute>
+              }
+            />
+
+            {/* Calendar Page */}
+            <Route
+              path="/calendar"
+              element={
+                <PrivateRoute>
+                  <CalendarPage />
                 </PrivateRoute>
               }
             />
