@@ -19,7 +19,9 @@ const CourseDetail = () => {
   const [assignments, setAssignments] = useState([]);
   const [students, setStudents] = useState([]);
   const [grades, setGrades] = useState(null);
+  const [submissions, setSubmissions] = useState([]);
   const [activeView, setActiveView] = useState('overview');
+  const [subNavCollapsed, setSubNavCollapsed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -48,13 +50,24 @@ const CourseDetail = () => {
           }
         }
 
-        // Students can see their own grades
+        // Students can see their own grades and submissions
         if (courseData.user_role === 'student' && user) {
           try {
             const myGrades = await gradebookService.getStudentGrades(user.id);
             setGrades(myGrades);
           } catch (e) {
             console.log('No grades yet');
+          }
+
+          try {
+            const mySubmissions = await assignmentService.getMySubmissions();
+            // Filter submissions for this course only
+            const courseSubmissions = mySubmissions.filter(
+              sub => sub.assignment_info?.course === parseInt(courseId)
+            );
+            setSubmissions(courseSubmissions);
+          } catch (e) {
+            console.log('No submissions yet');
           }
         }
 
@@ -109,16 +122,56 @@ const CourseDetail = () => {
   // Calculate assignment counters
   const now = new Date();
   const totalAssignments = assignments.length;
-  const upcomingAssignments = assignments.filter(a => {
-    const dueDate = a.due_date ? new Date(a.due_date) : null;
-    const startDate = a.start_date ? new Date(a.start_date) : null;
-    const hasStarted = !startDate || startDate <= now;
-    return dueDate && dueDate >= now && hasStarted;
-  }).length;
-  const pastDueAssignments = assignments.filter(a => {
-    const dueDate = a.due_date ? new Date(a.due_date) : null;
-    return dueDate && dueDate < now;
-  }).length;
+
+  // Create a map of assignment IDs to submissions
+  const submissionMap = {};
+  submissions.forEach(sub => {
+    submissionMap[sub.assignment] = sub;
+  });
+
+  // For students: calculate based on submission status
+  let upcomingAssignments = 0;
+  let completedAssignments = 0;
+  let lateSubmissions = 0;
+  let pastDueAssignments = 0;
+
+  if (isStudent) {
+    assignments.forEach(a => {
+      const dueDate = a.due_date ? new Date(a.due_date) : null;
+      const startDate = a.start_date ? new Date(a.start_date) : null;
+      const hasStarted = !startDate || startDate <= now;
+      const submission = submissionMap[a.id];
+
+      if (submission) {
+        const submittedAt = new Date(submission.submitted_at);
+        // Check if submitted before or after due date
+        if (dueDate && submittedAt > dueDate) {
+          lateSubmissions++;
+        } else {
+          completedAssignments++;
+        }
+      } else {
+        // Not submitted
+        if (dueDate && dueDate >= now && hasStarted) {
+          upcomingAssignments++;
+        } else if (dueDate && dueDate < now) {
+          pastDueAssignments++;
+        }
+      }
+    });
+  } else {
+    // For instructors: simpler view (no submission tracking)
+    upcomingAssignments = assignments.filter(a => {
+      const dueDate = a.due_date ? new Date(a.due_date) : null;
+      const startDate = a.start_date ? new Date(a.start_date) : null;
+      const hasStarted = !startDate || startDate <= now;
+      return dueDate && dueDate >= now && hasStarted;
+    }).length;
+    pastDueAssignments = assignments.filter(a => {
+      const dueDate = a.due_date ? new Date(a.due_date) : null;
+      return dueDate && dueDate < now;
+    }).length;
+  }
 
   return (
     <div className="course-detail-container">
@@ -167,7 +220,7 @@ const CourseDetail = () => {
               <div className="stat-icon">📝</div>
               <div className="stat-info">
                 <div className="stat-number">{totalAssignments}</div>
-                <div className="stat-label">Total Assignments</div>
+                <div className="stat-label">Total</div>
               </div>
             </div>
             <div className="stat-card stat-upcoming">
@@ -177,11 +230,29 @@ const CourseDetail = () => {
                 <div className="stat-label">Upcoming</div>
               </div>
             </div>
+            {isStudent && (
+              <>
+                <div className="stat-card stat-completed">
+                  <div className="stat-icon">✅</div>
+                  <div className="stat-info">
+                    <div className="stat-number">{completedAssignments}</div>
+                    <div className="stat-label">Completed</div>
+                  </div>
+                </div>
+                <div className="stat-card stat-late">
+                  <div className="stat-icon">⏱️</div>
+                  <div className="stat-info">
+                    <div className="stat-number">{lateSubmissions}</div>
+                    <div className="stat-label">Late</div>
+                  </div>
+                </div>
+              </>
+            )}
             <div className="stat-card stat-pastdue">
               <div className="stat-icon">⚠️</div>
               <div className="stat-info">
                 <div className="stat-number">{pastDueAssignments}</div>
-                <div className="stat-label">Past Due</div>
+                <div className="stat-label">{isStudent ? 'Missing' : 'Past Due'}</div>
               </div>
             </div>
           </div>
@@ -189,12 +260,14 @@ const CourseDetail = () => {
       </header>
 
       {/* Course Content with Sub-Navigation */}
-      <div className="course-content-layout">
+      <div className={`course-content-layout ${subNavCollapsed ? 'sub-nav-collapsed' : ''}`}>
         <CourseSubNav
           activeView={activeView}
           onViewChange={setActiveView}
           isInstructor={isInstructor}
           isStudent={isStudent}
+          collapsed={subNavCollapsed}
+          onToggleCollapse={() => setSubNavCollapsed(!subNavCollapsed)}
         />
 
         <div className="course-main-content">
