@@ -1,12 +1,21 @@
 .course-sub-nav {
   background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
-  border-radius: 12px;
+  border-radius: 0 12px 12px 0;
   padding: 1rem 0.75rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  position: sticky;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+  position: fixed;
+  left: 200px;
   top: 80px;
+  width: 220px;
   max-height: calc(100vh - 100px);
   overflow-y: auto;
+  z-index: 100;
+  transition: left 0.3s ease;
+}
+
+/* When main sidebar is collapsed */
+body.sidebar-collapsed .course-sub-nav {
+  left: 70px;
 }
 
 .sub-nav-items {

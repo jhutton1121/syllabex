@@ -161,17 +161,28 @@ const CourseDetail = () => {
               <span className="meta-label">Instructors</span>
               <span className="meta-value">{course.instructor_count}</span>
             </div>
-            <div className="meta-item">
-              <span className="meta-label">Total Assignments</span>
-              <span className="meta-value">{totalAssignments}</span>
+          </div>
+          <div className="assignment-stats-cards">
+            <div className="stat-card">
+              <div className="stat-icon">📝</div>
+              <div className="stat-info">
+                <div className="stat-number">{totalAssignments}</div>
+                <div className="stat-label">Total Assignments</div>
+              </div>
             </div>
-            <div className="meta-item meta-upcoming">
-              <span className="meta-label">Upcoming</span>
-              <span className="meta-value">{upcomingAssignments}</span>
+            <div className="stat-card stat-upcoming">
+              <div className="stat-icon">⏰</div>
+              <div className="stat-info">
+                <div className="stat-number">{upcomingAssignments}</div>
+                <div className="stat-label">Upcoming</div>
+              </div>
             </div>
-            <div className="meta-item meta-pastdue">
-              <span className="meta-label">Past Due</span>
-              <span className="meta-value">{pastDueAssignments}</span>
+            <div className="stat-card stat-pastdue">
+              <div className="stat-icon">⚠️</div>
+              <div className="stat-info">
+                <div className="stat-number">{pastDueAssignments}</div>
+                <div className="stat-label">Past Due</div>
+              </div>
             </div>
           </div>
         </div>
@@ -197,28 +208,8 @@ const CourseDetail = () => {
                   <p>{course.description}</p>
                 </div>
               )}
-              <div className="overview-stats">
-                <div className="stat-card">
-                  <div className="stat-icon">📝</div>
-                  <div className="stat-info">
-                    <div className="stat-number">{totalAssignments}</div>
-                    <div className="stat-label">Total Assignments</div>
-                  </div>
-                </div>
-                <div className="stat-card stat-upcoming">
-                  <div className="stat-icon">⏰</div>
-                  <div className="stat-info">
-                    <div className="stat-number">{upcomingAssignments}</div>
-                    <div className="stat-label">Upcoming</div>
-                  </div>
-                </div>
-                <div className="stat-card stat-pastdue">
-                  <div className="stat-icon">⚠️</div>
-                  <div className="stat-info">
-                    <div className="stat-number">{pastDueAssignments}</div>
-                    <div className="stat-label">Past Due</div>
-                  </div>
-                </div>
+              <div className="overview-info">
+                <p>Welcome to {course.name}! Use the navigation on the left to explore course content, view assignments, check your grades, and more.</p>
               </div>
             </div>
           )}
