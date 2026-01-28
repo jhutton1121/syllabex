@@ -1,8 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { SidebarProvider } from './context/SidebarContext';
 import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
+import Layout from './components/Layout';
 
 // Public Pages
 import LoginPage from './pages/public/LoginPage';
@@ -30,10 +32,12 @@ import UserManagement from './pages/admin/UserManagement';
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <div className="App">
-          <Navbar />
-          <Routes>
+      <SidebarProvider>
+        <Router>
+          <div className="App">
+            <Navbar />
+            <Layout>
+              <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
@@ -150,9 +154,11 @@ function App() {
             {/* Default Route */}
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="*" element={<Navigate to="/dashboard" />} />
-          </Routes>
-        </div>
-      </Router>
+              </Routes>
+            </Layout>
+          </div>
+        </Router>
+      </SidebarProvider>
     </AuthProvider>
   );
 }
