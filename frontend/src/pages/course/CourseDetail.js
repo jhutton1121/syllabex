@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useSidebar } from '../../context/SidebarContext';
 import courseService from '../../services/courseService';
 import assignmentService from '../../services/assignmentService';
 import gradebookService from '../../services/gradebookService';
@@ -15,13 +16,13 @@ const CourseDetail = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isSidebarExpanded } = useSidebar();
   const [course, setCourse] = useState(null);
   const [assignments, setAssignments] = useState([]);
   const [students, setStudents] = useState([]);
   const [grades, setGrades] = useState(null);
   const [submissions, setSubmissions] = useState([]);
   const [activeView, setActiveView] = useState('overview');
-  const [subNavCollapsed, setSubNavCollapsed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -260,14 +261,13 @@ const CourseDetail = () => {
       </header>
 
       {/* Course Content with Sub-Navigation */}
-      <div className={`course-content-layout ${subNavCollapsed ? 'sub-nav-collapsed' : ''}`}>
+      <div className="course-content-layout">
         <CourseSubNav
           activeView={activeView}
           onViewChange={setActiveView}
           isInstructor={isInstructor}
           isStudent={isStudent}
-          collapsed={subNavCollapsed}
-          onToggleCollapse={() => setSubNavCollapsed(!subNavCollapsed)}
+          mainSidebarWidth={isSidebarExpanded ? 200 : 70}
         />
 
         <div className="course-main-content">

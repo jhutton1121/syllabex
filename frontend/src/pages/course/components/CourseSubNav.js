@@ -1,7 +1,7 @@
 import React from 'react';
 import './CourseSubNav.css';
 
-function CourseSubNav({ activeView, onViewChange, isInstructor, isStudent, collapsed, onToggleCollapse }) {
+function CourseSubNav({ activeView, onViewChange, isInstructor, isStudent, mainSidebarWidth }) {
   const navItems = [
     { id: 'overview', label: 'Overview', icon: '🏠', visible: true },
     { id: 'syllabus', label: 'Syllabus', icon: '📚', visible: true },
@@ -15,10 +15,7 @@ function CourseSubNav({ activeView, onViewChange, isInstructor, isStudent, colla
   ];
 
   return (
-    <nav className={`course-sub-nav ${collapsed ? 'collapsed' : ''}`}>
-      <button className="sub-nav-toggle" onClick={onToggleCollapse} title={collapsed ? 'Expand' : 'Collapse'}>
-        {collapsed ? '»' : '«'}
-      </button>
+    <nav className="course-sub-nav" style={{ left: `${mainSidebarWidth}px` }}>
       <div className="sub-nav-items">
         {navItems.filter(item => item.visible).map((item) => (
           <button
@@ -27,7 +24,7 @@ function CourseSubNav({ activeView, onViewChange, isInstructor, isStudent, colla
             onClick={() => onViewChange(item.id)}
           >
             <span className="sub-nav-icon">{item.icon}</span>
-            {!collapsed && <span className="sub-nav-label">{item.label}</span>}
+            <span className="sub-nav-label">{item.label}</span>
           </button>
         ))}
       </div>

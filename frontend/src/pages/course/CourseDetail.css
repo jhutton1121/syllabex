@@ -727,21 +727,17 @@
 
 /* Course Content Layout with Sub-Navigation */
 .course-content-layout {
-  max-width: 1400px;
-  margin: 0 auto;
+  margin-left: 450px; /* 200px main sidebar + 250px sub-nav */
   padding: 2rem;
-  padding-left: calc(220px + 2rem);
   position: relative;
-  transition: padding-left 0.3s ease;
-}
-
-/* When course sub-nav is collapsed */
-.course-content-layout.sub-nav-collapsed {
-  padding-left: calc(70px + 2rem);
+  transition: margin-left 0.3s ease;
+  display: flex;
+  justify-content: center;
 }
 
 .course-main-content {
-  min-width: 0;
+  max-width: 1200px;
+  width: 100%;
 }
 
 /* Overview View */
