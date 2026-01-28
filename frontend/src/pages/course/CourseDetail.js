@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import courseService from '../services/courseService';
-import assignmentService from '../services/assignmentService';
-import gradebookService from '../services/gradebookService';
+import { useAuth } from '../../context/AuthContext';
+import courseService from '../../services/courseService';
+import assignmentService from '../../services/assignmentService';
+import gradebookService from '../../services/gradebookService';
 import './CourseDetail.css';
 
 const CourseDetail = () => {

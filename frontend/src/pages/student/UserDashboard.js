@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import courseService from '../services/courseService';
-import assignmentService from '../services/assignmentService';
+import { useAuth } from '../../context/AuthContext';
+import courseService from '../../services/courseService';
+import assignmentService from '../../services/assignmentService';
 import './UserDashboard.css';
 
 const UserDashboard = () => {

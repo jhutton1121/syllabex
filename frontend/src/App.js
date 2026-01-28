@@ -4,19 +4,25 @@ import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
 
-// Pages
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import UserDashboard from './pages/UserDashboard';
-import CourseDetail from './pages/CourseDetail';
-import TakeAssignment from './pages/TakeAssignment';
-import CreateAssignment from './pages/CreateAssignment';
-import CreateCourse from './pages/CreateCourse';
-import ViewSubmissions from './pages/ViewSubmissions';
-import GradeSubmission from './pages/GradeSubmission';
+// Public Pages
+import LoginPage from './pages/public/LoginPage';
+import RegisterPage from './pages/public/RegisterPage';
+
+// Student Pages
+import UserDashboard from './pages/student/UserDashboard';
+import TakeAssignment from './pages/student/TakeAssignment';
+
+// Instructor Pages
+import CreateAssignment from './pages/instructor/CreateAssignment';
+import ViewSubmissions from './pages/instructor/ViewSubmissions';
+import GradeSubmission from './pages/instructor/GradeSubmission';
+
+// Course Pages
+import CourseDetail from './pages/course/CourseDetail';
+import CreateCourse from './pages/course/CreateCourse';
 
 // Admin Pages
-import AdminDashboard from './pages/AdminDashboard';
+import AdminDashboard from './pages/admin/AdminDashboard';
 import CourseManagement from './pages/admin/CourseManagement';
 import AdminCourseDetail from './pages/admin/AdminCourseDetail';
 import UserManagement from './pages/admin/UserManagement';

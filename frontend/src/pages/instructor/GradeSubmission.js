@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import assignmentService from '../services/assignmentService';
+import assignmentService from '../../services/assignmentService';
 import './GradeSubmission.css';
 
 const GradeSubmission = () => {
