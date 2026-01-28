@@ -15,6 +15,7 @@ function CalendarPage() {
   const [courses, setCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [view, setView] = useState('month');
   const [date, setDate] = useState(new Date());
 
@@ -37,7 +38,18 @@ function CalendarPage() {
   const fetchCalendarData = async () => {
     try {
       setLoading(true);
-      const coursesData = await courseService.getCourses();
+      setError(null);
+
+      console.log('Fetching courses...');
+      const coursesResponse = await courseService.getCourses();
+      console.log('Courses response:', coursesResponse);
+
+      // Handle different response formats (array or object with results)
+      const coursesData = Array.isArray(coursesResponse)
+        ? coursesResponse
+        : coursesResponse.results || [];
+
+      console.log('Courses fetched:', coursesData.length);
       setCourses(coursesData);
 
       // Fetch assignments for all courses
@@ -45,7 +57,9 @@ function CalendarPage() {
       for (let i = 0; i < coursesData.length; i++) {
         const course = coursesData[i];
         try {
+          console.log(`Fetching assignments for course ${course.id}...`);
           const assignments = await assignmentService.getAssignments(course.id);
+          console.log(`Found ${assignments.length} assignments for ${course.code}`);
 
           assignments.forEach(assignment => {
             // Add due date event
@@ -87,9 +101,11 @@ function CalendarPage() {
         }
       }
 
+      console.log('Total events created:', allEvents.length);
       setEvents(allEvents);
     } catch (error) {
       console.error('Error fetching calendar data:', error);
+      setError(error.message || 'Failed to load calendar data');
     } finally {
       setLoading(false);
     }
@@ -132,6 +148,23 @@ function CalendarPage() {
       <div className="calendar-page">
         <div className="calendar-container">
           <div className="loading-spinner">Loading calendar...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="calendar-page">
+        <div className="calendar-container">
+          <div className="error-state">
+            <span className="error-icon">⚠️</span>
+            <h2>Error Loading Calendar</h2>
+            <p>{error}</p>
+            <button className="btn btn-primary" onClick={fetchCalendarData}>
+              Try Again
+            </button>
+          </div>
         </div>
       </div>
     );
