@@ -4,7 +4,7 @@ import AIQuestionReview from './AIQuestionReview';
 import SyllabusUpload from './SyllabusUpload';
 import './AIChatPanel.css';
 
-const AIChatPanel = ({ courseId, assignmentContext, onQuestionsAccepted, isOpen, onToggle }) => {
+const AIChatPanel = ({ courseId, assignmentContext, onQuestionsAccepted, onMetadataAccepted, isOpen, onToggle }) => {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -70,6 +70,7 @@ const AIChatPanel = ({ courseId, assignmentContext, onQuestionsAccepted, isOpen,
         role: 'assistant',
         content: result.message || 'Here are the generated questions.',
         questions: result.questions || [],
+        metadata: result.assignment_metadata || null,
       };
       setMessages(prev => [...prev, assistantMessage]);
 
@@ -172,6 +173,21 @@ const AIChatPanel = ({ courseId, assignmentContext, onQuestionsAccepted, isOpen,
                 className={`ai-message ai-message-${msg.role} ${msg.isError ? 'ai-message-error' : ''}`}
               >
                 <div className="ai-message-content">{msg.content}</div>
+                {msg.metadata && (
+                  <div className="ai-metadata-suggestion">
+                    <div className="ai-metadata-label">Suggested Assignment Details:</div>
+                    {msg.metadata.title && <div className="ai-metadata-field"><strong>Title:</strong> {msg.metadata.title}</div>}
+                    {msg.metadata.description && <div className="ai-metadata-field"><strong>Description:</strong> {msg.metadata.description}</div>}
+                    {msg.metadata.start_date && <div className="ai-metadata-field"><strong>Start:</strong> {new Date(msg.metadata.start_date).toLocaleString()}</div>}
+                    {msg.metadata.due_date && <div className="ai-metadata-field"><strong>Due:</strong> {new Date(msg.metadata.due_date).toLocaleString()}</div>}
+                    <button
+                      className="btn btn-primary ai-review-btn"
+                      onClick={() => onMetadataAccepted(msg.metadata)}
+                    >
+                      Apply to Form
+                    </button>
+                  </div>
+                )}
                 {msg.questions && msg.questions.length > 0 && (
                   <button
                     className="btn btn-secondary ai-review-btn"

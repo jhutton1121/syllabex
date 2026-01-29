@@ -3,7 +3,7 @@
   position: sticky;
   top: 60px; /* Account for navbar height */
   height: calc(100vh - 60px);
-  background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
+  background: linear-gradient(180deg, #1e1e3f 0%, #2a2a4e 100%);
   border-right: 1px solid rgba(255, 255, 255, 0.1);
   transition: width 0.3s ease, transform 0.3s ease;
   overflow-y: auto;

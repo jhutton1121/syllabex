@@ -173,6 +173,25 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
     ]);
   };
 
+  const handleAIMetadataAccepted = (metadata) => {
+    setFormData(prev => {
+      const updates = { ...prev };
+      if (metadata.title) updates.title = metadata.title;
+      if (metadata.description) updates.description = metadata.description;
+      if (metadata.due_date) {
+        const due = new Date(metadata.due_date);
+        updates.due_date = due.toISOString().slice(0, 10);
+        updates.due_time = due.toTimeString().slice(0, 5);
+      }
+      if (metadata.start_date) {
+        const start = new Date(metadata.start_date);
+        updates.start_date = start.toISOString().slice(0, 10);
+        updates.start_time = start.toTimeString().slice(0, 5);
+      }
+      return updates;
+    });
+  };
+
   const validateDates = () => {
     // If start date is provided, validate it's before due date
     if (formData.start_date && formData.due_date) {
@@ -547,6 +566,7 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
         points_possible: formData.points_possible,
       }}
       onQuestionsAccepted={handleAIQuestionsAccepted}
+      onMetadataAccepted={handleAIMetadataAccepted}
       isOpen={aiPanelOpen}
       onToggle={() => setAiPanelOpen(!aiPanelOpen)}
     />
