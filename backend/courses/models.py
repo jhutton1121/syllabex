@@ -1,11 +1,18 @@
 from django.db import models
 from users.models import User
+from accounts.managers import AccountScopedManager
 
 
 class Course(models.Model):
-    """Course model"""
-    
-    code = models.CharField(max_length=20, unique=True, db_index=True)
+    """Course model, scoped to an account"""
+
+    account = models.ForeignKey(
+        'accounts.Account',
+        on_delete=models.CASCADE,
+        related_name='courses',
+        db_index=True,
+    )
+    code = models.CharField(max_length=20, db_index=True)
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True, db_index=True)
@@ -15,11 +22,15 @@ class Course(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    objects = AccountScopedManager()
+    unscoped = models.Manager()
+
     class Meta:
         db_table = 'courses'
         verbose_name = 'Course'
         verbose_name_plural = 'Courses'
         ordering = ['-created_at']
+        unique_together = [['code', 'account']]
         indexes = [
             models.Index(fields=['code']),
             models.Index(fields=['is_active']),

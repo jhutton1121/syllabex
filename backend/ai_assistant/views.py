@@ -16,13 +16,13 @@ class AISettingsView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsAdmin]
 
     def get(self, request):
-        settings = AISettings.load()
-        serializer = AISettingsSerializer(settings)
+        ai_settings = AISettings.load(request.account)
+        serializer = AISettingsSerializer(ai_settings)
         return Response(serializer.data)
 
     def put(self, request):
-        settings = AISettings.load()
-        serializer = AISettingsSerializer(settings, data=request.data, partial=True)
+        ai_settings = AISettings.load(request.account)
+        serializer = AISettingsSerializer(ai_settings, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
@@ -35,7 +35,8 @@ class CourseSyllabusViewSet(viewsets.ModelViewSet):
     parser_classes = [MultiPartParser, FormParser]
 
     def get_queryset(self):
-        queryset = CourseSyllabus.objects.all()
+        account = getattr(self.request, 'account', None)
+        queryset = CourseSyllabus.objects.filter(course__account=account)
         course_id = self.request.query_params.get('course_id')
         if course_id:
             queryset = queryset.filter(course_id=course_id)
@@ -65,11 +66,11 @@ class AICourseStatusView(APIView):
 
     def get(self, request, course_id):
         try:
-            course = Course.objects.get(id=course_id)
+            course = Course.unscoped.get(id=course_id, account=request.account)
         except Course.DoesNotExist:
             return Response({'error': 'Course not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        ai_settings = AISettings.load()
+        ai_settings = AISettings.load(request.account)
         api_key_set = bool(decrypt_api_key(ai_settings.openai_api_key_encrypted))
 
         return Response({
@@ -89,8 +90,8 @@ class AIGenerateView(APIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
-        # Load AI settings
-        ai_settings = AISettings.load()
+        # Load AI settings for current account
+        ai_settings = AISettings.load(request.account)
         if not ai_settings.enabled:
             return Response(
                 {'error': 'AI assistant is currently disabled by the administrator.'},
@@ -100,7 +101,7 @@ class AIGenerateView(APIView):
         # Verify user is instructor of the course
         course_id = data['course_id']
         try:
-            course = Course.objects.get(id=course_id)
+            course = Course.unscoped.get(id=course_id, account=request.account)
         except Course.DoesNotExist:
             return Response(
                 {'error': 'Course not found.'},

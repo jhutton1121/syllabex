@@ -14,8 +14,12 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('access_token');
+    const accountSlug = localStorage.getItem('account_slug');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    if (accountSlug) {
+      config.headers['X-Account-Slug'] = accountSlug;
     }
     return config;
   },
@@ -53,6 +57,7 @@ api.interceptors.response.use(
         // Refresh failed, clear tokens and redirect to login
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
+        localStorage.removeItem('account_slug');
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }

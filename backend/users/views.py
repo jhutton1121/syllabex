@@ -8,19 +8,28 @@ from .permissions import IsAdmin
 
 
 class UserRegistrationView(generics.CreateAPIView):
-    """API endpoint for user registration"""
+    """API endpoint for user registration (requires account context)"""
     queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
     permission_classes = [permissions.AllowAny]
-    
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['account'] = getattr(self.request, 'account', None)
+        return context
+
     def create(self, request, *args, **kwargs):
+        if getattr(request, 'account', None) is None:
+            return Response(
+                {'error': 'Account context is required. Provide X-Account-Slug header.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        
-        # Return user data with profile
+
         user_serializer = UserSerializer(user)
-        
+
         return Response(
             {
                 'message': 'User registered successfully',
@@ -51,33 +60,34 @@ class CurrentUserView(APIView):
 
 
 class UserListView(generics.ListAPIView):
-    """API endpoint to list all users (Admin only)"""
-    queryset = User.objects.all().order_by('-created_at')
+    """API endpoint to list all users in current account (Admin only)"""
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated, IsAdmin]
-    
+
     def get_queryset(self):
-        queryset = super().get_queryset()
-        
-        # Search by email or name
+        account = getattr(self.request, 'account', None)
+        queryset = User.objects.filter(account=account).order_by('-created_at')
+
         search = self.request.query_params.get('search')
         if search:
+            from django.db.models import Q
             queryset = queryset.filter(
-                email__icontains=search
-            ) | queryset.filter(
-                first_name__icontains=search
-            ) | queryset.filter(
-                last_name__icontains=search
+                Q(email__icontains=search)
+                | Q(first_name__icontains=search)
+                | Q(last_name__icontains=search)
             )
-        
+
         return queryset
 
 
 class UserDetailView(generics.RetrieveAPIView):
-    """API endpoint to get user details (Admin only)"""
-    queryset = User.objects.all()
+    """API endpoint to get user details in current account (Admin only)"""
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated, IsAdmin]
+
+    def get_queryset(self):
+        account = getattr(self.request, 'account', None)
+        return User.objects.filter(account=account)
 
 
 class ChangePasswordView(APIView):

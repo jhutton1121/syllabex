@@ -4,7 +4,12 @@ from django.conf import settings
 
 
 class AISettings(models.Model):
-    """Singleton model for AI configuration"""
+    """Per-account AI configuration"""
+    account = models.OneToOneField(
+        'accounts.Account',
+        on_delete=models.CASCADE,
+        related_name='ai_settings',
+    )
     openai_api_key_encrypted = models.TextField(blank=True, default='')
     model_name = models.CharField(max_length=50, default='gpt-4o')
     max_tokens = models.IntegerField(default=4096)
@@ -15,18 +20,13 @@ class AISettings(models.Model):
         verbose_name = 'AI Settings'
         verbose_name_plural = 'AI Settings'
 
-    def save(self, *args, **kwargs):
-        # Enforce singleton
-        self.pk = 1
-        super().save(*args, **kwargs)
-
     @classmethod
-    def load(cls):
-        obj, _ = cls.objects.get_or_create(pk=1)
+    def load(cls, account):
+        obj, _ = cls.objects.get_or_create(account=account)
         return obj
 
     def __str__(self):
-        return f"AI Settings (model: {self.model_name}, enabled: {self.enabled})"
+        return f"AI Settings for {self.account.name} (model: {self.model_name}, enabled: {self.enabled})"
 
 
 class CourseSyllabus(models.Model):

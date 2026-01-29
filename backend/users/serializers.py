@@ -15,21 +15,23 @@ class AdminProfileSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for user with profile information"""
-    
+
     admin_profile = AdminProfileSerializer(required=False, allow_null=True)
     is_admin = serializers.SerializerMethodField()
-    
+    account_slug = serializers.CharField(source='account.slug', read_only=True)
+
     class Meta:
         model = User
         fields = [
-            'id', 'email', 'first_name', 'last_name', 'is_active', 
-            'created_at', 'updated_at', 'admin_profile', 'is_admin'
+            'id', 'email', 'first_name', 'last_name', 'is_active',
+            'created_at', 'updated_at', 'admin_profile', 'is_admin',
+            'account_slug',
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
-    
+
     def get_is_admin(self, obj):
-        """Check if user has admin profile"""
-        return hasattr(obj, 'admin_profile')
+        """Check if user has admin profile or is account admin"""
+        return hasattr(obj, 'admin_profile') or obj.is_account_admin()
 
 
 class UserBasicSerializer(serializers.ModelSerializer):
@@ -86,21 +88,25 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         """Create user and optionally admin profile"""
-        # Extract admin data
         validated_data.pop('password_confirm')
         make_admin = validated_data.pop('make_admin', False)
         employee_id = validated_data.pop('employee_id', None)
         permissions_level = validated_data.pop('permissions_level', 1)
-        
-        # Create user
-        user = User.objects.create_user(**validated_data)
-        
-        # Create admin profile if requested
+
+        # Account is injected by the view via serializer context
+        account = self.context.get('account')
+        if account is None:
+            raise serializers.ValidationError(
+                {'account': 'Account context is required for registration.'}
+            )
+
+        user = User.objects.create_user(account=account, **validated_data)
+
         if make_admin and employee_id:
             AdminProfile.objects.create(
                 user=user,
                 employee_id=employee_id,
-                permissions_level=permissions_level
+                permissions_level=permissions_level,
             )
-        
+
         return user

@@ -39,25 +39,24 @@ class AssignmentViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
     
     def get_queryset(self):
-        """Filter assignments based on user role and query params"""
+        """Filter assignments by account and user role"""
         user = self.request.user
-        queryset = super().get_queryset()
-        
-        # Filter by course if provided
+        account = getattr(self.request, 'account', None)
+        queryset = Assignment.objects.filter(
+            course__account=account
+        ).select_related('course').prefetch_related('submissions', 'questions__choices')
+
         course_id = self.request.query_params.get('course')
         if course_id:
             queryset = queryset.filter(course_id=course_id)
-        
-        # Filter by type if provided
+
         assignment_type = self.request.query_params.get('type')
         if assignment_type:
             queryset = queryset.filter(type=assignment_type)
-        
-        # Admins see all assignments
-        if hasattr(user, 'admin_profile'):
+
+        if hasattr(user, 'admin_profile') or user.is_account_admin():
             return queryset.order_by('-due_date')
-        
-        # Regular users see assignments from their enrolled courses
+
         user_courses = user.memberships.filter(status='active').values_list('course_id', flat=True)
         return queryset.filter(course_id__in=user_courses).order_by('-due_date')
     
@@ -260,7 +259,7 @@ class AssignmentViewSet(viewsets.ModelViewSet):
     
     def _is_course_instructor(self, user, course):
         """Check if user is an instructor of the course"""
-        if hasattr(user, 'admin_profile'):
+        if hasattr(user, 'admin_profile') or user.is_account_admin():
             return True
         return course.memberships.filter(
             user=user,
@@ -278,7 +277,7 @@ class AssignmentViewSet(viewsets.ModelViewSet):
     
     def _is_course_member(self, user, course):
         """Check if user is a member of the course (any role)"""
-        if hasattr(user, 'admin_profile'):
+        if hasattr(user, 'admin_profile') or user.is_account_admin():
             return True
         return course.memberships.filter(
             user=user,
@@ -288,26 +287,26 @@ class AssignmentViewSet(viewsets.ModelViewSet):
 
 class QuestionViewSet(viewsets.ModelViewSet):
     """ViewSet for managing individual questions"""
-    
-    queryset = Question.objects.select_related('assignment__course').prefetch_related('choices')
+
     serializer_class = QuestionSerializer
     permission_classes = [permissions.IsAuthenticated, IsInstructor]
-    
+
     def get_queryset(self):
-        """Filter questions based on user role"""
+        """Filter questions by account and user role"""
         user = self.request.user
-        queryset = super().get_queryset()
-        
-        # Admins see all questions
-        if hasattr(user, 'admin_profile'):
+        account = getattr(self.request, 'account', None)
+        queryset = Question.objects.filter(
+            assignment__course__account=account
+        ).select_related('assignment__course').prefetch_related('choices')
+
+        if hasattr(user, 'admin_profile') or user.is_account_admin():
             return queryset.order_by('order')
-        
-        # Instructors see questions from their courses
+
         instructor_courses = user.memberships.filter(
             role='instructor',
             status='active'
         ).values_list('course_id', flat=True)
-        
+
         return queryset.filter(
             assignment__course_id__in=instructor_courses
         ).order_by('order')
@@ -367,7 +366,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     
     def _is_course_instructor(self, user, course):
         """Check if user is an instructor of the course"""
-        if hasattr(user, 'admin_profile'):
+        if hasattr(user, 'admin_profile') or user.is_account_admin():
             return True
         return course.memberships.filter(
             user=user,
@@ -378,32 +377,30 @@ class QuestionViewSet(viewsets.ModelViewSet):
 
 class AssignmentSubmissionViewSet(viewsets.ModelViewSet):
     """ViewSet for viewing and managing submissions"""
-    
-    queryset = AssignmentSubmission.objects.select_related(
-        'assignment__course',
-        'student'
-    ).prefetch_related(
-        'question_responses__question__choices',
-        'assignment__questions'
-    )
+
     serializer_class = AssignmentSubmissionSerializer
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def get_queryset(self):
-        """Filter submissions based on user role"""
+        """Filter submissions by account and user role"""
         user = self.request.user
-        queryset = super().get_queryset()
-        
-        # Admins see all submissions
-        if hasattr(user, 'admin_profile'):
+        account = getattr(self.request, 'account', None)
+        queryset = AssignmentSubmission.objects.filter(
+            assignment__course__account=account
+        ).select_related(
+            'assignment__course', 'student'
+        ).prefetch_related(
+            'question_responses__question__choices', 'assignment__questions'
+        )
+
+        if hasattr(user, 'admin_profile') or user.is_account_admin():
             return queryset.order_by('-submitted_at')
-        
-        # Users see their own submissions AND submissions from courses they instruct
+
         instructor_courses = user.memberships.filter(
             role='instructor',
             status='active'
         ).values_list('course_id', flat=True)
-        
+
         return queryset.filter(
             Q(student=user) |
             Q(assignment__course_id__in=instructor_courses)
@@ -476,9 +473,10 @@ class AssignmentSubmissionViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'], url_path='my-submissions')
     def my_submissions(self, request):
-        """Get current user's submissions"""
+        """Get current user's submissions in current account"""
         submissions = AssignmentSubmission.objects.filter(
-            student=request.user
+            student=request.user,
+            assignment__course__account=request.account,
         ).select_related(
             'assignment__course'
         ).prefetch_related(
@@ -537,7 +535,7 @@ class AssignmentSubmissionViewSet(viewsets.ModelViewSet):
     
     def _is_course_instructor(self, user, course):
         """Check if user is an instructor of the course"""
-        if hasattr(user, 'admin_profile'):
+        if hasattr(user, 'admin_profile') or user.is_account_admin():
             return True
         return course.memberships.filter(
             user=user,

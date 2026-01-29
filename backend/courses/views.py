@@ -32,14 +32,15 @@ class CourseViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
     
     def get_queryset(self):
-        """Filter courses based on user role"""
+        """Filter courses by account and user role"""
         user = self.request.user
-        queryset = super().get_queryset()
-        
-        # Admins see all courses
-        if hasattr(user, 'admin_profile'):
+        account = getattr(self.request, 'account', None)
+        queryset = Course.unscoped.filter(account=account).prefetch_related('memberships__user')
+
+        # Admins see all courses in the account
+        if hasattr(user, 'admin_profile') or user.is_account_admin():
             return queryset
-        
+
         # Regular users see only their enrolled courses
         return queryset.filter(
             memberships__user=user,
@@ -57,6 +58,10 @@ class CourseViewSet(viewsets.ModelViewSet):
         context = super().get_serializer_context()
         context['request'] = self.request
         return context
+
+    def perform_create(self, serializer):
+        """Auto-set account on course creation"""
+        serializer.save(account=self.request.account)
     
     @action(detail=True, methods=['post'], url_path='members')
     def add_member(self, request, pk=None):
@@ -83,7 +88,7 @@ class CourseViewSet(viewsets.ModelViewSet):
             )
         
         try:
-            user = User.objects.get(pk=user_id)
+            user = User.objects.get(pk=user_id, account=request.account)
         except User.DoesNotExist:
             return Response(
                 {'error': 'User not found'},
@@ -206,24 +211,18 @@ class CourseViewSet(viewsets.ModelViewSet):
     
     def _can_manage_course(self, user, course):
         """Check if user can manage course members"""
-        # Admins can manage any course
-        if hasattr(user, 'admin_profile'):
+        if hasattr(user, 'admin_profile') or user.is_account_admin():
             return True
-        
-        # Check if user is an instructor in this course
         return course.memberships.filter(
             user=user,
             role='instructor',
             status='active'
         ).exists()
-    
+
     def _can_view_course_members(self, user, course):
         """Check if user can view course members"""
-        # Admins can view any course
-        if hasattr(user, 'admin_profile'):
+        if hasattr(user, 'admin_profile') or user.is_account_admin():
             return True
-        
-        # Check if user is a member of the course (instructor or student)
         return course.memberships.filter(
             user=user,
             status='active'
@@ -232,19 +231,19 @@ class CourseViewSet(viewsets.ModelViewSet):
 
 class CourseMembershipViewSet(viewsets.ModelViewSet):
     """ViewSet for CourseMembership operations"""
-    
-    queryset = CourseMembership.objects.select_related('user', 'course')
+
     serializer_class = CourseMembershipSerializer
     permission_classes = [permissions.IsAuthenticated, IsAdmin]
-    
+
     def get_queryset(self):
-        """Filter memberships based on user role"""
+        """Filter memberships by account and user role"""
         user = self.request.user
-        queryset = super().get_queryset()
-        
-        # Admins see all memberships
-        if hasattr(user, 'admin_profile'):
+        account = getattr(self.request, 'account', None)
+        queryset = CourseMembership.objects.filter(
+            course__account=account
+        ).select_related('user', 'course')
+
+        if hasattr(user, 'admin_profile') or user.is_account_admin():
             return queryset
-        
-        # Regular users see only their own memberships
+
         return queryset.filter(user=user)
