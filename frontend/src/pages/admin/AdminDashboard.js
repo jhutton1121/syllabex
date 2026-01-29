@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import courseService from '../services/courseService';
+import { useAuth } from '../../context/AuthContext';
+import courseService from '../../services/courseService';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -117,6 +117,11 @@ const AdminDashboard = () => {
             <span className="action-icon">➕</span>
             <span className="action-title">Create Course</span>
             <span className="action-desc">Add a new course to the system</span>
+          </Link>
+          <Link to="/admin/ai-settings" className="action-card">
+            <span className="action-icon">AI</span>
+            <span className="action-title">AI Settings</span>
+            <span className="action-desc">Configure AI assistant for question generation</span>
           </Link>
         </div>
       </section>

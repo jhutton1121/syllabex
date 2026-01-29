@@ -1,0 +1,164 @@
+"""Views for AI assistant app"""
+from rest_framework import status, permissions, viewsets
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
+
+from .models import AISettings, CourseSyllabus
+from .serializers import AISettingsSerializer, CourseSyllabusSerializer, AIGenerateRequestSerializer
+from .utils import build_system_prompt, call_openai, extract_text_from_file, decrypt_api_key
+from courses.models import Course, CourseMembership
+from users.permissions import IsAdmin, IsInstructor
+
+
+class AISettingsView(APIView):
+    """GET/PUT singleton AI settings (admin only)"""
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
+
+    def get(self, request):
+        settings = AISettings.load()
+        serializer = AISettingsSerializer(settings)
+        return Response(serializer.data)
+
+    def put(self, request):
+        settings = AISettings.load()
+        serializer = AISettingsSerializer(settings, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
+class CourseSyllabusViewSet(viewsets.ModelViewSet):
+    """CRUD for course syllabi (instructor only)"""
+    serializer_class = CourseSyllabusSerializer
+    permission_classes = [permissions.IsAuthenticated, IsInstructor]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get_queryset(self):
+        queryset = CourseSyllabus.objects.all()
+        course_id = self.request.query_params.get('course_id')
+        if course_id:
+            queryset = queryset.filter(course_id=course_id)
+        return queryset
+
+    def perform_create(self, serializer):
+        file_obj = self.request.FILES.get('file')
+        if not file_obj:
+            raise ValueError("No file provided")
+
+        filename = file_obj.name
+        # Extract text from the uploaded file
+        extracted_text = extract_text_from_file(file_obj, filename)
+        # Reset file position after reading
+        file_obj.seek(0)
+
+        serializer.save(
+            uploaded_by=self.request.user,
+            original_filename=filename,
+            extracted_text=extracted_text,
+        )
+
+
+class AICourseStatusView(APIView):
+    """Check if AI is available for a specific course (any authenticated user)"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, course_id):
+        try:
+            course = Course.objects.get(id=course_id)
+        except Course.DoesNotExist:
+            return Response({'error': 'Course not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        ai_settings = AISettings.load()
+        api_key_set = bool(decrypt_api_key(ai_settings.openai_api_key_encrypted))
+
+        return Response({
+            'available': ai_settings.enabled and course.ai_enabled and api_key_set,
+            'global_enabled': ai_settings.enabled,
+            'course_enabled': course.ai_enabled,
+            'api_key_configured': api_key_set,
+        })
+
+
+class AIGenerateView(APIView):
+    """Generate assignment questions using AI"""
+    permission_classes = [permissions.IsAuthenticated, IsInstructor]
+
+    def post(self, request):
+        serializer = AIGenerateRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        # Load AI settings
+        ai_settings = AISettings.load()
+        if not ai_settings.enabled:
+            return Response(
+                {'error': 'AI assistant is currently disabled by the administrator.'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+
+        # Verify user is instructor of the course
+        course_id = data['course_id']
+        try:
+            course = Course.objects.get(id=course_id)
+        except Course.DoesNotExist:
+            return Response(
+                {'error': 'Course not found.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if not course.ai_enabled:
+            return Response(
+                {'error': 'AI assistant is not enabled for this course. An admin can enable it in course settings.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        is_instructor = CourseMembership.objects.filter(
+            user=request.user,
+            course=course,
+            role='instructor',
+            status='active'
+        ).exists() or hasattr(request.user, 'admin_profile')
+
+        if not is_instructor:
+            return Response(
+                {'error': 'You must be an instructor of this course.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Get syllabus text if available
+        syllabus_text = ''
+        syllabi = CourseSyllabus.objects.filter(course=course)
+        if syllabi.exists():
+            syllabus_text = '\n\n---\n\n'.join(
+                s.extracted_text for s in syllabi if s.extracted_text
+            )
+
+        # Build messages
+        system_prompt = build_system_prompt(
+            course, syllabus_text, data.get('assignment_context', {})
+        )
+        messages = [{'role': 'system', 'content': system_prompt}]
+
+        # Add conversation history
+        for msg in data.get('conversation_history', []):
+            if msg.get('role') in ('user', 'assistant') and msg.get('content'):
+                messages.append({
+                    'role': msg['role'],
+                    'content': msg['content']
+                })
+
+        # Add current prompt
+        messages.append({'role': 'user', 'content': data['prompt']})
+
+        try:
+            result = call_openai(messages, ai_settings)
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {'error': f'AI generation failed: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        return Response(result)

@@ -1,0 +1,249 @@
+.ai-review-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.ai-review-modal {
+  background: var(--card-bg, #1e1e3f);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.ai-review-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color, #2a2a4e);
+}
+
+.ai-review-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary, #e0e0e0);
+  flex: 1;
+}
+
+.ai-review-stats {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.stat-pending { color: var(--text-secondary, #a0a0c0); }
+.stat-approved { color: #34d399; }
+.stat-rejected { color: #f87171; }
+
+.ai-review-actions-top {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border-color, #2a2a4e);
+}
+
+.ai-review-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ai-review-card {
+  border: 1px solid var(--border-color, #2a2a4e);
+  border-radius: 8px;
+  overflow: visible;
+  transition: border-color 0.2s;
+}
+
+.ai-review-card-approved {
+  border-color: #34d399;
+  background: rgba(52, 211, 153, 0.05);
+}
+
+.ai-review-card-rejected {
+  border-color: #f87171;
+  background: rgba(248, 113, 113, 0.05);
+  opacity: 0.6;
+}
+
+.ai-review-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--border-color, #2a2a4e);
+  font-size: 13px;
+}
+
+.ai-review-q-num {
+  font-weight: 700;
+  color: #6366f1;
+}
+
+.ai-review-q-type {
+  color: var(--text-secondary, #a0a0c0);
+  font-size: 12px;
+}
+
+.ai-review-q-points {
+  color: var(--text-secondary, #a0a0c0);
+  font-size: 12px;
+  margin-left: auto;
+}
+
+.ai-review-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge-approved {
+  background: rgba(52, 211, 153, 0.2);
+  color: #34d399;
+}
+
+.badge-rejected {
+  background: rgba(248, 113, 113, 0.2);
+  color: #f87171;
+}
+
+.ai-review-card-body {
+  padding: 12px 14px;
+  display: block;
+}
+
+.ai-review-q-text {
+  margin: 0 0 12px;
+  color: var(--text-primary, #e0e0e0);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.ai-review-choices {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 8px 0 0 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+
+.ai-review-choices li {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--text-secondary, #a0a0c0);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color, #2a2a4e);
+  display: list-item;
+}
+
+.ai-review-choices li.correct-choice {
+  background: rgba(52, 211, 153, 0.12);
+  color: #34d399;
+  font-weight: 600;
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+.correct-marker {
+  margin-right: 6px;
+  font-weight: 700;
+}
+
+.ai-review-numeric {
+  font-size: 13px;
+  color: var(--text-secondary, #a0a0c0);
+  margin: 0;
+}
+
+.ai-review-card-actions {
+  display: flex !important;
+  gap: 8px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--border-color, #2a2a4e);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.btn-approve {
+  background: #059669;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.btn-approve:hover:not(:disabled) {
+  background: #047857;
+}
+
+.btn-approve:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-reject {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.btn-reject:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.btn-reject:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ai-review-edit-wrapper {
+  padding: 14px;
+}
+
+.ai-review-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border-color, #2a2a4e);
+}
+
+@media (max-width: 768px) {
+  .ai-review-modal {
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .ai-review-overlay {
+    padding: 0;
+  }
+}

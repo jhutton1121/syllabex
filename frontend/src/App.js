@@ -1,33 +1,48 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { SidebarProvider } from './context/SidebarContext';
 import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
+import Layout from './components/Layout';
 
-// Pages
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import UserDashboard from './pages/UserDashboard';
-import CourseDetail from './pages/CourseDetail';
-import TakeAssignment from './pages/TakeAssignment';
-import CreateAssignment from './pages/CreateAssignment';
-import CreateCourse from './pages/CreateCourse';
-import ViewSubmissions from './pages/ViewSubmissions';
-import GradeSubmission from './pages/GradeSubmission';
+// Public Pages
+import LoginPage from './pages/public/LoginPage';
+import RegisterPage from './pages/public/RegisterPage';
+
+// Student Pages
+import UserDashboard from './pages/student/UserDashboard';
+import TakeAssignment from './pages/student/TakeAssignment';
+
+// Instructor Pages
+import CreateAssignment from './pages/instructor/CreateAssignment';
+import ViewSubmissions from './pages/instructor/ViewSubmissions';
+import GradeSubmission from './pages/instructor/GradeSubmission';
+
+// Course Pages
+import CourseDetail from './pages/course/CourseDetail';
+import CreateCourse from './pages/course/CreateCourse';
+
+// Shared Pages
+import AccountPage from './pages/shared/AccountPage';
+import CalendarPage from './pages/shared/CalendarPage';
 
 // Admin Pages
-import AdminDashboard from './pages/AdminDashboard';
+import AdminDashboard from './pages/admin/AdminDashboard';
 import CourseManagement from './pages/admin/CourseManagement';
 import AdminCourseDetail from './pages/admin/AdminCourseDetail';
 import UserManagement from './pages/admin/UserManagement';
+import AISettings from './pages/admin/AISettings';
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <div className="App">
-          <Navbar />
-          <Routes>
+      <SidebarProvider>
+        <Router>
+          <div className="App">
+            <Navbar />
+            <Layout>
+              <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
@@ -38,6 +53,26 @@ function App() {
               element={
                 <PrivateRoute>
                   <UserDashboard />
+                </PrivateRoute>
+              }
+            />
+
+            {/* Account Page */}
+            <Route
+              path="/account"
+              element={
+                <PrivateRoute>
+                  <AccountPage />
+                </PrivateRoute>
+              }
+            />
+
+            {/* Calendar Page */}
+            <Route
+              path="/calendar"
+              element={
+                <PrivateRoute>
+                  <CalendarPage />
                 </PrivateRoute>
               }
             />
@@ -134,6 +169,15 @@ function App() {
               }
             />
 
+            <Route
+              path="/admin/ai-settings"
+              element={
+                <PrivateRoute requireAdmin>
+                  <AISettings />
+                </PrivateRoute>
+              }
+            />
+
             {/* Legacy redirects - remove old student/teacher routes */}
             <Route path="/student/dashboard" element={<Navigate to="/dashboard" replace />} />
             <Route path="/teacher/dashboard" element={<Navigate to="/dashboard" replace />} />
@@ -144,9 +188,11 @@ function App() {
             {/* Default Route */}
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="*" element={<Navigate to="/dashboard" />} />
-          </Routes>
-        </div>
-      </Router>
+              </Routes>
+            </Layout>
+          </div>
+        </Router>
+      </SidebarProvider>
     </AuthProvider>
   );
 }

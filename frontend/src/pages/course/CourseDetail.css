@@ -137,6 +137,77 @@
   font-weight: 600;
 }
 
+/* Assignment Stats Cards in Header */
+.assignment-stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.assignment-stats-cards .stat-card {
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.assignment-stats-cards .stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.assignment-stats-cards .stat-card.stat-upcoming {
+  border-color: #10b981;
+  background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+}
+
+.assignment-stats-cards .stat-card.stat-completed {
+  border-color: #6366f1;
+  background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+}
+
+.assignment-stats-cards .stat-card.stat-late {
+  border-color: #f59e0b;
+  background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
+}
+
+.assignment-stats-cards .stat-card.stat-pastdue {
+  border-color: #ef4444;
+  background: linear-gradient(135deg, #ffffff 0%, #fef2f2 100%);
+}
+
+.assignment-stats-cards .stat-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.assignment-stats-cards .stat-info {
+  flex: 1;
+}
+
+.assignment-stats-cards .stat-number {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+  color: #0f172a;
+}
+
+.assignment-stats-cards .stat-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  color: #64748b;
+}
+
 /* Tabs */
 .course-tabs {
   display: flex;
@@ -628,5 +699,337 @@
 
   .assignment-actions .btn {
     width: 100%;
+  }
+}
+
+/* Enhanced Meta Counters */
+.meta-upcoming {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+}
+
+.meta-upcoming .meta-value {
+  color: #10b981;
+}
+
+.meta-pastdue {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+}
+
+.meta-pastdue .meta-value {
+  color: #ef4444;
+}
+
+/* Course Content Layout with Sub-Navigation */
+.course-content-layout {
+  margin-left: 450px; /* 200px main sidebar + 250px sub-nav */
+  padding: 2rem;
+  position: relative;
+  transition: margin-left 0.3s ease;
+  display: flex;
+  justify-content: center;
+}
+
+.course-main-content {
+  max-width: 1200px;
+  width: 100%;
+}
+
+/* Overview View */
+.overview-view h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 1.5rem;
+}
+
+.overview-section {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.overview-section h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 1rem;
+}
+
+.overview-section p {
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.overview-info {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.overview-info p {
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.overview-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.stat-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.stat-card.stat-upcoming {
+  border-color: #10b981;
+  background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+}
+
+.stat-card.stat-pastdue {
+  border-color: #ef4444;
+  background: linear-gradient(135deg, #ffffff 0%, #fef2f2 100%);
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0f172a;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.stat-card.stat-upcoming .stat-number {
+  color: #10b981;
+}
+
+.stat-card.stat-pastdue .stat-number {
+  color: #ef4444;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Assignments View */
+.assignments-view h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 1.5rem;
+}
+
+/* Course Calendar Styles */
+.course-calendar {
+  padding: 1.5rem;
+}
+
+.calendar-placeholder {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.calendar-placeholder .empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.calendar-placeholder h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 0.75rem;
+}
+
+.calendar-placeholder p {
+  color: #64748b;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.calendar-placeholder .info-subtext {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.upcoming-section {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.upcoming-section h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 1rem;
+}
+
+.upcoming-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.upcoming-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.upcoming-item:hover {
+  border-color: #6366f1;
+  background: #f8fafc;
+}
+
+.type-indicator {
+  width: 4px;
+  height: 40px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.type-indicator.quiz {
+  background: #3b82f6;
+}
+
+.type-indicator.test {
+  background: #ea580c;
+}
+
+.type-indicator.homework {
+  background: #8b5cf6;
+}
+
+.upcoming-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.upcoming-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 0.25rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.upcoming-type {
+  font-size: 0.75rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.upcoming-date {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #6366f1;
+  font-family: 'JetBrains Mono', monospace;
+  flex-shrink: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .course-content-layout {
+    padding: 1.5rem;
+    padding-left: 1.5rem;
+  }
+
+  .assignment-stats-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .overview-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .course-content-layout {
+    padding: 1rem;
+    padding-left: 1rem;
+  }
+
+  .assignment-stats-cards {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .assignment-stats-cards .stat-card {
+    padding: 1rem;
+  }
+
+  .overview-view h2,
+  .assignments-view h2 {
+    font-size: 1.5rem;
+  }
+
+  .stat-card {
+    padding: 1rem;
+  }
+
+  .stat-number {
+    font-size: 1.5rem;
+  }
+
+  .stat-icon {
+    font-size: 2rem;
+  }
+
+  .upcoming-item {
+    flex-wrap: wrap;
+  }
+
+  .upcoming-date {
+    width: 100%;
+    text-align: left;
+    margin-top: 0.25rem;
   }
 }

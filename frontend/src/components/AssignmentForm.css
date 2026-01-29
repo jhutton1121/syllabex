@@ -1,7 +1,42 @@
+/* Wrapper for form + AI panel side-by-side */
+.assignment-form-wrapper {
+  display: flex;
+  gap: 0;
+  min-height: calc(100vh - 80px);
+}
+
+.assignment-form-wrapper.ai-panel-active .assignment-form-container {
+  max-width: 100%;
+  flex: 1;
+}
+
+.section-header-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-ai {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-ai:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
 .assignment-form-container {
   max-width: 900px;
   margin: 0 auto;
   padding: 20px;
+  flex: 1;
 }
 
 /* Loading Spinner */

@@ -23,8 +23,9 @@ const AdminCourseDetail = () => {
     start_date: '',
     end_date: '',
     is_active: true,
+    ai_enabled: false,
   });
-  
+
   // Delete confirmation
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -51,6 +52,7 @@ const AdminCourseDetail = () => {
         start_date: data.start_date || '',
         end_date: data.end_date || '',
         is_active: data.is_active ?? true,
+        ai_enabled: data.ai_enabled ?? false,
       });
       setMembers(data.members || []);
     } catch (err) {
@@ -248,6 +250,16 @@ const AdminCourseDetail = () => {
                   >
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>AI Assistant</label>
+                  <select
+                    value={editForm.ai_enabled ? 'enabled' : 'disabled'}
+                    onChange={(e) => setEditForm({ ...editForm, ai_enabled: e.target.value === 'enabled' })}
+                  >
+                    <option value="disabled">Disabled</option>
+                    <option value="enabled">Enabled</option>
                   </select>
                 </div>
               </div>
