@@ -69,9 +69,17 @@ def build_system_prompt(course, syllabus_text, assignment_context):
     """Build the system prompt for OpenAI"""
     prompt = (
         "You are an AI teaching assistant that helps instructors create assignment questions. "
-        "You must return your response as valid JSON with two fields:\n"
+        "You must return your response as valid JSON with these fields:\n"
         "1. \"message\": A brief conversational response to the instructor\n"
-        "2. \"questions\": An array of question objects\n\n"
+        "2. \"questions\": An array of question objects\n"
+        "3. \"assignment_metadata\": (optional) An object with suggested assignment details. "
+        "Include this when the instructor's request implies a title, description, or dates. Fields:\n"
+        "   - \"title\": suggested assignment title (string)\n"
+        "   - \"description\": suggested assignment description (string)\n"
+        "   - \"due_date\": suggested due date as ISO 8601 string, e.g. \"2025-02-15T23:59:00\" (string or null)\n"
+        "   - \"start_date\": suggested start/available date as ISO 8601 string (string or null)\n"
+        "   Only include fields you can reasonably infer from the instructor's request. "
+        "If the instructor doesn't mention dates, titles, or descriptions, omit assignment_metadata entirely.\n\n"
         "Each question object must have:\n"
         "- \"question_type\": one of \"multiple_choice\", \"numerical\", or \"text_response\"\n"
         "- \"text\": the question text\n"
@@ -147,5 +155,9 @@ def call_openai(messages, ai_settings):
     for i, q in enumerate(parsed['questions']):
         if 'order' not in q:
             q['order'] = i
+
+    # Pass through assignment_metadata if present
+    if 'assignment_metadata' not in parsed:
+        parsed['assignment_metadata'] = None
 
     return parsed

@@ -13,7 +13,8 @@
 }
 
 .ai-review-modal {
-  background: var(--card-bg, #1e1e3f);
+  background: #1e1e3f;
+  border: 1px solid #3a3a5e;
   border-radius: 12px;
   width: 100%;
   max-width: 800px;
@@ -21,7 +22,11 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --card-bg: #1e1e3f;
+  --border-color: #3a3a5e;
+  --text-primary: #f0f0ff;
+  --text-secondary: #b0b0d0;
 }
 
 .ai-review-header {
@@ -29,14 +34,15 @@
   align-items: center;
   gap: 12px;
   padding: 16px 20px;
-  border-bottom: 1px solid var(--border-color, #2a2a4e);
+  border-bottom: 1px solid #3a3a5e;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
 }
 
 .ai-review-header h3 {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-primary, #e0e0e0);
+  color: #ffffff;
   flex: 1;
 }
 
@@ -46,15 +52,16 @@
   font-size: 12px;
 }
 
-.stat-pending { color: var(--text-secondary, #a0a0c0); }
-.stat-approved { color: #34d399; }
-.stat-rejected { color: #f87171; }
+.stat-pending { color: rgba(255, 255, 255, 0.8); }
+.stat-approved { color: #a7f3d0; }
+.stat-rejected { color: #fca5a5; }
 
 .ai-review-actions-top {
   display: flex;
   gap: 8px;
   padding: 12px 20px;
-  border-bottom: 1px solid var(--border-color, #2a2a4e);
+  border-bottom: 1px solid #3a3a5e;
+  background: #1a1a38;
 }
 
 .ai-review-list {
@@ -67,10 +74,11 @@
 }
 
 .ai-review-card {
-  border: 1px solid var(--border-color, #2a2a4e);
+  border: 1px solid #4a4a6e;
   border-radius: 8px;
   overflow: visible;
   transition: border-color 0.2s;
+  background: #252550;
 }
 
 .ai-review-card-approved {
@@ -89,23 +97,23 @@
   align-items: center;
   gap: 10px;
   padding: 10px 14px;
-  background: rgba(255, 255, 255, 0.03);
-  border-bottom: 1px solid var(--border-color, #2a2a4e);
+  background: rgba(99, 102, 241, 0.08);
+  border-bottom: 1px solid #3a3a5e;
   font-size: 13px;
 }
 
 .ai-review-q-num {
   font-weight: 700;
-  color: #6366f1;
+  color: #818cf8;
 }
 
 .ai-review-q-type {
-  color: var(--text-secondary, #a0a0c0);
+  color: #b0b0d0;
   font-size: 12px;
 }
 
 .ai-review-q-points {
-  color: var(--text-secondary, #a0a0c0);
+  color: #b0b0d0;
   font-size: 12px;
   margin-left: auto;
 }
@@ -135,7 +143,7 @@
 
 .ai-review-q-text {
   margin: 0 0 12px;
-  color: var(--text-primary, #e0e0e0);
+  color: #f0f0ff;
   font-size: 14px;
   line-height: 1.5;
 }
@@ -153,17 +161,17 @@
   padding: 8px 12px;
   border-radius: 6px;
   font-size: 13px;
-  color: var(--text-secondary, #a0a0c0);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-color, #2a2a4e);
+  color: #c8c8e0;
+  background: #1e1e3f;
+  border: 1px solid #3a3a5e;
   display: list-item;
 }
 
 .ai-review-choices li.correct-choice {
   background: rgba(52, 211, 153, 0.12);
-  color: #34d399;
+  color: #4ade80;
   font-weight: 600;
-  border-color: rgba(52, 211, 153, 0.3);
+  border-color: rgba(52, 211, 153, 0.35);
 }
 
 .correct-marker {
@@ -173,7 +181,7 @@
 
 .ai-review-numeric {
   font-size: 13px;
-  color: var(--text-secondary, #a0a0c0);
+  color: #b0b0d0;
   margin: 0;
 }
 
@@ -181,8 +189,8 @@
   display: flex !important;
   gap: 8px;
   padding: 10px 14px;
-  border-top: 1px solid var(--border-color, #2a2a4e);
-  background: rgba(255, 255, 255, 0.02);
+  border-top: 1px solid #3a3a5e;
+  background: rgba(99, 102, 241, 0.05);
 }
 
 .btn-approve {
@@ -234,7 +242,8 @@
   justify-content: flex-end;
   gap: 10px;
   padding: 14px 20px;
-  border-top: 1px solid var(--border-color, #2a2a4e);
+  border-top: 1px solid #3a3a5e;
+  background: #1a1a38;
 }
 
 @media (max-width: 768px) {

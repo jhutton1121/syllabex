@@ -3,6 +3,7 @@
   display: flex;
   gap: 0;
   min-height: calc(100vh - 80px);
+  align-items: stretch;
 }
 
 .assignment-form-wrapper.ai-panel-active .assignment-form-container {
@@ -37,6 +38,188 @@
   margin: 0 auto;
   padding: 20px;
   flex: 1;
+}
+
+/* Dark theme for assignment form to match AI panel */
+.assignment-form-container .card {
+  background: #1e1e3f !important;
+  border-color: #2a2a4e !important;
+  color: #e0e0e0 !important;
+}
+
+.assignment-form-container .card-header {
+  color: #e0e0e0 !important;
+  border-bottom-color: #2a2a4e !important;
+  background: transparent !important;
+}
+
+.assignment-form-container .form-group label {
+  color: #e8e8f8;
+}
+
+.assignment-form-container .form-hint {
+  color: #a0a0c0;
+}
+
+.assignment-form-container .form-group input,
+.assignment-form-container .form-group select,
+.assignment-form-container .form-group textarea {
+  background: #2a2a4e;
+  color: #e0e0e0;
+  border-color: #3a3a5e;
+}
+
+.assignment-form-container .form-group input:focus,
+.assignment-form-container .form-group select:focus,
+.assignment-form-container .form-group textarea:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.assignment-form-container .form-group input::placeholder,
+.assignment-form-container .form-group textarea::placeholder {
+  color: #6a6a8e;
+}
+
+.assignment-form-container .form-group select option {
+  background: #2a2a4e;
+  color: #e0e0e0;
+}
+
+.assignment-form-container .form-group input:disabled,
+.assignment-form-container .form-group select:disabled {
+  opacity: 0.5;
+  background: #1a1a35;
+}
+
+.assignment-form-container .btn-secondary,
+.assignment-form-container .section-header-buttons .btn-secondary {
+  background: #2a2a4e !important;
+  color: #e0e0e0 !important;
+  border: 1px solid #3a3a5e !important;
+}
+
+.assignment-form-container .btn-secondary:hover,
+.assignment-form-container .section-header-buttons .btn-secondary:hover {
+  background: #3a3a5e !important;
+}
+
+/* Form actions buttons at the bottom */
+.assignment-form-container .form-actions .btn-secondary {
+  background: #2a2a4e !important;
+  color: #e0e0e0 !important;
+  border: 1px solid #3a3a5e !important;
+}
+
+.assignment-form-container .form-actions .btn-secondary:hover {
+  background: #3a3a5e !important;
+}
+
+/* Set CSS variables for question list/builder inside the form */
+.assignment-form-container .card {
+  --card-bg: #2a2a4e;
+  --bg-secondary: #323260;
+  --border-color: #4a4a6e;
+  --text-primary: #e8e8f0;
+  --text-secondary: #b0b0d0;
+  --text-muted: #8080a8;
+  --primary-color: #818cf8;
+  --input-bg: #2a2a4e;
+  --danger-color: #ef4444;
+  --danger-hover: #dc2626;
+}
+
+/* Question list overrides for better contrast */
+.assignment-form-container .question-list-header {
+  background: #2a2a4e;
+  border: 1px solid #4a4a6e;
+}
+
+.assignment-form-container .question-item {
+  background: #252550;
+  border-color: #4a4a6e;
+}
+
+.assignment-form-container .question-item:hover {
+  border-color: #818cf8;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
+}
+
+.assignment-form-container .question-type-badge {
+  background: #1e1e3f;
+  border: 1px solid #4a4a6e;
+  color: #b0b0d0;
+}
+
+.assignment-form-container .choice-tag {
+  background: #1e1e3f;
+  border: 1px solid #3a3a5e;
+  color: #b0b0d0;
+}
+
+.assignment-form-container .choice-tag.correct {
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.35);
+}
+
+.assignment-form-container .question-text {
+  color: #f0f0ff;
+}
+
+.assignment-form-container .question-answer-info {
+  color: #b0b0d0;
+}
+
+.assignment-form-container .order-number {
+  color: #f0f0ff;
+}
+
+.assignment-form-container .question-count {
+  color: #f0f0ff;
+}
+
+.assignment-form-container .total-points {
+  color: #818cf8;
+}
+
+.assignment-form-container .question-list-empty {
+  background: #252550 !important;
+  border: 1px dashed #4a4a6e !important;
+  color: #b0b0d0 !important;
+}
+
+/* Ensure form and all children inside card inherit dark background */
+.assignment-form-container .card form {
+  background: transparent;
+}
+
+.assignment-form-container .question-points {
+  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+}
+
+/* Question builder overrides */
+.assignment-form-container .question-builder {
+  background: #252550;
+  border-color: #4a4a6e;
+}
+
+.assignment-form-container .choices-section,
+.assignment-form-container .numerical-section,
+.assignment-form-container .text-response-notice {
+  background: #1e1e3f;
+}
+
+.assignment-form-container .question-builder-header h4 {
+  color: #f0f0ff;
+}
+
+.assignment-form-container .choices-section > label {
+  color: #f0f0ff;
+}
+
+.assignment-form-container .choices-section .form-hint {
+  color: #a0a0c0;
 }
 
 /* Loading Spinner */
@@ -156,7 +339,8 @@
 .questions-section {
   margin-top: 30px;
   padding-top: 30px;
-  border-top: 2px solid var(--border-color, #2a2a4e);
+  border-top: 1px solid #3a3a5e;
+  background: transparent !important;
 }
 
 .section-header {
@@ -164,13 +348,14 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  background: transparent !important;
 }
 
 .section-header h3 {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
-  color: var(--text-primary, #e0e0e0);
+  color: #f0f0ff !important;
 }
 
 @media (max-width: 768px) {
