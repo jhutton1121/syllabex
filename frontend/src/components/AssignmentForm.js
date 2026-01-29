@@ -4,6 +4,7 @@ import courseService from '../services/courseService';
 import assignmentService from '../services/assignmentService';
 import QuestionBuilder from './QuestionBuilder';
 import QuestionList from './QuestionList';
+import AIChatPanel from './AIChatPanel';
 import './AssignmentForm.css';
 
 const AssignmentForm = ({ assignment = null, isEdit = false }) => {
@@ -66,6 +67,7 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [aiPanelOpen, setAiPanelOpen] = useState(false);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -162,6 +164,13 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
 
   const getTotalQuestionPoints = () => {
     return questions.reduce((sum, q) => sum + (q.points || 0), 0);
+  };
+
+  const handleAIQuestionsAccepted = (newQuestions) => {
+    setQuestions(prev => [
+      ...prev,
+      ...newQuestions.map((q, i) => ({ ...q, order: prev.length + i })),
+    ]);
   };
 
   const validateDates = () => {
@@ -285,6 +294,7 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
   };
 
   return (
+    <div className={`assignment-form-wrapper ${aiPanelOpen ? 'ai-panel-active' : ''}`}>
     <div className="assignment-form-container">
       <div className="card">
         <div className="card-header">
@@ -471,13 +481,22 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
             <div className="section-header">
               <h3>Questions</h3>
               {!showQuestionBuilder && (
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={handleAddQuestion}
-                >
-                  + Add Question
-                </button>
+                <div className="section-header-buttons">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={handleAddQuestion}
+                  >
+                    + Add Question
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-ai"
+                    onClick={() => setAiPanelOpen(true)}
+                  >
+                    AI Generate
+                  </button>
+                </div>
               )}
             </div>
 
@@ -518,6 +537,19 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
           </div>
         </form>
       </div>
+    </div>
+
+    <AIChatPanel
+      courseId={formData.course_id || courseId}
+      assignmentContext={{
+        title: formData.title,
+        type: formData.type,
+        points_possible: formData.points_possible,
+      }}
+      onQuestionsAccepted={handleAIQuestionsAccepted}
+      isOpen={aiPanelOpen}
+      onToggle={() => setAiPanelOpen(!aiPanelOpen)}
+    />
     </div>
   );
 };

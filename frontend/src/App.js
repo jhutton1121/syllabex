@@ -32,6 +32,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import CourseManagement from './pages/admin/CourseManagement';
 import AdminCourseDetail from './pages/admin/AdminCourseDetail';
 import UserManagement from './pages/admin/UserManagement';
+import AISettings from './pages/admin/AISettings';
 
 function App() {
   return (
@@ -164,6 +165,15 @@ function App() {
               element={
                 <PrivateRoute requireAdmin>
                   <UserManagement />
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/admin/ai-settings"
+              element={
+                <PrivateRoute requireAdmin>
+                  <AISettings />
                 </PrivateRoute>
               }
             />
