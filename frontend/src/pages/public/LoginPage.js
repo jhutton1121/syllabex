@@ -4,18 +4,28 @@ import { useAuth } from '../../context/AuthContext';
 import './AuthPages.css';
 
 const LoginPage = () => {
+  const [orgSlug, setOrgSlug] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
-  const { login } = useAuth();
+
+  const { login, setAccountSlug } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    if (!orgSlug.trim()) {
+      setError('Organization is required.');
+      setLoading(false);
+      return;
+    }
+
+    // Set account slug before login so the API interceptor sends the header
+    setAccountSlug(orgSlug.trim());
 
     try {
       const userData = await login(email, password);
@@ -42,6 +52,18 @@ const LoginPage = () => {
         {error && <div className="alert alert-error">{error}</div>}
         
         <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="org">Organization</label>
+            <input
+              id="org"
+              type="text"
+              value={orgSlug}
+              onChange={(e) => setOrgSlug(e.target.value)}
+              required
+              placeholder="your-organization"
+            />
+          </div>
+
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input

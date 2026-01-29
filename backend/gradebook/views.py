@@ -14,14 +14,8 @@ from users.permissions import IsInstructor, IsInstructorOrAdmin
 class GradeEntryViewSet(viewsets.ModelViewSet):
     """ViewSet for GradeEntry CRUD operations"""
     
-    queryset = GradeEntry.objects.select_related(
-        'membership__user',
-        'membership__course',
-        'assignment',
-        'graded_by'
-    )
     serializer_class = GradeEntrySerializer
-    
+
     def get_permissions(self):
         """Set permissions based on action"""
         if self.action in ['create', 'update', 'partial_update', 'destroy', 'course_gradebook']:
@@ -31,20 +25,25 @@ class GradeEntryViewSet(viewsets.ModelViewSet):
         else:
             permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
-    
+
     def get_queryset(self):
-        """Filter grades based on user role"""
+        """Filter grades by account and user role"""
         user = self.request.user
-        queryset = super().get_queryset()
-        
-        if hasattr(user, 'admin_profile'):
+        account = getattr(self.request, 'account', None)
+        queryset = GradeEntry.objects.filter(
+            membership__course__account=account
+        ).select_related(
+            'membership__user', 'membership__course', 'assignment', 'graded_by'
+        )
+
+        if hasattr(user, 'admin_profile') or user.is_account_admin():
             return queryset.order_by('-graded_at')
-        
+
         instructor_courses = user.memberships.filter(
             role='instructor',
             status='active'
         ).values_list('course_id', flat=True)
-        
+
         return queryset.filter(
             Q(membership__user=user) |
             Q(membership__course_id__in=instructor_courses)
@@ -72,7 +71,7 @@ class GradeEntryViewSet(viewsets.ModelViewSet):
     def course_gradebook(self, request, course_id=None):
         """Get gradebook for a specific course"""
         try:
-            course = Course.objects.get(pk=course_id)
+            course = Course.unscoped.get(pk=course_id, account=request.account)
         except Course.DoesNotExist:
             return Response({'error': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
         
@@ -131,11 +130,12 @@ class GradeEntryViewSet(viewsets.ModelViewSet):
         """Get grades for a specific student"""
         current_user = request.user
         is_own_grades = str(current_user.id) == str(user_id)
-        is_admin = hasattr(current_user, 'admin_profile')
-        
+        is_admin = hasattr(current_user, 'admin_profile') or current_user.is_account_admin()
+
         if not is_own_grades and not is_admin:
             student_courses = CourseMembership.objects.filter(
-                user_id=user_id, role='student', status='active'
+                user_id=user_id, role='student', status='active',
+                course__account=request.account,
             ).values_list('course_id', flat=True)
             
             instructor_courses = current_user.memberships.filter(
@@ -153,7 +153,8 @@ class GradeEntryViewSet(viewsets.ModelViewSet):
             ).select_related('membership__course', 'assignment')
         else:
             grades = GradeEntry.objects.filter(
-                membership__user_id=user_id
+                membership__user_id=user_id,
+                membership__course__account=request.account,
             ).select_related('membership__course', 'assignment')
         
         if not grades.exists():
@@ -164,6 +165,6 @@ class GradeEntryViewSet(viewsets.ModelViewSet):
     
     def _is_course_instructor(self, user, course):
         """Check if user is an instructor of the course"""
-        if hasattr(user, 'admin_profile'):
+        if hasattr(user, 'admin_profile') or user.is_account_admin():
             return True
         return course.memberships.filter(user=user, role='instructor', status='active').exists()

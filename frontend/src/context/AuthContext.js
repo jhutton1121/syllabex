@@ -33,6 +33,14 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
+  const setAccountSlug = (slug) => {
+    authService.setAccountSlug(slug);
+  };
+
+  const getAccountSlug = () => {
+    return authService.getAccountSlug();
+  };
+
   const login = async (email, password) => {
     await authService.login(email, password);
     const userData = await authService.getCurrentUser();
@@ -62,6 +70,9 @@ export const AuthProvider = ({ children }) => {
     logout,
     isAuthenticated: !!user,
     isAdmin,
+    setAccountSlug,
+    getAccountSlug,
+    accountSlug: user?.account_slug || getAccountSlug(),
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

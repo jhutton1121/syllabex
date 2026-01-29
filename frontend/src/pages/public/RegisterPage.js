@@ -5,6 +5,7 @@ import './AuthPages.css';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
+    org_slug: '',
     email: '',
     password: '',
     password_confirm: '',
@@ -15,7 +16,7 @@ const RegisterPage = () => {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   
-  const { register } = useAuth();
+  const { register, setAccountSlug } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -31,12 +32,21 @@ const RegisterPage = () => {
     setSuccess('');
     setLoading(true);
 
+    if (!formData.org_slug?.trim()) {
+      setError('Organization is required.');
+      setLoading(false);
+      return;
+    }
+
     // Validate passwords match
     if (formData.password !== formData.password_confirm) {
       setError('Passwords do not match');
       setLoading(false);
       return;
     }
+
+    // Set account slug so the API sends the header
+    setAccountSlug(formData.org_slug.trim());
 
     try {
       await register(formData);
@@ -69,6 +79,19 @@ const RegisterPage = () => {
         {success && <div className="alert alert-success">{success}</div>}
         
         <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="org_slug">Organization</label>
+            <input
+              id="org_slug"
+              type="text"
+              name="org_slug"
+              value={formData.org_slug}
+              onChange={handleChange}
+              required
+              placeholder="your-organization"
+            />
+          </div>
+
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="first_name">First Name</label>

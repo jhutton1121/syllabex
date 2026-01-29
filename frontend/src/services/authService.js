@@ -8,15 +8,35 @@ const authService = {
     return response.data;
   },
 
-  // Login user
+  // Set the account slug (must be called before login)
+  setAccountSlug: (slug) => {
+    localStorage.setItem('account_slug', slug);
+  },
+
+  // Get the current account slug
+  getAccountSlug: () => {
+    return localStorage.getItem('account_slug');
+  },
+
+  // Login user (account_slug must be set first via setAccountSlug or X-Account-Slug header)
   login: async (email, password) => {
     const response = await api.post('/auth/login/', { email, password });
     const { access, refresh } = response.data;
-    
+
     // Store tokens
     localStorage.setItem('access_token', access);
     localStorage.setItem('refresh_token', refresh);
-    
+
+    // Extract and store account_slug from JWT
+    try {
+      const decoded = jwtDecode(access);
+      if (decoded.account_slug) {
+        localStorage.setItem('account_slug', decoded.account_slug);
+      }
+    } catch (e) {
+      // JWT decode failed, account_slug stays as-is
+    }
+
     return response.data;
   },
 
@@ -24,6 +44,7 @@ const authService = {
   logout: () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    localStorage.removeItem('account_slug');
   },
 
   // Get current user
