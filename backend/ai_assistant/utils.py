@@ -3,6 +3,7 @@ import base64
 import json
 from cryptography.fernet import Fernet
 from django.conf import settings
+import pdfplumber
 
 
 def _get_fernet():
@@ -37,7 +38,6 @@ def mask_api_key(plaintext):
 
 def extract_text_from_pdf(file_obj):
     """Extract text from a PDF file"""
-    import pdfplumber
     text_parts = []
     with pdfplumber.open(file_obj) as pdf:
         for page in pdf.pages:
@@ -87,6 +87,9 @@ def build_system_prompt(course, syllabus_text, assignment_context):
         "If the instructor asks you to modify, refine, or discuss questions without generating new ones, "
         "return an empty \"questions\" array and put your response in \"message\".\n\n"
         "IMPORTANT: Always return valid JSON. Do not include markdown formatting or code blocks."
+        "IMPORTANT: Ensure for multiple choice \"questions\" that you are not always putting the correct answer as the first choice.\n\n"
+        "IMPORTANT: If you create a multiple choice question with numeric responses, ensure they are close enough to be realistic "
+
     )
 
     if course:
