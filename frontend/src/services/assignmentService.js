@@ -29,9 +29,15 @@ const assignmentService = {
     return response.data;
   },
 
-  // Update assignment
+  // Update assignment (full)
   updateAssignment: async (id, assignmentData) => {
     const response = await api.put(`/assignments/${id}/`, assignmentData);
+    return response.data;
+  },
+
+  // Partial update assignment
+  patchAssignment: async (id, data) => {
+    const response = await api.patch(`/assignments/${id}/`, data);
     return response.data;
   },
 

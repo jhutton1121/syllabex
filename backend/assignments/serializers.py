@@ -120,6 +120,13 @@ class AssignmentSerializer(serializers.ModelSerializer):
         queryset=Course.objects.all(),
         write_only=True
     )
+    module_id = serializers.PrimaryKeyRelatedField(
+        source='module',
+        queryset=Assignment.module.field.related_model.objects.all(),
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
     is_overdue = serializers.SerializerMethodField()
     has_started = serializers.SerializerMethodField()
     is_available = serializers.SerializerMethodField()
@@ -129,11 +136,12 @@ class AssignmentSerializer(serializers.ModelSerializer):
     questions = QuestionSerializer(many=True, read_only=True)
     question_count = serializers.SerializerMethodField()
     total_question_points = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Assignment
         fields = [
-            'id', 'course', 'course_info', 'course_id', 'type', 'title',
+            'id', 'course', 'course_info', 'course_id', 'module', 'module_id',
+            'type', 'title',
             'description', 'start_date', 'due_date', 'points_possible', 'created_at',
             'updated_at', 'is_overdue', 'has_started', 'is_available', 'is_editable',
             'is_auto_gradable', 'submission_count', 'questions',

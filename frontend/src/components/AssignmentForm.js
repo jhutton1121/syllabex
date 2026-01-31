@@ -58,7 +58,9 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
     due_date: getInitialDueDate(),
     due_time: getInitialDueTime(),
     points_possible: assignment?.points_possible || 100,
+    module_id: assignment?.module || '',
   });
+  const [modules, setModules] = useState([]);
   const [questions, setQuestions] = useState(assignment?.questions || []);
   const [originalQuestionIds, setOriginalQuestionIds] = useState([]);
   const [showQuestionBuilder, setShowQuestionBuilder] = useState(false);
@@ -81,6 +83,16 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
 
     fetchCourses();
   }, []);
+
+  // Load modules for the selected course
+  useEffect(() => {
+    const cid = formData.course_id || courseId;
+    if (cid) {
+      courseService.getCourseModules(cid).then((data) => {
+        setModules(data.results || data);
+      }).catch(() => setModules([]));
+    }
+  }, [formData.course_id, courseId]);
 
   // Load questions if editing
   useEffect(() => {
@@ -239,6 +251,7 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
         description: formData.description,
         points_possible: formData.points_possible,
         due_date: new Date(dueDateTimeString).toISOString(),
+        module_id: formData.module_id || null,
       };
 
       // Add start_date if provided
@@ -360,6 +373,26 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
               <option value="test">Test</option>
             </select>
           </div>
+
+          {modules.length > 0 && (
+            <div className="form-group">
+              <label htmlFor="module_id">Module</label>
+              <select
+                id="module_id"
+                name="module_id"
+                value={formData.module_id}
+                onChange={handleChange}
+              >
+                <option value="">No module</option>
+                {modules.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.title}
+                  </option>
+                ))}
+              </select>
+              <small className="form-hint">Optionally assign to a course module</small>
+            </div>
+          )}
 
           <div className="form-group">
             <label htmlFor="title">Title *</label>

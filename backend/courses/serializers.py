@@ -1,6 +1,6 @@
 """Serializers for courses app"""
 from rest_framework import serializers
-from .models import Course, CourseMembership
+from .models import Course, CourseMembership, CourseModule
 from users.models import User
 from users.serializers import UserBasicSerializer
 
@@ -105,3 +105,49 @@ class CourseDetailSerializer(CourseSerializer):
         """Get all active members of the course"""
         members = obj.memberships.filter(status='active').select_related('user')
         return CourseMembershipSerializer(members, many=True).data
+
+
+class ModuleAssignmentSummarySerializer(serializers.Serializer):
+    """Lightweight assignment summary for nesting inside module cards"""
+    id = serializers.IntegerField()
+    title = serializers.CharField()
+    type = serializers.CharField()
+    due_date = serializers.DateTimeField()
+    points_possible = serializers.IntegerField()
+    start_date = serializers.DateTimeField(allow_null=True)
+
+
+class CourseModuleSerializer(serializers.ModelSerializer):
+    """Serializer for CourseModule model"""
+
+    assignments = serializers.SerializerMethodField()
+    status = serializers.CharField(read_only=True)
+    is_active = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = CourseModule
+        fields = [
+            'id', 'course', 'title', 'description', 'order',
+            'start_date', 'end_date', 'is_locked', 'zoom_link',
+            'created_at', 'updated_at', 'assignments', 'status', 'is_active',
+        ]
+        read_only_fields = ['id', 'course', 'created_at', 'updated_at']
+
+    def get_assignments(self, obj):
+        request = self.context.get('request')
+        user = request.user if request else None
+
+        # If student and module is locked, hide assignments
+        if user and not self._is_instructor(user, obj.course):
+            if obj.is_locked:
+                return []
+
+        qs = obj.assignments.order_by('due_date')
+        return ModuleAssignmentSummarySerializer(qs, many=True).data
+
+    def _is_instructor(self, user, course):
+        if hasattr(user, 'admin_profile') or user.is_account_admin():
+            return True
+        return course.memberships.filter(
+            user=user, role='instructor', status='active'
+        ).exists()

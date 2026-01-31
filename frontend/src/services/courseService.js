@@ -71,6 +71,33 @@ const courseService = {
     const response = await api.get('/courses/memberships/');
     return response.data;
   },
+
+  // --- Course Modules ---
+
+  getCourseModules: async (courseId) => {
+    const response = await api.get(`/courses/${courseId}/modules/`);
+    return response.data;
+  },
+
+  createCourseModule: async (courseId, data) => {
+    const response = await api.post(`/courses/${courseId}/modules/`, data);
+    return response.data;
+  },
+
+  updateCourseModule: async (courseId, moduleId, data) => {
+    const response = await api.put(`/courses/${courseId}/modules/${moduleId}/`, data);
+    return response.data;
+  },
+
+  deleteCourseModule: async (courseId, moduleId) => {
+    const response = await api.delete(`/courses/${courseId}/modules/${moduleId}/`);
+    return response.data;
+  },
+
+  toggleModuleLock: async (courseId, moduleId) => {
+    const response = await api.patch(`/courses/${courseId}/modules/${moduleId}/toggle-lock/`);
+    return response.data;
+  },
 };
 
 export default courseService;
