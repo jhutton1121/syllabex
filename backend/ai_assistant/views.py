@@ -136,7 +136,7 @@ class AIGenerateView(APIView):
             )
 
         # Build messages
-        system_prompt = build_system_prompt(
+        system_prompt, syllabus_meta = build_system_prompt(
             course, syllabus_text, data.get('assignment_context', {})
         )
         messages = [{'role': 'system', 'content': system_prompt}]
@@ -161,6 +161,11 @@ class AIGenerateView(APIView):
                 {'error': f'AI generation failed: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+        if syllabus_meta.get('truncated'):
+            result['syllabus_truncated'] = True
+            result['syllabus_chars_total'] = syllabus_meta['syllabus_chars_total']
+            result['syllabus_chars_used'] = syllabus_meta['syllabus_chars_used']
 
         return Response(result)
 
@@ -216,7 +221,7 @@ class AIModuleGenerateView(APIView):
                 s.extracted_text for s in syllabi if s.extracted_text
             )
 
-        system_prompt = build_module_system_prompt(
+        system_prompt, syllabus_meta = build_module_system_prompt(
             course, syllabus_text,
             data.get('existing_modules', []),
             data.get('mode', 'create')
@@ -247,5 +252,10 @@ class AIModuleGenerateView(APIView):
                 m['order'] = i
             if 'assignments' not in m:
                 m['assignments'] = []
+
+        if syllabus_meta.get('truncated'):
+            result['syllabus_truncated'] = True
+            result['syllabus_chars_total'] = syllabus_meta['syllabus_chars_total']
+            result['syllabus_chars_used'] = syllabus_meta['syllabus_chars_used']
 
         return Response(result)

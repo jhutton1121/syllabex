@@ -88,6 +88,14 @@ const AIModuleChatPanel = ({ courseId, existingModules, onModulesAccepted, isOpe
         mode
       );
 
+      if (result.syllabus_truncated) {
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: `Note: Your syllabus was too long and was truncated (${result.syllabus_chars_used.toLocaleString()} of ${result.syllabus_chars_total.toLocaleString()} characters used). Content at the end may not be reflected.`,
+          isWarning: true,
+        }]);
+      }
+
       const assistantMessage = {
         role: 'assistant',
         content: result.message || 'Here are the generated modules.',

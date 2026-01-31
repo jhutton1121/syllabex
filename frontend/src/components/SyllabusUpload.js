@@ -79,14 +79,28 @@ const SyllabusUpload = ({ courseId }) => {
         <ul className="syllabus-list">
           {syllabi.map(s => (
             <li key={s.id} className="syllabus-item">
-              <span className="syllabus-filename">{s.original_filename}</span>
-              <button
-                className="syllabus-delete-btn"
-                onClick={() => handleDelete(s.id)}
-                title="Remove"
-              >
-                &times;
-              </button>
+              <div className="syllabus-item-header">
+                <span className="syllabus-filename">{s.original_filename}</span>
+                <button
+                  className="syllabus-delete-btn"
+                  onClick={() => handleDelete(s.id)}
+                  title="Remove"
+                >
+                  &times;
+                </button>
+              </div>
+              {s.char_count === 0 ? (
+                <div className="syllabus-warning">
+                  No text could be extracted. The AI won't have syllabus context. Try a different format.
+                </div>
+              ) : (
+                <div className="syllabus-extract-info">
+                  <span className="syllabus-char-count">{s.char_count.toLocaleString()} chars extracted</span>
+                  {s.preview && (
+                    <div className="syllabus-preview">{s.preview}...</div>
+                  )}
+                </div>
+              )}
             </li>
           ))}
         </ul>

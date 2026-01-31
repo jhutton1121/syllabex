@@ -37,14 +37,46 @@ def mask_api_key(plaintext):
 
 
 def extract_text_from_pdf(file_obj):
-    """Extract text from a PDF file"""
+    """Extract text from a PDF file, including tables as markdown"""
     text_parts = []
     with pdfplumber.open(file_obj) as pdf:
         for page in pdf.pages:
             page_text = page.extract_text()
             if page_text:
                 text_parts.append(page_text)
-    return '\n\n'.join(text_parts)
+            # Extract tables and format as markdown
+            tables = page.extract_tables()
+            for table in tables:
+                if not table:
+                    continue
+                md_rows = []
+                for row in table:
+                    cells = [str(c).strip() if c else '' for c in row]
+                    md_rows.append('| ' + ' | '.join(cells) + ' |')
+                    if len(md_rows) == 1:
+                        md_rows.append('| ' + ' | '.join(['---'] * len(cells)) + ' |')
+                if md_rows:
+                    text_parts.append('\n'.join(md_rows))
+
+    text = '\n\n'.join(text_parts)
+
+    # OCR fallback for scanned PDFs
+    if not text.strip():
+        try:
+            from pdf2image import convert_from_bytes
+            import pytesseract
+            file_obj.seek(0)
+            images = convert_from_bytes(file_obj.read())
+            ocr_parts = []
+            for img in images:
+                ocr_text = pytesseract.image_to_string(img)
+                if ocr_text.strip():
+                    ocr_parts.append(ocr_text)
+            text = '\n\n'.join(ocr_parts)
+        except ImportError:
+            pass  # OCR deps not installed — frontend warning handles visibility
+
+    return text
 
 
 def extract_text_from_docx(file_obj):
@@ -105,11 +137,15 @@ def build_system_prompt(course, syllabus_text, assignment_context):
         if course.description:
             prompt += f"\nCourse Description: {course.description}"
 
+    syllabus_meta = {'syllabus_chars_total': 0, 'syllabus_chars_used': 0, 'truncated': False}
     if syllabus_text:
-        # Truncate to ~8000 chars to stay within context limits
-        truncated = syllabus_text[:8000]
-        if len(syllabus_text) > 8000:
-            truncated += "\n... [syllabus truncated]"
+        syllabus_meta['syllabus_chars_total'] = len(syllabus_text)
+        max_chars = 50000
+        truncated = syllabus_text[:max_chars]
+        if len(syllabus_text) > max_chars:
+            truncated += f"\n... [syllabus truncated — {len(syllabus_text) - max_chars} characters omitted]"
+            syllabus_meta['truncated'] = True
+        syllabus_meta['syllabus_chars_used'] = min(len(syllabus_text), max_chars)
         prompt += f"\n\nCourse Syllabus:\n{truncated}"
 
     if assignment_context:
@@ -121,7 +157,7 @@ def build_system_prompt(course, syllabus_text, assignment_context):
         if assignment_context.get('points_possible'):
             prompt += f"\n- Total Points: {assignment_context['points_possible']}"
 
-    return prompt
+    return prompt, syllabus_meta
 
 
 def build_module_system_prompt(course, syllabus_text, existing_modules, mode):
@@ -172,10 +208,15 @@ def build_module_system_prompt(course, syllabus_text, existing_modules, mode):
         if course.end_date:
             prompt += f"\nCourse End Date: {course.end_date}"
 
+    syllabus_meta = {'syllabus_chars_total': 0, 'syllabus_chars_used': 0, 'truncated': False}
     if syllabus_text:
-        truncated = syllabus_text[:8000]
-        if len(syllabus_text) > 8000:
-            truncated += "\n... [syllabus truncated]"
+        syllabus_meta['syllabus_chars_total'] = len(syllabus_text)
+        max_chars = 50000
+        truncated = syllabus_text[:max_chars]
+        if len(syllabus_text) > max_chars:
+            truncated += f"\n... [syllabus truncated — {len(syllabus_text) - max_chars} characters omitted]"
+            syllabus_meta['truncated'] = True
+        syllabus_meta['syllabus_chars_used'] = min(len(syllabus_text), max_chars)
         prompt += f"\n\nCourse Syllabus:\n{truncated}"
 
     if mode == 'edit' and existing_modules:
@@ -189,7 +230,7 @@ def build_module_system_prompt(course, syllabus_text, existing_modules, mode):
             "Use _action='create' for new modules being added."
         )
 
-    return prompt
+    return prompt, syllabus_meta
 
 
 def call_openai(messages, ai_settings):
