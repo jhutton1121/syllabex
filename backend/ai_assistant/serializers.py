@@ -47,3 +47,20 @@ class AIGenerateRequestSerializer(serializers.Serializer):
     )
     course_id = serializers.IntegerField()
     assignment_context = serializers.DictField(required=False, default=dict)
+
+
+class AIModuleGenerateRequestSerializer(serializers.Serializer):
+    """Validates the AI module generation request"""
+    prompt = serializers.CharField()
+    conversation_history = serializers.ListField(
+        child=serializers.DictField(),
+        required=False,
+        default=list
+    )
+    course_id = serializers.IntegerField()
+    existing_modules = serializers.ListField(
+        child=serializers.DictField(),
+        required=False,
+        default=list
+    )
+    mode = serializers.ChoiceField(choices=['create', 'edit'], default='create')

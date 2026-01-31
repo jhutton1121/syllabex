@@ -98,6 +98,11 @@ const courseService = {
     const response = await api.patch(`/courses/${courseId}/modules/${moduleId}/toggle-lock/`);
     return response.data;
   },
+
+  batchApplyModules: async (courseId, modules) => {
+    const response = await api.post(`/courses/${courseId}/modules/batch/`, { modules });
+    return response.data;
+  },
 };
 
 export default courseService;

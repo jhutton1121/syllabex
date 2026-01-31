@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import courseService from '../../../services/courseService';
 import ModuleForm from './ModuleForm';
+import AIModuleChatPanel from '../../../components/AIModuleChatPanel';
 import './CourseModules.css';
 
 function CourseModules({ courseId, modules, assignments, isInstructor, onModulesChange }) {
@@ -9,6 +10,7 @@ function CourseModules({ courseId, modules, assignments, isInstructor, onModules
   const [editingModule, setEditingModule] = useState(null);
   const [lockConfirm, setLockConfirm] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [aiPanelOpen, setAiPanelOpen] = useState(false);
 
   const handleToggleLock = async (moduleId) => {
     try {
@@ -46,6 +48,15 @@ function CourseModules({ courseId, modules, assignments, isInstructor, onModules
     setShowForm(true);
   };
 
+  const handleAIModulesAccepted = async (approvedModules) => {
+    try {
+      await courseService.batchApplyModules(courseId, approvedModules);
+      onModulesChange();
+    } catch (err) {
+      console.error('Failed to apply AI modules:', err);
+    }
+  };
+
   const sortedModules = [...(modules || [])].sort(
     (a, b) => new Date(a.start_date) - new Date(b.start_date)
   );
@@ -60,9 +71,14 @@ function CourseModules({ courseId, modules, assignments, isInstructor, onModules
       <div className="modules-header">
         <h2>Course Modules</h2>
         {isInstructor && !showForm && (
-          <button className="btn-new-module" onClick={() => setShowForm(true)}>
-            + New Module
-          </button>
+          <div className="modules-header-actions">
+            <button className="btn-ai-modules" onClick={() => setAiPanelOpen(!aiPanelOpen)}>
+              {aiPanelOpen ? 'Close AI' : 'AI Assistant'}
+            </button>
+            <button className="btn-new-module" onClick={() => setShowForm(true)}>
+              + New Module
+            </button>
+          </div>
         )}
       </div>
 
@@ -200,6 +216,16 @@ function CourseModules({ courseId, modules, assignments, isInstructor, onModules
             </div>
           </div>
         </div>
+      )}
+
+      {isInstructor && aiPanelOpen && (
+        <AIModuleChatPanel
+          courseId={courseId}
+          existingModules={modules}
+          onModulesAccepted={handleAIModulesAccepted}
+          isOpen={aiPanelOpen}
+          onToggle={() => setAiPanelOpen(false)}
+        />
       )}
 
       {/* Delete Confirmation */}

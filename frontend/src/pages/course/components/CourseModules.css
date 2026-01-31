@@ -16,6 +16,29 @@
   color: #f0f0ff;
 }
 
+.modules-header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-ai-modules {
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-ai-modules:hover {
+  background: rgba(99, 102, 241, 0.25);
+  border-color: #6366f1;
+}
+
 .btn-new-module {
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   color: white;

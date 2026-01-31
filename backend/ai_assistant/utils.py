@@ -124,6 +124,74 @@ def build_system_prompt(course, syllabus_text, assignment_context):
     return prompt
 
 
+def build_module_system_prompt(course, syllabus_text, existing_modules, mode):
+    """Build the system prompt for AI module generation"""
+    prompt = (
+        "You are an AI teaching assistant that helps instructors create and organize course modules. "
+        "You must return your response as valid JSON with these fields:\n"
+        '1. "message": A brief conversational response to the instructor\n'
+        '2. "modules": An array of module objects\n\n'
+        "Each module object must have:\n"
+        '- "title": string (e.g. "Time Value of Money")\n'
+        '- "description": string (brief overview of what the module covers)\n'
+        '- "start_date": date string in YYYY-MM-DD format\n'
+        '- "end_date": date string in YYYY-MM-DD format\n'
+        '- "order": 0-based index (integer)\n'
+        '- "zoom_link": empty string (placeholder)\n'
+        '- "assignments": array of placeholder assignment objects for this module\n\n'
+        "Each assignment object in the assignments array must have:\n"
+        '- "title": string (e.g. "Module 1 Quiz: Time Value of Money")\n'
+        '- "type": one of "quiz", "test", or "homework"\n'
+        '- "due_date": date string in YYYY-MM-DD format (should fall within the module date range)\n'
+        '- "points_possible": integer (reasonable default, e.g. 100 for tests, 50 for quizzes, 25 for homework)\n'
+        '- "description": string (brief description of the assignment)\n\n'
+        "IMPORTANT: If the syllabus or user prompt mentions assessments (quizzes, tests, exams, homework, "
+        "problem sets, etc.), generate placeholder assignments with sensible titles, types, and due dates "
+        "within each module's date range. These are wireframe placeholders that instructors will flesh out later.\n\n"
+        "IMPORTANT: Always return valid JSON. Do not include markdown formatting or code blocks.\n"
+        "IMPORTANT: Ensure module dates do not overlap unless explicitly requested.\n"
+        "IMPORTANT: Account for holidays, breaks, and exam periods when the user mentions them.\n"
+        "IMPORTANT: Due dates for assignments should typically be near the end of the module's date range.\n"
+    )
+
+    if mode == 'edit':
+        prompt += (
+            "\nWhen editing existing modules, each module object must also include:\n"
+            '- "id": the existing module ID (integer) if updating an existing module, or null if creating a new one\n'
+            '- "_action": one of "update", "create", or "delete"\n'
+            "For deleted modules, only id and _action are required.\n"
+            "Return the FULL updated list of modules (including unchanged ones with _action='update').\n\n"
+        )
+
+    if course:
+        prompt += f"\n\nCourse: {course.code} - {course.name}"
+        if course.description:
+            prompt += f"\nCourse Description: {course.description}"
+        if course.start_date:
+            prompt += f"\nCourse Start Date: {course.start_date}"
+        if course.end_date:
+            prompt += f"\nCourse End Date: {course.end_date}"
+
+    if syllabus_text:
+        truncated = syllabus_text[:8000]
+        if len(syllabus_text) > 8000:
+            truncated += "\n... [syllabus truncated]"
+        prompt += f"\n\nCourse Syllabus:\n{truncated}"
+
+    if mode == 'edit' and existing_modules:
+        prompt += "\n\nExisting Modules (current state):\n"
+        prompt += json.dumps(existing_modules, indent=2, default=str)
+        prompt += (
+            "\n\nThe user wants to modify these existing modules. "
+            "Return the full updated list with _action and id fields. "
+            "Use _action='delete' for modules that should be removed. "
+            "Use _action='update' for modules being modified. "
+            "Use _action='create' for new modules being added."
+        )
+
+    return prompt
+
+
 def call_openai(messages, ai_settings):
     """Call OpenAI API and return the parsed response"""
     from openai import OpenAI

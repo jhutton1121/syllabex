@@ -294,6 +294,61 @@ class CourseModuleViewSet(viewsets.ModelViewSet):
         module.save(update_fields=['is_locked', 'updated_at'])
         return Response(CourseModuleSerializer(module, context={'request': request}).data)
 
+    @action(detail=False, methods=['post'], url_path='batch')
+    def batch_apply(self, request, course_id=None):
+        """Batch create/update/delete modules with optional placeholder assignments"""
+        from assignments.models import Assignment
+        from django.utils.dateparse import parse_date
+
+        course = self._get_course()
+        if not self._is_instructor(request.user, course):
+            raise PermissionDenied('Only instructors can batch-modify modules.')
+
+        modules_data = request.data.get('modules', [])
+        results = []
+
+        for m in modules_data:
+            action_type = m.pop('_action', 'create')
+            m.pop('_status', None)
+            module_id = m.pop('id', None)
+            assignments_data = m.pop('assignments', [])
+
+            if action_type == 'delete' and module_id:
+                CourseModule.objects.filter(pk=module_id, course=course).delete()
+                continue
+
+            if action_type == 'update' and module_id:
+                try:
+                    instance = CourseModule.objects.get(pk=module_id, course=course)
+                except CourseModule.DoesNotExist:
+                    continue
+                ser = CourseModuleSerializer(instance, data=m, partial=True, context={'request': request})
+                ser.is_valid(raise_exception=True)
+                ser.save()
+                results.append(ser.data)
+            else:
+                # create
+                m.pop('course', None)
+                ser = CourseModuleSerializer(data=m, context={'request': request})
+                ser.is_valid(raise_exception=True)
+                module_obj = ser.save(course=course)
+                results.append(ser.data)
+
+                # Create placeholder assignments for new modules
+                for a in assignments_data:
+                    due_date = parse_date(a.get('due_date', '')) if a.get('due_date') else None
+                    Assignment.objects.create(
+                        course=course,
+                        module=module_obj,
+                        title=a.get('title', 'Untitled Assignment'),
+                        type=a.get('type', 'homework'),
+                        due_date=due_date,
+                        points_possible=a.get('points_possible', 0),
+                        description=a.get('description', ''),
+                    )
+
+        return Response(results, status=status.HTTP_200_OK)
+
 
 class CourseMembershipViewSet(viewsets.ModelViewSet):
     """ViewSet for CourseMembership operations"""
