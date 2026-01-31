@@ -10,6 +10,7 @@ import CourseSyllabus from './components/CourseSyllabus';
 import CourseQuizzes from './components/CourseQuizzes';
 import CourseTests from './components/CourseTests';
 import CourseCourseCalendar from './components/CourseCourseCalendar';
+import CourseModules from './components/CourseModules';
 import './CourseDetail.css';
 
 const CourseDetail = () => {
@@ -22,7 +23,8 @@ const CourseDetail = () => {
   const [students, setStudents] = useState([]);
   const [grades, setGrades] = useState(null);
   const [submissions, setSubmissions] = useState([]);
-  const [activeView, setActiveView] = useState('overview');
+  const [modules, setModules] = useState([]);
+  const [activeView, setActiveView] = useState('modules');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -37,6 +39,13 @@ const CourseDetail = () => {
 
         const assignmentsData = await assignmentService.getAssignments(courseId);
         setAssignments(assignmentsData.results || assignmentsData);
+
+        try {
+          const modulesData = await courseService.getCourseModules(courseId);
+          setModules(modulesData.results || modulesData);
+        } catch (e) {
+          console.log('No modules data yet');
+        }
 
         // Instructors can see students and gradebook
         if (courseData.user_role === 'instructor') {
@@ -271,20 +280,22 @@ const CourseDetail = () => {
         />
 
         <div className="course-main-content">
-          {/* Overview View */}
-          {activeView === 'overview' && (
-            <div className="overview-view">
-              <h2>Course Overview</h2>
-              {course.description && (
-                <div className="overview-section">
-                  <h3>About This Course</h3>
-                  <p>{course.description}</p>
-                </div>
-              )}
-              <div className="overview-info">
-                <p>Welcome to {course.name}! Use the navigation on the left to explore course content, view assignments, check your grades, and more.</p>
-              </div>
-            </div>
+          {/* Modules View */}
+          {activeView === 'modules' && (
+            <CourseModules
+              courseId={courseId}
+              modules={modules}
+              assignments={assignments}
+              isInstructor={isInstructor}
+              onModulesChange={async () => {
+                try {
+                  const data = await courseService.getCourseModules(courseId);
+                  setModules(data.results || data);
+                  const aData = await assignmentService.getAssignments(courseId);
+                  setAssignments(aData.results || aData);
+                } catch (e) { console.error(e); }
+              }}
+            />
           )}
 
           {/* Syllabus View */}

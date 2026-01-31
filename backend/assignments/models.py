@@ -14,10 +14,18 @@ class Assignment(models.Model):
     ]
     
     course = models.ForeignKey(
-        Course, 
-        on_delete=models.CASCADE, 
+        Course,
+        on_delete=models.CASCADE,
         related_name='assignments',
         db_index=True
+    )
+    module = models.ForeignKey(
+        'courses.CourseModule',
+        on_delete=models.SET_NULL,
+        related_name='assignments',
+        null=True,
+        blank=True,
+        db_index=True,
     )
     type = models.CharField(
         max_length=20, 

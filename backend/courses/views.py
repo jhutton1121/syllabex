@@ -4,8 +4,11 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from django.db.models import Q
-from .models import Course, CourseMembership
-from .serializers import CourseSerializer, CourseDetailSerializer, CourseMembershipSerializer
+from .models import Course, CourseMembership, CourseModule
+from .serializers import (
+    CourseSerializer, CourseDetailSerializer, CourseMembershipSerializer,
+    CourseModuleSerializer,
+)
 from users.models import User
 from users.permissions import IsAdmin, IsInstructorOrAdmin, IsCourseInstructorOrAdmin
 
@@ -227,6 +230,69 @@ class CourseViewSet(viewsets.ModelViewSet):
             user=user,
             status='active'
         ).exists()
+
+
+class CourseModuleViewSet(viewsets.ModelViewSet):
+    """ViewSet for CourseModule CRUD — nested under a course"""
+
+    serializer_class = CourseModuleSerializer
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy', 'toggle_lock']:
+            return [permissions.IsAuthenticated()]
+        return [permissions.IsAuthenticated()]
+
+    def _get_course(self):
+        course_id = self.kwargs.get('course_id')
+        account = getattr(self.request, 'account', None)
+        try:
+            return Course.unscoped.get(pk=course_id, account=account)
+        except Course.DoesNotExist:
+            raise ValidationError('Course not found.')
+
+    def _is_instructor(self, user, course):
+        if hasattr(user, 'admin_profile') or user.is_account_admin():
+            return True
+        return course.memberships.filter(
+            user=user, role='instructor', status='active'
+        ).exists()
+
+    def get_queryset(self):
+        course = self._get_course()
+        return CourseModule.objects.filter(course=course).prefetch_related('assignments')
+
+    def get_serializer_context(self):
+        ctx = super().get_serializer_context()
+        ctx['request'] = self.request
+        return ctx
+
+    def perform_create(self, serializer):
+        course = self._get_course()
+        if not self._is_instructor(self.request.user, course):
+            raise PermissionDenied('Only instructors can create modules.')
+        serializer.save(course=course)
+
+    def perform_update(self, serializer):
+        course = self._get_course()
+        if not self._is_instructor(self.request.user, course):
+            raise PermissionDenied('Only instructors can update modules.')
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        course = self._get_course()
+        if not self._is_instructor(self.request.user, course):
+            raise PermissionDenied('Only instructors can delete modules.')
+        instance.delete()
+
+    @action(detail=True, methods=['patch'], url_path='toggle-lock')
+    def toggle_lock(self, request, course_id=None, pk=None):
+        course = self._get_course()
+        if not self._is_instructor(request.user, course):
+            raise PermissionDenied('Only instructors can lock/unlock modules.')
+        module = self.get_object()
+        module.is_locked = not module.is_locked
+        module.save(update_fields=['is_locked', 'updated_at'])
+        return Response(CourseModuleSerializer(module, context={'request': request}).data)
 
 
 class CourseMembershipViewSet(viewsets.ModelViewSet):

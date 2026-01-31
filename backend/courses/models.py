@@ -64,6 +64,54 @@ class Course(models.Model):
         return self.memberships.filter(role='instructor', status='active').count()
 
 
+class CourseModule(models.Model):
+    """A time-bounded module within a course (e.g. 'Time Value of Money - Weeks 1-3')"""
+
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name='modules',
+        db_index=True,
+    )
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    order = models.IntegerField(default=0)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    is_locked = models.BooleanField(default=False, db_index=True)
+    zoom_link = models.URLField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'course_modules'
+        verbose_name = 'Course Module'
+        verbose_name_plural = 'Course Modules'
+        ordering = ['start_date', 'order']
+        indexes = [
+            models.Index(fields=['course']),
+            models.Index(fields=['start_date']),
+            models.Index(fields=['order']),
+        ]
+
+    def __str__(self):
+        return f"{self.course.code} - {self.title}"
+
+    @property
+    def status(self):
+        from django.utils import timezone
+        today = timezone.now().date()
+        if today < self.start_date:
+            return 'upcoming'
+        elif today > self.end_date:
+            return 'completed'
+        return 'active'
+
+    @property
+    def is_active(self):
+        return self.status == 'active'
+
+
 class CourseMembership(models.Model):
     """Course membership linking users to courses with roles"""
     
