@@ -57,6 +57,7 @@ urlpatterns = [
     path('api/ai/', include('ai_assistant.urls')),
     path('api/pages/', include('pages.urls')),
     path('api/rubrics/', include('rubrics.urls')),
+    path('api/notifications/', include('notifications.urls')),
 ]
 
 if settings.DEBUG:

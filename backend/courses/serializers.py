@@ -1,6 +1,6 @@
 """Serializers for courses app"""
 from rest_framework import serializers
-from .models import Course, CourseMembership, CourseModule
+from .models import Course, CourseMembership, CourseModule, Announcement
 from .utils import sanitize_html
 from users.models import User
 from users.serializers import UserBasicSerializer
@@ -173,3 +173,19 @@ class CourseModuleSerializer(serializers.ModelSerializer):
         return course.memberships.filter(
             user=user, role='instructor', status='active'
         ).exists()
+
+
+class AnnouncementSerializer(serializers.ModelSerializer):
+    author_info = UserBasicSerializer(source='author', read_only=True)
+    course_code = serializers.CharField(source='course.code', read_only=True)
+
+    class Meta:
+        model = Announcement
+        fields = [
+            'id', 'course', 'author', 'author_info', 'title', 'body',
+            'is_published', 'pinned', 'course_code', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ['id', 'course', 'author', 'created_at', 'updated_at']
+
+    def validate_body(self, value):
+        return sanitize_html(value)

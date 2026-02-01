@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'ai_assistant',
     'pages',
     'rubrics',
+    'notifications',
 ]
 
 MIDDLEWARE = [

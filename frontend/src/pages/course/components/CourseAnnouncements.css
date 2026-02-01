@@ -1,0 +1,111 @@
+.course-announcements {
+  padding: 0;
+}
+
+.announcements-toolbar {
+  margin-bottom: 20px;
+}
+
+.announcements-loading {
+  text-align: center;
+  padding: 48px;
+  color: var(--text-muted);
+}
+
+.announcements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.announcement-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.announcement-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: 0 4px 16px var(--shadow-light);
+}
+
+.announcement-card.pinned {
+  border-left: 3px solid var(--primary);
+}
+
+.announcement-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 20px 24px 0;
+  gap: 16px;
+}
+
+.announcement-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pinned-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--primary-light);
+  background: rgba(99, 102, 241, 0.15);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.draft-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--warning-light);
+  background: rgba(245, 158, 11, 0.15);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.announcement-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.announcement-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.announcement-card-body {
+  padding: 12px 24px 16px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.announcement-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  border-top: 1px solid var(--border-default);
+}
+
+.announcement-author {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.announcement-date {
+  font-size: 12px;
+  color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace;
+}

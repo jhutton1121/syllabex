@@ -23,9 +23,11 @@ Account (tenant root)
   │     │     │     └── RubricRatings (performance levels per criterion)
   │     │     └── RubricAssessments (per-submission rubric scores)
   │     │           └── RubricCriterionScores (selected rating per criterion)
+  │     ├── Announcements (instructor broadcasts, rich text, pinned/published)
   │     ├── CourseMemberships (role: student | instructor)
   │     └── CourseSyllabi (uploaded files for AI context)
   ├── AccountMemberships (role: account_admin | sub_account_admin | member)
+  ├── Notifications (per-user, event-driven, links to courses)
   └── AISettings (per-account OpenAI config)
 ```
 
@@ -97,7 +99,8 @@ Permissions enforced at view level via DRF permission classes in `users/permissi
 backend/
   accounts/     # Account, AccountMembership, middleware, managers
   users/        # User, AdminProfile, permissions, auth views
-  courses/      # Course, CourseModule, CourseMembership, HTML sanitization
+  courses/      # Course, CourseModule, CourseMembership, Announcement, HTML sanitization
+  notifications/ # Notification model, creation utilities
   assignments/  # Assignment, Question, Choice, Submission, QuestionResponse
   rubrics/      # Rubric, RubricCriterion, RubricRating, RubricAssessment, RubricCriterionScore
   gradebook/    # GradeEntry
@@ -116,8 +119,9 @@ frontend/src/
 
 | Path Pattern | Who | What |
 |---|---|---|
-| `/dashboard` | All | Course list, upcoming assignments |
-| `/courses/:id` | All | Tabbed course view (modules, pages, assignments, grades) |
+| `/dashboard` | All | Course list, upcoming assignments, recent announcements |
+| `/courses/:id` | All | Tabbed course view (announcements, modules, pages, assignments, grades) |
+| `/notifications` | All | Full notification history with pagination |
 | `/courses/:id/assignments/:id` | Student | Take/view assignment |
 | `/courses/:id/assignments/:id/edit` | Instructor | Edit assignment + questions |
 | `/courses/:id/assignments/:id/submissions` | Instructor | View/grade submissions |

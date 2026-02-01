@@ -112,6 +112,38 @@ class CourseModule(models.Model):
         return self.status == 'active'
 
 
+class Announcement(models.Model):
+    """Instructor announcement broadcast to course members"""
+
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name='announcements',
+        db_index=True,
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='announcements',
+    )
+    title = models.CharField(max_length=200)
+    body = models.TextField()
+    is_published = models.BooleanField(default=True, db_index=True)
+    pinned = models.BooleanField(default=False, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'announcements'
+        ordering = ['-pinned', '-created_at']
+        indexes = [
+            models.Index(fields=['-created_at']),
+        ]
+
+    def __str__(self):
+        return f"{self.course.code} - {self.title}"
+
+
 class CourseMembership(models.Model):
     """Course membership linking users to courses with roles"""
     
