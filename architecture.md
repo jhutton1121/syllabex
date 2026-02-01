@@ -18,6 +18,11 @@ Account (tenant root)
   │     ├── CourseModules (time-bounded sections)
   │     │     ├── Assignments
   │     │     └── Pages
+  │     ├── Rubrics (reusable grading rubrics)
+  │     │     ├── RubricCriteria (assessment dimensions)
+  │     │     │     └── RubricRatings (performance levels per criterion)
+  │     │     └── RubricAssessments (per-submission rubric scores)
+  │     │           └── RubricCriterionScores (selected rating per criterion)
   │     ├── CourseMemberships (role: student | instructor)
   │     └── CourseSyllabi (uploaded files for AI context)
   ├── AccountMemberships (role: account_admin | sub_account_admin | member)
@@ -45,10 +50,17 @@ Account (tenant root)
 2. Updates `QuestionResponse.points_earned`, `graded=True`, `teacher_remarks`
 3. Instructor can then create/update `GradeEntry` for final grade
 
+### Rubric Grading (Instructor)
+1. Instructor attaches rubric to assignment via `AssignmentForm` → `RubricSelector`
+2. On `GradeSubmission` page, `RubricGradingPanel` shows alongside per-question grading
+3. Instructor selects a rating per criterion + optional comments
+4. `POST /api/rubrics/submissions/<id>/rubric-assessment/` creates `RubricAssessment` + `RubricCriterionScore` records
+5. Total score combines per-question scores + rubric total → updates `GradeEntry`
+
 ### AI Generation
-1. Instructor sends prompt → `POST /api/ai/generate/` or `/api/ai/generate-modules/`
+1. Instructor sends prompt → `POST /api/ai/generate/`, `/api/ai/generate-modules/`, or `/api/ai/generate-rubric/`
 2. Backend loads account's `AISettings`, builds system prompt with course + syllabus context
-3. Calls OpenAI API, returns structured JSON (questions or modules)
+3. Calls OpenAI API, returns structured JSON (questions, modules, or rubrics)
 4. Frontend shows review UI; instructor accepts/rejects generated items
 
 ## Invariants & Business Rules
@@ -58,6 +70,8 @@ Account (tenant root)
 | Users unique per (email, account) | DB unique_together |
 | Courses unique per (code, account) | DB unique_together |
 | One submission per (student, assignment) | DB unique_together |
+| One rubric assessment per (submission, rubric) | DB unique_together |
+| Rubric delete blocked if assessments exist | View-level check |
 | One grade per (membership, assignment) | DB unique_together |
 | Assignments not editable after start_date | `Assignment.is_editable_by_teacher()` |
 | Students can't see grades before due_date | Serializer-level filtering |
@@ -85,6 +99,7 @@ backend/
   users/        # User, AdminProfile, permissions, auth views
   courses/      # Course, CourseModule, CourseMembership, HTML sanitization
   assignments/  # Assignment, Question, Choice, Submission, QuestionResponse
+  rubrics/      # Rubric, RubricCriterion, RubricRating, RubricAssessment, RubricCriterionScore
   gradebook/    # GradeEntry
   pages/        # Page (rich text content)
   ai_assistant/ # AISettings, CourseSyllabus, OpenAI integration

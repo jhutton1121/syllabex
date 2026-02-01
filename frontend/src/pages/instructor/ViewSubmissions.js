@@ -218,12 +218,26 @@ const ViewSubmissions = () => {
                         )}
                       </td>
                       <td>
-                        <span 
+                        <span
                           className="grading-status"
                           style={{ backgroundColor: gradingStatus.color + '20', color: gradingStatus.color }}
                         >
                           {gradingStatus.label}
                         </span>
+                        {assignment?.has_rubric && (
+                          <span
+                            className="grading-status"
+                            style={{
+                              marginLeft: '6px',
+                              backgroundColor: submission.rubric_assessment
+                                ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)',
+                              color: submission.rubric_assessment
+                                ? '#10b981' : '#f59e0b'
+                            }}
+                          >
+                            {submission.rubric_assessment ? 'Rubric Graded' : 'Rubric Pending'}
+                          </span>
+                        )}
                       </td>
                       <td>
                         {score ? (

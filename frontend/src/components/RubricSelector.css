@@ -1,0 +1,58 @@
+.rubric-selector {
+  margin-top: 16px;
+}
+
+.rubric-selector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.rubric-selector-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.rubric-selector-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.rubric-selector-loading,
+.rubric-selector-empty {
+  padding: 12px;
+  font-size: 13px;
+  color: var(--text-subtle);
+  text-align: center;
+  background: var(--bg-secondary);
+  border: 1px dashed var(--border-default);
+  border-radius: 8px;
+}
+
+.rubric-selector-dropdown select {
+  width: 100%;
+  background: var(--input-bg);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.rubric-selector-dropdown select:focus {
+  outline: none;
+  border-color: var(--border-active);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.rubric-selector-preview {
+  margin-top: 12px;
+}
+
+.rubric-remove-btn {
+  margin-top: 8px;
+}

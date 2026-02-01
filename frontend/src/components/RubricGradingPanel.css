@@ -1,0 +1,193 @@
+.rubric-grading-panel {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.rubric-grading-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.rubric-grading-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.rubric-grading-score {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.rubric-grading-score-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary-light);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.rubric-grading-score-sep {
+  font-size: 16px;
+  color: var(--text-muted);
+  margin: 0 2px;
+}
+
+.rubric-grading-score-total {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.rubric-grading-score-label {
+  font-size: 12px;
+  color: var(--text-subtle);
+  margin-left: 4px;
+}
+
+.rubric-grading-criteria {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.rubric-grading-criterion {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.rubric-grading-criterion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.rubric-grading-criterion-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.rubric-grading-criterion-points {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary-light);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.rubric-grading-criterion-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.rubric-grading-ratings {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.rubric-grading-rating-card {
+  flex: 1;
+  min-width: 120px;
+  background: var(--input-bg);
+  border: 2px solid var(--border-default);
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+  font-family: inherit;
+  color: var(--text-secondary);
+}
+
+.rubric-grading-rating-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-1px);
+}
+
+.rubric-grading-rating-card.selected {
+  border-color: var(--primary);
+  background: rgba(99, 102, 241, 0.1);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.rubric-grading-rating-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.rubric-grading-rating-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+
+.rubric-grading-rating-points {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary-light);
+}
+
+.rubric-grading-comment textarea {
+  width: 100%;
+  background: var(--input-bg);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 40px;
+}
+
+.rubric-grading-comment textarea:focus {
+  outline: none;
+  border-color: var(--border-active);
+}
+
+.rubric-grading-comment textarea::placeholder {
+  color: var(--text-faint);
+}
+
+.rubric-grading-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-default);
+}
+
+.rubric-grading-hint {
+  font-size: 12px;
+  color: var(--text-subtle);
+}
+
+@media (max-width: 768px) {
+  .rubric-grading-ratings {
+    flex-direction: column;
+  }
+
+  .rubric-grading-rating-card {
+    min-width: unset;
+  }
+}

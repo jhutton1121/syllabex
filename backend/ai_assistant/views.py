@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 
 from .models import AISettings, CourseSyllabus
-from .serializers import AISettingsSerializer, CourseSyllabusSerializer, AIGenerateRequestSerializer, AIModuleGenerateRequestSerializer
-from .utils import build_system_prompt, build_module_system_prompt, call_openai, extract_text_from_file, decrypt_api_key
+from .serializers import AISettingsSerializer, CourseSyllabusSerializer, AIGenerateRequestSerializer, AIModuleGenerateRequestSerializer, AIRubricGenerateRequestSerializer
+from .utils import build_system_prompt, build_module_system_prompt, build_rubric_system_prompt, call_openai, extract_text_from_file, decrypt_api_key
 from courses.models import Course, CourseMembership
 from users.permissions import IsAdmin, IsInstructor
 
@@ -252,6 +252,96 @@ class AIModuleGenerateView(APIView):
                 m['order'] = i
             if 'assignments' not in m:
                 m['assignments'] = []
+
+        if syllabus_meta.get('truncated'):
+            result['syllabus_truncated'] = True
+            result['syllabus_chars_total'] = syllabus_meta['syllabus_chars_total']
+            result['syllabus_chars_used'] = syllabus_meta['syllabus_chars_used']
+
+        return Response(result)
+
+
+class AIRubricGenerateView(APIView):
+    """Generate a grading rubric using AI"""
+    permission_classes = [permissions.IsAuthenticated, IsInstructor]
+
+    def post(self, request):
+        serializer = AIRubricGenerateRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        ai_settings = AISettings.load(request.account)
+        if not ai_settings.enabled:
+            return Response(
+                {'error': 'AI assistant is currently disabled by the administrator.'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+
+        course_id = data['course_id']
+        try:
+            course = Course.unscoped.get(id=course_id, account=request.account)
+        except Course.DoesNotExist:
+            return Response({'error': 'Course not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if not course.ai_enabled:
+            return Response(
+                {'error': 'AI assistant is not enabled for this course.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        is_instructor = CourseMembership.objects.filter(
+            user=request.user, course=course, role='instructor', status='active'
+        ).exists() or hasattr(request.user, 'admin_profile')
+
+        if not is_instructor:
+            return Response(
+                {'error': 'You must be an instructor of this course.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        syllabus_text = ''
+        syllabi = CourseSyllabus.objects.filter(course=course)
+        if syllabi.exists():
+            syllabus_text = '\n\n---\n\n'.join(
+                s.extracted_text for s in syllabi if s.extracted_text
+            )
+
+        system_prompt, syllabus_meta = build_rubric_system_prompt(
+            course, syllabus_text, data.get('assignment_context', {})
+        )
+        messages = [{'role': 'system', 'content': system_prompt}]
+
+        for msg in data.get('conversation_history', []):
+            if msg.get('role') in ('user', 'assistant') and msg.get('content'):
+                messages.append({'role': msg['role'], 'content': msg['content']})
+
+        messages.append({'role': 'user', 'content': data['prompt']})
+
+        try:
+            result = call_openai(messages, ai_settings)
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {'error': f'AI generation failed: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        # Normalize rubric response
+        if 'rubric' not in result:
+            result['rubric'] = None
+        if result['rubric']:
+            rubric = result['rubric']
+            if 'criteria' not in rubric:
+                rubric['criteria'] = []
+            for i, c in enumerate(rubric['criteria']):
+                if 'order' not in c:
+                    c['order'] = i
+                if 'ratings' not in c:
+                    c['ratings'] = []
+                for j, r in enumerate(c['ratings']):
+                    if 'order' not in r:
+                        r['order'] = j
 
         if syllabus_meta.get('truncated'):
             result['syllabus_truncated'] = True

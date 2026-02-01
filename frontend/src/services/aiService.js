@@ -45,6 +45,16 @@ const aiService = {
     await api.delete(`/ai/syllabi/${id}/`);
   },
 
+  generateRubric: async (prompt, conversationHistory, courseId, assignmentContext) => {
+    const response = await api.post('/ai/generate-rubric/', {
+      prompt,
+      conversation_history: conversationHistory,
+      course_id: courseId,
+      assignment_context: assignmentContext || {},
+    });
+    return response.data;
+  },
+
   generateModules: async (prompt, conversationHistory, courseId, existingModules, mode) => {
     const response = await api.post('/ai/generate-modules/', {
       prompt,

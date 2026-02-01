@@ -120,7 +120,7 @@ class QuestionResponseSubmitSerializer(serializers.Serializer):
 
 class AssignmentSerializer(serializers.ModelSerializer):
     """Serializer for Assignment model"""
-    
+
     course_info = CourseSerializer(source='course', read_only=True)
     course_id = serializers.PrimaryKeyRelatedField(
         source='course',
@@ -134,6 +134,15 @@ class AssignmentSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
     )
+    rubric_id = serializers.PrimaryKeyRelatedField(
+        source='rubric',
+        queryset=Assignment.rubric.field.related_model.objects.all(),
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+    has_rubric = serializers.SerializerMethodField()
+    rubric_info = serializers.SerializerMethodField()
     is_overdue = serializers.SerializerMethodField()
     has_started = serializers.SerializerMethodField()
     is_available = serializers.SerializerMethodField()
@@ -149,7 +158,9 @@ class AssignmentSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'course', 'course_info', 'course_id', 'module', 'module_id',
             'type', 'title',
-            'description', 'start_date', 'due_date', 'points_possible', 'created_at',
+            'description', 'start_date', 'due_date', 'points_possible',
+            'rubric', 'rubric_id', 'has_rubric', 'rubric_info',
+            'created_at',
             'updated_at', 'is_overdue', 'has_started', 'is_available', 'is_editable',
             'is_auto_gradable', 'submission_count', 'questions',
             'question_count', 'total_question_points'
@@ -159,36 +170,37 @@ class AssignmentSerializer(serializers.ModelSerializer):
     def validate_description(self, value):
         return sanitize_html(value)
 
+    def get_has_rubric(self, obj):
+        return obj.rubric_id is not None
+
+    def get_rubric_info(self, obj):
+        if obj.rubric_id is None:
+            return None
+        from rubrics.serializers import RubricSerializer
+        return RubricSerializer(obj.rubric).data
+
     def get_is_overdue(self, obj):
-        """Check if assignment is past due date"""
         return obj.is_overdue()
 
     def get_has_started(self, obj):
-        """Check if assignment has started"""
         return obj.has_started()
 
     def get_is_available(self, obj):
-        """Check if assignment is available for students"""
         return obj.is_available_for_students()
 
     def get_is_editable(self, obj):
-        """Check if assignment can still be edited by teacher"""
         return obj.is_editable_by_teacher()
-    
+
     def get_is_auto_gradable(self, obj):
-        """Check if assignment is fully auto-gradable"""
         return obj.is_auto_gradable()
-    
+
     def get_submission_count(self, obj):
-        """Get count of submissions"""
         return obj.submissions.count()
-    
+
     def get_question_count(self, obj):
-        """Get count of questions"""
         return obj.questions.count()
-    
+
     def get_total_question_points(self, obj):
-        """Get total points from all questions"""
         return sum(q.points for q in obj.questions.all())
 
 
@@ -207,14 +219,15 @@ class AssignmentSubmissionSerializer(serializers.ModelSerializer):
     max_score = serializers.SerializerMethodField()
     is_fully_graded = serializers.SerializerMethodField()
     grading_status = serializers.SerializerMethodField()
-    
+    rubric_assessment = serializers.SerializerMethodField()
+
     class Meta:
         model = AssignmentSubmission
         fields = [
             'id', 'assignment', 'assignment_info', 'assignment_id',
             'student', 'student_info', 'answer', 'submitted_at', 'is_late',
             'question_responses', 'total_score', 'max_score',
-            'is_fully_graded', 'grading_status'
+            'is_fully_graded', 'grading_status', 'rubric_assessment'
         ]
         read_only_fields = ['id', 'submitted_at', 'is_late', 'assignment', 'student']
     
@@ -233,7 +246,15 @@ class AssignmentSubmissionSerializer(serializers.ModelSerializer):
     def get_grading_status(self, obj):
         """Get grading status"""
         return obj.get_grading_status()
-    
+
+    def get_rubric_assessment(self, obj):
+        """Get rubric assessment if one exists"""
+        assessment = obj.rubric_assessments.first()
+        if assessment:
+            from rubrics.serializers import RubricAssessmentSerializer
+            return RubricAssessmentSerializer(assessment).data
+        return None
+
     def validate(self, attrs):
         """Validate submission"""
         # Get student from context (will be set in view)
@@ -322,46 +343,54 @@ class AssignmentSubmissionStudentSerializer(serializers.ModelSerializer):
 
 class AssignmentStudentSerializer(serializers.ModelSerializer):
     """Serializer for Assignment model - student view (hides correct answers)"""
-    
+
     course_info = CourseSerializer(source='course', read_only=True)
     is_overdue = serializers.SerializerMethodField()
     has_started = serializers.SerializerMethodField()
     is_available = serializers.SerializerMethodField()
+    has_rubric = serializers.SerializerMethodField()
+    rubric_info = serializers.SerializerMethodField()
     questions = QuestionStudentSerializer(many=True, read_only=True)
     question_count = serializers.SerializerMethodField()
     total_question_points = serializers.SerializerMethodField()
     my_submission = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Assignment
         fields = [
             'id', 'course', 'course_info', 'type', 'title',
-            'description', 'start_date', 'due_date', 'points_possible', 'created_at',
-            'updated_at', 'is_overdue', 'has_started', 'is_available', 
+            'description', 'start_date', 'due_date', 'points_possible',
+            'has_rubric', 'rubric_info',
+            'created_at',
+            'updated_at', 'is_overdue', 'has_started', 'is_available',
             'questions', 'question_count', 'total_question_points', 'my_submission'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'course']
-    
+
+    def get_has_rubric(self, obj):
+        return obj.rubric_id is not None
+
+    def get_rubric_info(self, obj):
+        if obj.rubric_id is None:
+            return None
+        from rubrics.serializers import RubricSerializer
+        return RubricSerializer(obj.rubric).data
+
     def get_is_overdue(self, obj):
-        """Check if assignment is past due date"""
         return obj.is_overdue()
-    
+
     def get_has_started(self, obj):
-        """Check if assignment has started"""
         return obj.has_started()
-    
+
     def get_is_available(self, obj):
-        """Check if assignment is available for taking"""
         return obj.is_available_for_students()
-    
+
     def get_question_count(self, obj):
-        """Get count of questions"""
         return obj.questions.count()
-    
+
     def get_total_question_points(self, obj):
-        """Get total points from all questions"""
         return sum(q.points for q in obj.questions.all())
-    
+
     def get_my_submission(self, obj):
         """Get the current user's submission if exists"""
         request = self.context.get('request')

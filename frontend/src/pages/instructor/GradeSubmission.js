@@ -3,6 +3,8 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import assignmentService from '../../services/assignmentService';
 import RichTextEditor from '../../components/RichTextEditor';
 import RichContent from '../../components/RichContent';
+import RubricGradingPanel from '../../components/RubricGradingPanel';
+import rubricService from '../../services/rubricService';
 import './GradeSubmission.css';
 
 const GradeSubmission = () => {
@@ -14,6 +16,8 @@ const GradeSubmission = () => {
   const [remarks, setRemarks] = useState({});
   const [savingStates, setSavingStates] = useState({});
   const [savedStates, setSavedStates] = useState({});
+  const [rubric, setRubric] = useState(null);
+  const [existingAssessment, setExistingAssessment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -26,6 +30,17 @@ const GradeSubmission = () => {
         ]);
         setSubmission(submissionData);
         setAssignment(assignmentData);
+
+        // Load rubric if assignment has one
+        if (assignmentData.rubric_info) {
+          setRubric(assignmentData.rubric_info);
+          try {
+            const assessment = await rubricService.getAssessment(submissionId);
+            setExistingAssessment(assessment);
+          } catch (e) {
+            // No existing assessment yet - that's fine
+          }
+        }
 
         // Initialize grades and remarks from existing data
         const initialGrades = {};
@@ -412,6 +427,18 @@ const GradeSubmission = () => {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Rubric Grading */}
+        {rubric && (
+          <div className="rubric-grading-section" style={{ marginTop: '24px' }}>
+            <RubricGradingPanel
+              rubric={rubric}
+              submissionId={submissionId}
+              existingAssessment={existingAssessment}
+              onGraded={(assessment) => setExistingAssessment(assessment)}
+            />
           </div>
         )}
 

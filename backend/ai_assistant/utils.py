@@ -233,6 +233,69 @@ def build_module_system_prompt(course, syllabus_text, existing_modules, mode):
     return prompt, syllabus_meta
 
 
+def build_rubric_system_prompt(course, syllabus_text, assignment_context):
+    """Build the system prompt for AI rubric generation"""
+    prompt = (
+        "You are an AI teaching assistant that helps instructors create grading rubrics. "
+        "You must return your response as valid JSON with these fields:\n"
+        '1. "message": A brief conversational response to the instructor\n'
+        '2. "rubric": A rubric object (or null if just chatting)\n\n'
+        "The rubric object must have:\n"
+        '- "title": string (e.g. "Essay Rubric" or "Research Paper Rubric")\n'
+        '- "description": string (brief description of what this rubric assesses)\n'
+        '- "criteria": array of criterion objects\n\n'
+        "Each criterion object must have:\n"
+        '- "title": string (e.g. "Thesis Clarity", "Evidence Quality", "Grammar")\n'
+        '- "description": string (what this criterion assesses)\n'
+        '- "points_possible": integer (max points for this criterion)\n'
+        '- "order": 0-based index\n'
+        '- "ratings": array of rating objects (from highest to lowest score)\n\n'
+        "Each rating object must have:\n"
+        '- "label": string (e.g. "Excellent", "Proficient", "Developing", "Beginning")\n'
+        '- "description": string (what performance at this level looks like)\n'
+        '- "points": integer (must be <= the criterion\'s points_possible, descending order)\n'
+        '- "order": 0-based index\n\n'
+        "Guidelines:\n"
+        "- Create 3-6 criteria that cover the key aspects of the assignment\n"
+        "- Each criterion should have 3-5 rating levels\n"
+        "- Rating points should span from 0 (or near 0) to the criterion's points_possible\n"
+        "- Descriptions should be specific and actionable, not vague\n"
+        "- If the instructor asks to modify or discuss without generating, return null for rubric\n\n"
+        "IMPORTANT: Always return valid JSON. Do not include markdown formatting or code blocks.\n"
+    )
+
+    if assignment_context:
+        prompt += "\nAssignment Context:"
+        if assignment_context.get('title'):
+            prompt += f"\n- Title: {assignment_context['title']}"
+        if assignment_context.get('type'):
+            prompt += f"\n- Type: {assignment_context['type']}"
+        if assignment_context.get('points_possible'):
+            prompt += f"\n- Total Points: {assignment_context['points_possible']}"
+            prompt += (
+                "\n- IMPORTANT: The sum of all criteria points_possible should equal "
+                f"{assignment_context['points_possible']} total points."
+            )
+
+    if course:
+        prompt += f"\n\nCourse: {course.code} - {course.name}"
+        if course.description:
+            prompt += f"\nCourse Description: {course.description}"
+
+    syllabus_meta = {'syllabus_chars_total': 0, 'syllabus_chars_used': 0, 'truncated': False}
+    if syllabus_text:
+        syllabus_meta['syllabus_chars_total'] = len(syllabus_text)
+        max_chars = 50000
+        truncated = syllabus_text[:max_chars]
+        if len(syllabus_text) > max_chars:
+            truncated += f"\n... [syllabus truncated — {len(syllabus_text) - max_chars} characters omitted]"
+            syllabus_meta['truncated'] = True
+        syllabus_meta['syllabus_chars_used'] = min(len(syllabus_text), max_chars)
+        prompt += f"\n\nCourse Syllabus:\n{truncated}"
+
+    return prompt, syllabus_meta
+
+
 def call_openai(messages, ai_settings):
     """Call OpenAI API and return the parsed response"""
     from openai import OpenAI
