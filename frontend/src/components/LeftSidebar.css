@@ -3,7 +3,7 @@
   position: sticky;
   top: 60px; /* Account for navbar height */
   height: calc(100vh - 60px);
-  background: linear-gradient(180deg, #1e1e3f 0%, #2a2a4e 100%);
+  background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
   border-right: 1px solid rgba(255, 255, 255, 0.1);
   transition: width 0.3s ease, transform 0.3s ease;
   overflow-y: auto;
@@ -31,7 +31,7 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   border: 2px solid #312e81;
   color: white;
   font-size: 14px;
@@ -45,7 +45,7 @@
 
 .sidebar-toggle:hover {
   transform: scale(1.1);
-  background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
 }
 
 .sidebar-toggle:active {
@@ -90,7 +90,7 @@
 }
 
 .nav-item.active {
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: white;
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
@@ -217,6 +217,6 @@
   }
 
   .nav-item.active {
-    border-color: #818cf8;
+    border-color: var(--primary-light);
   }
 }

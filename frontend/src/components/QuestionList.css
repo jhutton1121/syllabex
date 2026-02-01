@@ -5,15 +5,15 @@
 .question-list-empty {
   text-align: center;
   padding: 40px 20px;
-  background: var(--bg-secondary, #12121f);
+  background: var(--bg-secondary);
   border-radius: 8px;
-  color: var(--text-secondary, #a0a0a0);
+  color: var(--text-secondary);
 }
 
 .question-list-empty .hint {
   font-size: 14px;
   margin-top: 10px;
-  color: var(--text-muted, #666);
+  color: var(--text-muted);
 }
 
 .question-list-header {
@@ -21,18 +21,18 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 15px;
-  background: var(--bg-secondary, #12121f);
+  background: var(--bg-secondary);
   border-radius: 6px;
   margin-bottom: 15px;
 }
 
 .question-count {
   font-weight: 600;
-  color: var(--text-primary, #e0e0e0);
+  color: var(--text-primary);
 }
 
 .total-points {
-  color: var(--primary-color, #6366f1);
+  color: var(--primary);
   font-weight: 500;
 }
 
@@ -48,14 +48,14 @@
   gap: 15px;
   align-items: flex-start;
   padding: 15px;
-  background: var(--card-bg, #1a1a2e);
-  border: 1px solid var(--border-color, #2a2a4e);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
   border-radius: 8px;
   transition: border-color 0.2s ease;
 }
 
 .question-item:hover {
-  border-color: var(--primary-color, #6366f1);
+  border-color: var(--primary);
 }
 
 .question-order {
@@ -68,7 +68,7 @@
 .btn-reorder {
   background: none;
   border: none;
-  color: var(--text-secondary, #a0a0a0);
+  color: var(--text-secondary);
   cursor: pointer;
   padding: 2px 6px;
   font-size: 10px;
@@ -77,7 +77,7 @@
 }
 
 .btn-reorder:hover:not(:disabled) {
-  background: var(--primary-color, #6366f1);
+  background: var(--primary);
   color: white;
 }
 
@@ -89,7 +89,7 @@
 .order-number {
   font-weight: 700;
   font-size: 16px;
-  color: var(--text-primary, #e0e0e0);
+  color: var(--text-primary);
   min-width: 24px;
   text-align: center;
 }
@@ -103,12 +103,12 @@
   align-items: center;
   gap: 5px;
   padding: 3px 10px;
-  background: var(--bg-secondary, #12121f);
+  background: var(--bg-primary);
   border-radius: 20px;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--text-secondary, #a0a0a0);
+  color: var(--text-secondary);
   margin-bottom: 8px;
 }
 
@@ -117,7 +117,7 @@
 }
 
 .question-text {
-  color: var(--text-primary, #e0e0e0);
+  color: var(--text-primary);
   font-size: 15px;
   line-height: 1.5;
   word-break: break-word;
@@ -133,10 +133,10 @@
 .choice-tag {
   display: inline-block;
   padding: 4px 10px;
-  background: var(--bg-secondary, #12121f);
+  background: var(--bg-primary);
   border-radius: 4px;
   font-size: 13px;
-  color: var(--text-secondary, #a0a0a0);
+  color: var(--text-secondary);
   max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -152,7 +152,7 @@
 .question-answer-info {
   margin-top: 8px;
   font-size: 13px;
-  color: var(--text-secondary, #a0a0a0);
+  color: var(--text-secondary);
   font-family: 'Fira Code', 'Consolas', monospace;
 }
 
@@ -163,7 +163,7 @@
 .question-points {
   display: inline-block;
   padding: 4px 10px;
-  background: var(--primary-color, #6366f1);
+  background: var(--primary);
   color: white;
   border-radius: 4px;
   font-size: 13px;
@@ -187,18 +187,18 @@
     grid-template-columns: 1fr;
     gap: 10px;
   }
-  
+
   .question-order {
     flex-direction: row;
     justify-content: flex-start;
   }
-  
+
   .question-meta,
   .question-actions {
     flex-direction: row;
     justify-content: flex-start;
   }
-  
+
   .question-actions {
     gap: 10px;
   }

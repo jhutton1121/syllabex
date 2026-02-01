@@ -24,7 +24,7 @@
   margin: 0;
   font-size: 22px;
   font-weight: 700;
-  color: #f0f0ff;
+  color: var(--text-primary);
 }
 
 .modules-header-actions {
@@ -35,7 +35,7 @@
 
 .btn-ai-modules {
   background: rgba(99, 102, 241, 0.15);
-  color: #818cf8;
+  color: var(--primary-light);
   border: 1px solid rgba(99, 102, 241, 0.3);
   padding: 10px 20px;
   border-radius: 8px;
@@ -47,7 +47,7 @@
 
 .btn-ai-modules:hover {
   background: rgba(99, 102, 241, 0.25);
-  border-color: #6366f1;
+  border-color: var(--primary);
 }
 
 .btn-new-module {
@@ -76,21 +76,21 @@
 
 /* Module Card */
 .module-card {
-  background: #2a2a4e;
-  border: 1px solid #3a3a5e;
-  border-left: 4px solid #3a3a5e;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-left: 4px solid var(--border-default);
   border-radius: 12px;
   overflow: hidden;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .module-card:hover {
-  border-color: #4a4a6e;
+  border-color: var(--border-hover);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .module-card.status-active {
-  border-left-color: #6366f1;
+  border-left-color: var(--primary);
 }
 
 .module-card.status-upcoming {
@@ -129,7 +129,7 @@
 .module-title {
   font-size: 18px;
   font-weight: 700;
-  color: #f0f0ff;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -160,7 +160,7 @@
 
 .module-date-range {
   font-size: 13px;
-  color: #a0a0c0;
+  color: var(--text-subtle);
   margin-top: 4px;
 }
 
@@ -174,8 +174,8 @@
 
 .lock-btn {
   background: transparent;
-  border: 1px solid #3a3a5e;
-  color: #a0a0c0;
+  border: 1px solid var(--border-default);
+  color: var(--text-subtle);
   width: 36px;
   height: 36px;
   border-radius: 8px;
@@ -189,9 +189,9 @@
 }
 
 .lock-btn:hover {
-  border-color: #6366f1;
-  color: #e0e0e0;
-  background: #1e1e3f;
+  border-color: var(--primary);
+  color: var(--text-secondary);
+  background: var(--bg-primary);
 }
 
 .lock-btn.locked {
@@ -202,8 +202,8 @@
 .edit-module-btn,
 .delete-module-btn {
   background: transparent;
-  border: 1px solid #3a3a5e;
-  color: #a0a0c0;
+  border: 1px solid var(--border-default);
+  color: var(--text-subtle);
   width: 36px;
   height: 36px;
   border-radius: 8px;
@@ -216,15 +216,15 @@
 }
 
 .edit-module-btn:hover {
-  border-color: #6366f1;
-  color: #e0e0e0;
-  background: #1e1e3f;
+  border-color: var(--primary);
+  color: var(--text-secondary);
+  background: var(--bg-primary);
 }
 
 .delete-module-btn:hover {
   border-color: #ef4444;
   color: #ef4444;
-  background: #1e1e3f;
+  background: var(--bg-primary);
 }
 
 /* Lock Confirmation Popover */
@@ -242,8 +242,8 @@
 }
 
 .lock-confirm-popover {
-  background: #1e1e3f;
-  border: 1px solid #3a3a5e;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-default);
   border-radius: 12px;
   padding: 24px;
   max-width: 360px;
@@ -252,7 +252,7 @@
 }
 
 .lock-confirm-popover p {
-  color: #e0e0e0;
+  color: var(--text-secondary);
   font-size: 14px;
   margin: 0 0 16px;
   line-height: 1.5;
@@ -265,9 +265,9 @@
 }
 
 .lock-confirm-actions .btn-cancel {
-  background: #2a2a4e;
-  color: #e0e0e0;
-  border: 1px solid #3a3a5e;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
   padding: 8px 16px;
   border-radius: 8px;
   cursor: pointer;
@@ -277,7 +277,7 @@
 }
 
 .lock-confirm-actions .btn-cancel:hover {
-  background: #3a3a5e;
+  background: var(--border-default);
 }
 
 .lock-confirm-actions .btn-confirm {
@@ -303,7 +303,7 @@
 }
 
 .module-description {
-  color: #b0b0d0;
+  color: var(--text-muted);
   font-size: 14px;
   line-height: 1.6;
   margin: 0 0 12px;
@@ -313,7 +313,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #818cf8;
+  color: var(--primary-light);
   font-size: 13px;
   text-decoration: none;
   padding: 6px 12px;
@@ -346,7 +346,7 @@
 .module-assignments-label {
   font-size: 12px;
   font-weight: 600;
-  color: #8080a8;
+  color: var(--text-disabled);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 4px;
@@ -363,8 +363,8 @@
   align-items: center;
   gap: 10px;
   padding: 10px 14px;
-  background: #1e1e3f;
-  border: 1px solid #3a3a5e;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-default);
   border-radius: 8px;
   transition: border-color 0.2s;
   text-decoration: none;
@@ -373,7 +373,7 @@
 }
 
 .module-assignment-chip:hover {
-  border-color: #6366f1;
+  border-color: var(--primary);
 }
 
 .chip-view-btn {
@@ -381,7 +381,7 @@
   background: rgba(99, 102, 241, 0.1);
   border: 1px solid rgba(99, 102, 241, 0.3);
   border-radius: 6px;
-  color: #818cf8;
+  color: var(--primary-light);
   font-size: 12px;
   font-weight: 600;
   text-decoration: none;
@@ -392,7 +392,7 @@
 
 .chip-view-btn:hover {
   background: rgba(99, 102, 241, 0.2);
-  border-color: #6366f1;
+  border-color: var(--primary);
 }
 
 .chip-type-badge {
@@ -407,7 +407,7 @@
 
 .chip-type-badge.type-homework {
   background: rgba(99, 102, 241, 0.15);
-  color: #818cf8;
+  color: var(--primary-light);
 }
 
 .chip-type-badge.type-quiz {
@@ -429,7 +429,7 @@
   flex: 1;
   font-size: 13px;
   font-weight: 600;
-  color: #e0e0e0;
+  color: var(--text-secondary);
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -445,15 +445,15 @@
 .chip-due,
 .chip-points {
   font-size: 12px;
-  color: #a0a0c0;
+  color: var(--text-subtle);
 }
 
 /* Empty & No-assignments states */
 .modules-empty-state {
   text-align: center;
   padding: 60px 20px;
-  background: #2a2a4e;
-  border: 1px dashed #3a3a5e;
+  background: var(--bg-secondary);
+  border: 1px dashed var(--border-default);
   border-radius: 12px;
 }
 
@@ -463,17 +463,17 @@
 }
 
 .modules-empty-state h3 {
-  color: #f0f0ff;
+  color: var(--text-primary);
   margin: 0 0 8px;
 }
 
 .modules-empty-state p {
-  color: #a0a0c0;
+  color: var(--text-subtle);
   margin: 0;
 }
 
 .no-assignments-msg {
-  color: #6a6a8e;
+  color: var(--text-faint);
   font-size: 13px;
   font-style: italic;
   padding: 4px 0;
@@ -494,8 +494,8 @@
 }
 
 .delete-confirm-popover {
-  background: #1e1e3f;
-  border: 1px solid #3a3a5e;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-default);
   border-radius: 12px;
   padding: 24px;
   max-width: 360px;
@@ -504,7 +504,7 @@
 }
 
 .delete-confirm-popover p {
-  color: #e0e0e0;
+  color: var(--text-secondary);
   font-size: 14px;
   margin: 0 0 16px;
   line-height: 1.5;
@@ -517,9 +517,9 @@
 }
 
 .delete-confirm-actions .btn-cancel {
-  background: #2a2a4e;
-  color: #e0e0e0;
-  border: 1px solid #3a3a5e;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
   padding: 8px 16px;
   border-radius: 8px;
   cursor: pointer;
@@ -529,7 +529,7 @@
 }
 
 .delete-confirm-actions .btn-cancel:hover {
-  background: #3a3a5e;
+  background: var(--border-default);
 }
 
 .delete-confirm-actions .btn-confirm-delete {

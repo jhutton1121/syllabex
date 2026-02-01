@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { SidebarProvider } from './context/SidebarContext';
+import { ThemeProvider } from './context/ThemeContext';
 import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
 import Layout from './components/Layout';
@@ -38,6 +39,7 @@ import AISettings from './pages/admin/AISettings';
 
 function App() {
   return (
+    <ThemeProvider>
     <AuthProvider>
       <SidebarProvider>
         <Router>
@@ -222,6 +224,7 @@ function App() {
         </Router>
       </SidebarProvider>
     </AuthProvider>
+    </ThemeProvider>
   );
 }
 

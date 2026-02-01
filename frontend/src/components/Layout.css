@@ -9,7 +9,7 @@
 .main-content {
   grid-area: main;
   padding: 2rem;
-  background-color: #f8fafc;
+  background-color: var(--bg-page);
   transition: margin-left 0.3s ease;
   min-height: calc(100vh - 60px);
 }
@@ -21,7 +21,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(15, 23, 42, 0.6);
+  background-color: var(--overlay-bg);
   z-index: 998;
 }
 

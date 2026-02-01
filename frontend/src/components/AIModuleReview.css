@@ -13,8 +13,8 @@
 }
 
 .ai-module-review-modal {
-  background: #1e1e3f;
-  border: 1px solid #3a3a5e;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-default);
   border-radius: 12px;
   width: 100%;
   max-width: 860px;
@@ -30,8 +30,8 @@
   align-items: center;
   gap: 12px;
   padding: 16px 20px;
-  border-bottom: 1px solid #3a3a5e;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  border-bottom: 1px solid var(--border-default);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--purple) 100%);
 }
 
 .ai-module-review-header h3 {
@@ -52,7 +52,7 @@
 }
 
 .ai-module-review-card {
-  border: 1px solid #4a4a6e;
+  border: 1px solid var(--border-hover);
   border-radius: 8px;
   overflow: visible;
   transition: border-color 0.2s;
@@ -81,19 +81,19 @@
   gap: 10px;
   padding: 10px 14px;
   background: rgba(99, 102, 241, 0.08);
-  border-bottom: 1px solid #3a3a5e;
+  border-bottom: 1px solid var(--border-default);
   font-size: 13px;
 }
 
 .module-review-num {
   font-weight: 700;
-  color: #818cf8;
+  color: var(--primary-light);
 }
 
 .module-review-title {
   flex: 1;
   font-weight: 600;
-  color: #f0f0ff;
+  color: var(--text-primary);
   font-size: 14px;
 }
 
@@ -112,13 +112,13 @@
 
 .module-review-dates {
   font-size: 13px;
-  color: #a0a0c0;
+  color: var(--text-subtle);
   margin-bottom: 6px;
 }
 
 .module-review-desc {
   margin: 0 0 10px;
-  color: #c8c8e0;
+  color: var(--text-secondary);
   font-size: 13px;
   line-height: 1.5;
 }
@@ -131,7 +131,7 @@
 .module-review-assignments-label {
   font-size: 11px;
   font-weight: 600;
-  color: #8080a8;
+  color: var(--text-disabled);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 6px;
@@ -142,8 +142,8 @@
   align-items: center;
   gap: 8px;
   padding: 6px 10px;
-  background: #1e1e3f;
-  border: 1px solid #3a3a5e;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-default);
   border-radius: 6px;
   margin-bottom: 4px;
   font-size: 12px;
@@ -160,7 +160,7 @@
 
 .module-review-assignment-chip .chip-type-badge.type-homework {
   background: rgba(99, 102, 241, 0.15);
-  color: #818cf8;
+  color: var(--primary-light);
 }
 
 .module-review-assignment-chip .chip-type-badge.type-quiz {
@@ -175,7 +175,7 @@
 
 .module-review-assignment-chip .chip-title {
   flex: 1;
-  color: #e0e0e0;
+  color: var(--text-secondary);
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -184,7 +184,7 @@
 
 .module-review-assignment-chip .chip-due,
 .module-review-assignment-chip .chip-points {
-  color: #a0a0c0;
+  color: var(--text-subtle);
   font-size: 11px;
   flex-shrink: 0;
 }
@@ -192,7 +192,7 @@
 .chip-remove {
   background: transparent;
   border: none;
-  color: #6a6a8e;
+  color: var(--text-faint);
   cursor: pointer;
   font-size: 16px;
   padding: 0 2px;
@@ -208,7 +208,7 @@
   display: flex;
   gap: 8px;
   padding: 10px 14px;
-  border-top: 1px solid #3a3a5e;
+  border-top: 1px solid var(--border-default);
   background: rgba(99, 102, 241, 0.05);
 }
 
@@ -217,8 +217,8 @@
   justify-content: flex-end;
   gap: 10px;
   padding: 14px 20px;
-  border-top: 1px solid #3a3a5e;
-  background: #1a1a38;
+  border-top: 1px solid var(--border-default);
+  background: var(--bg-tertiary);
 }
 
 /* Edit form */
@@ -238,14 +238,14 @@
 .module-edit-field label {
   font-size: 12px;
   font-weight: 600;
-  color: #e8e8f8;
+  color: var(--text-secondary);
 }
 
 .module-edit-field input,
 .module-edit-field textarea {
-  background: #2a2a4e;
-  color: #e0e0e0;
-  border: 1px solid #3a3a5e;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
   border-radius: 6px;
   padding: 8px 10px;
   font-size: 13px;
@@ -255,7 +255,7 @@
 .module-edit-field input:focus,
 .module-edit-field textarea:focus {
   outline: none;
-  border-color: #6366f1;
+  border-color: var(--primary);
 }
 
 .module-edit-row {

@@ -6,8 +6,8 @@
   top: 0;
   display: flex;
   flex-direction: column;
-  background: var(--card-bg, #1e1e3f);
-  border: 1px solid var(--border-color, #2a2a4e);
+  background: var(--bg-primary);
+  border: 1px solid var(--bg-secondary);
   border-radius: 12px;
   overflow: hidden;
 }

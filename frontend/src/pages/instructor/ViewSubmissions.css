@@ -1,7 +1,7 @@
 /* ViewSubmissions Page */
 .view-submissions-page {
   min-height: calc(100vh - 60px);
-  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
 }
 
 /* Loading State */
@@ -12,14 +12,14 @@
   justify-content: center;
   min-height: 60vh;
   gap: 1rem;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .loading-spinner-large {
   width: 48px;
   height: 48px;
-  border: 3px solid #e2e8f0;
-  border-top-color: #6366f1;
+  border: 3px solid var(--border-default);
+  border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -45,12 +45,12 @@
 }
 
 .submissions-error h2 {
-  color: #1e293b;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
 }
 
 .submissions-error p {
-  color: #64748b;
+  color: var(--text-muted);
   margin-bottom: 1.5rem;
 }
 
@@ -191,9 +191,9 @@
 .empty-state {
   text-align: center;
   padding: 4rem 2rem;
-  background: white;
+  background: var(--bg-primary);
   border-radius: 16px;
-  border: 2px dashed #e2e8f0;
+  border: 2px dashed var(--border-default);
 }
 
 .empty-state .empty-icon {
@@ -202,19 +202,19 @@
 }
 
 .empty-state h3 {
-  color: #1e293b;
+  color: var(--text-primary);
   font-size: 1.25rem;
   margin: 0 0 0.5rem;
 }
 
 .empty-state p {
-  color: #64748b;
+  color: var(--text-muted);
   margin: 0;
 }
 
 /* Table */
 .submissions-table-wrapper {
-  background: white;
+  background: var(--bg-primary);
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 20px rgba(0, 0, 0, 0.03);
@@ -226,8 +226,8 @@
 }
 
 .submissions-table thead {
-  background: #f8fafc;
-  border-bottom: 2px solid #e2e8f0;
+  background: var(--bg-secondary);
+  border-bottom: 2px solid var(--border-default);
 }
 
 .submissions-table th {
@@ -237,17 +237,17 @@
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .submissions-table td {
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--bg-tertiary);
   vertical-align: middle;
 }
 
 .submissions-table tbody tr:hover {
-  background: #f8fafc;
+  background: var(--bg-secondary);
 }
 
 .submissions-table tbody tr:last-child td {
@@ -267,7 +267,7 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: white;
   font-weight: 600;
   font-size: 0.95rem;
@@ -282,17 +282,17 @@
 
 .student-name {
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .student-email {
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 /* Date Cell */
 .submitted-date {
-  color: #475569;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
@@ -320,7 +320,7 @@
 /* Score Cell */
 .score {
   font-size: 0.95rem;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .score strong {
@@ -328,7 +328,7 @@
 }
 
 .no-score {
-  color: #94a3b8;
+  color: var(--text-subtle);
 }
 
 /* Footer */
@@ -355,22 +355,22 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: white;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  background: linear-gradient(135deg, var(--primary-dark) 0%, #4338ca 100%);
   transform: translateY(-1px);
 }
 
 .btn-secondary {
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
 }
 
 .btn-secondary:hover {
-  background: #e2e8f0;
+  background: var(--border-default);
 }
 
 .btn-sm {

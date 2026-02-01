@@ -1,13 +1,13 @@
 .rte-container {
-  border: 1px solid #3a3a5e;
+  border: 1px solid var(--border-default);
   border-radius: 12px;
   overflow: hidden;
-  background: #2a2a4e;
+  background: var(--bg-secondary);
   transition: border-color 0.2s;
 }
 
 .rte-container:focus-within {
-  border-color: #6366f1;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
@@ -22,8 +22,8 @@
   align-items: center;
   gap: 4px;
   padding: 8px 12px;
-  background: #1e1e3f;
-  border-bottom: 1px solid #3a3a5e;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-default);
   flex-wrap: wrap;
 }
 
@@ -35,14 +35,14 @@
 .rte-toolbar-divider {
   width: 1px;
   height: 24px;
-  background: #3a3a5e;
+  background: var(--border-default);
   margin: 0 4px;
 }
 
 .rte-btn {
   background: transparent;
   border: none;
-  color: #b0b0d0;
+  color: var(--text-muted);
   padding: 4px 8px;
   border-radius: 4px;
   cursor: pointer;
@@ -55,12 +55,12 @@
 
 .rte-btn:hover {
   background: rgba(99, 102, 241, 0.1);
-  color: #e0e0e0;
+  color: var(--text-secondary);
 }
 
 .rte-btn.active {
   background: rgba(99, 102, 241, 0.2);
-  color: #818cf8;
+  color: var(--primary-light);
 }
 
 /* Editor content area */
@@ -71,7 +71,7 @@
 .rte-content .tiptap,
 .rte-content .ProseMirror {
   padding: 16px;
-  color: #f0f0ff;
+  color: var(--text-primary);
   font-size: 15px;
   line-height: 1.6;
   outline: none;
@@ -79,7 +79,7 @@
 }
 
 .rte-content .tiptap p.is-editor-empty:first-child::before {
-  color: #6a6a8e;
+  color: var(--text-faint);
   content: attr(data-placeholder);
   float: left;
   height: 0;
@@ -90,7 +90,7 @@
 .rte-content .tiptap h1 {
   font-size: 28px;
   font-weight: 700;
-  color: #f0f0ff;
+  color: var(--text-primary);
   margin: 24px 0 12px;
   line-height: 1.2;
 }
@@ -98,7 +98,7 @@
 .rte-content .tiptap h2 {
   font-size: 22px;
   font-weight: 700;
-  color: #f0f0ff;
+  color: var(--text-primary);
   margin: 20px 0 10px;
   line-height: 1.2;
 }
@@ -106,7 +106,7 @@
 .rte-content .tiptap h3 {
   font-size: 18px;
   font-weight: 600;
-  color: #f0f0ff;
+  color: var(--text-primary);
   margin: 16px 0 8px;
   line-height: 1.3;
 }
@@ -116,7 +116,7 @@
 }
 
 .rte-content .tiptap a {
-  color: #818cf8;
+  color: var(--primary-light);
   text-decoration: underline;
   cursor: pointer;
 }
@@ -136,16 +136,16 @@
 }
 
 .rte-content .tiptap blockquote {
-  border-left: 3px solid #6366f1;
+  border-left: 3px solid var(--primary);
   padding-left: 16px;
   margin: 12px 0;
-  color: #b0b0d0;
+  color: var(--text-muted);
   font-style: italic;
 }
 
 .rte-content .tiptap pre {
-  background: #12122b;
-  border: 1px solid #3a3a5e;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-default);
   border-radius: 8px;
   padding: 16px;
   overflow-x: auto;
@@ -155,7 +155,7 @@
 .rte-content .tiptap code {
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
-  color: #e0e0e0;
+  color: var(--text-secondary);
 }
 
 .rte-content .tiptap :not(pre) > code {
@@ -167,7 +167,7 @@
 
 .rte-content .tiptap hr {
   border: none;
-  border-top: 1px solid #3a3a5e;
+  border-top: 1px solid var(--border-default);
   margin: 20px 0;
 }
 

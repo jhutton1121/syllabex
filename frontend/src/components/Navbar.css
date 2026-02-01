@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
 
 .navbar {
-  background: linear-gradient(135deg, #1e1e3f 0%, #2a2a4e 100%);
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
   color: white;
   padding: 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -56,7 +56,7 @@
 }
 
 .hamburger-menu:hover span {
-  background: #6366f1;
+  background: var(--primary);
 }
 
 .navbar-menu {
@@ -86,7 +86,7 @@
   left: 0;
   width: 0;
   height: 2px;
-  background: #6366f1;
+  background: var(--primary);
   transition: width 0.2s;
 }
 
@@ -98,7 +98,7 @@
   background: rgba(99, 102, 241, 0.2);
   padding: 0.5rem 1rem;
   border-radius: 6px;
-  color: #a5b4fc;
+  color: var(--primary-light);
 }
 
 .navbar-link.admin-link:hover {

@@ -17,7 +17,7 @@
 }
 
 .btn-ai {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--purple) 100%);
   color: white;
   border: none;
   padding: 8px 16px;
@@ -42,119 +42,105 @@
 
 /* Dark theme for assignment form to match AI panel */
 .assignment-form-container .card {
-  background: #1e1e3f !important;
-  border-color: #2a2a4e !important;
-  color: #e0e0e0 !important;
+  background: var(--bg-primary) !important;
+  border-color: var(--bg-secondary) !important;
+  color: var(--text-secondary) !important;
 }
 
 .assignment-form-container .card-header {
-  color: #e0e0e0 !important;
-  border-bottom-color: #2a2a4e !important;
+  color: var(--text-secondary) !important;
+  border-bottom-color: var(--bg-secondary) !important;
   background: transparent !important;
 }
 
 .assignment-form-container .form-group label {
-  color: #e8e8f8;
+  color: var(--text-secondary);
 }
 
 .assignment-form-container .form-hint {
-  color: #a0a0c0;
+  color: var(--text-subtle);
 }
 
 .assignment-form-container .form-group input,
 .assignment-form-container .form-group select,
 .assignment-form-container .form-group textarea {
-  background: #2a2a4e;
-  color: #e0e0e0;
-  border-color: #3a3a5e;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border-color: var(--border-default);
 }
 
 .assignment-form-container .form-group input:focus,
 .assignment-form-container .form-group select:focus,
 .assignment-form-container .form-group textarea:focus {
-  border-color: #6366f1;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
 }
 
 .assignment-form-container .form-group input::placeholder,
 .assignment-form-container .form-group textarea::placeholder {
-  color: #6a6a8e;
+  color: var(--text-faint);
 }
 
 .assignment-form-container .form-group select option {
-  background: #2a2a4e;
-  color: #e0e0e0;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
 }
 
 .assignment-form-container .form-group input:disabled,
 .assignment-form-container .form-group select:disabled {
   opacity: 0.5;
-  background: #1a1a35;
+  background: var(--bg-tertiary);
 }
 
 .assignment-form-container .btn-secondary,
 .assignment-form-container .section-header-buttons .btn-secondary {
-  background: #2a2a4e !important;
-  color: #e0e0e0 !important;
-  border: 1px solid #3a3a5e !important;
+  background: var(--bg-secondary) !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--border-default) !important;
 }
 
 .assignment-form-container .btn-secondary:hover,
 .assignment-form-container .section-header-buttons .btn-secondary:hover {
-  background: #3a3a5e !important;
+  background: var(--border-default) !important;
 }
 
 /* Form actions buttons at the bottom */
 .assignment-form-container .form-actions .btn-secondary {
-  background: #2a2a4e !important;
-  color: #e0e0e0 !important;
-  border: 1px solid #3a3a5e !important;
+  background: var(--bg-secondary) !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--border-default) !important;
 }
 
 .assignment-form-container .form-actions .btn-secondary:hover {
-  background: #3a3a5e !important;
-}
-
-/* Set CSS variables for question list/builder inside the form */
-.assignment-form-container .card {
-  --card-bg: #2a2a4e;
-  --bg-secondary: #323260;
-  --border-color: #4a4a6e;
-  --text-primary: #e8e8f0;
-  --text-secondary: #b0b0d0;
-  --text-muted: #8080a8;
-  --primary-color: #818cf8;
-  --input-bg: #2a2a4e;
-  --danger-color: #ef4444;
-  --danger-hover: #dc2626;
+  background: var(--border-default) !important;
 }
 
 /* Question list overrides for better contrast */
 .assignment-form-container .question-list-header {
-  background: #2a2a4e;
-  border: 1px solid #4a4a6e;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-hover);
 }
 
 .assignment-form-container .question-item {
   background: #252550;
-  border-color: #4a4a6e;
+  border-color: var(--border-hover);
 }
 
 .assignment-form-container .question-item:hover {
-  border-color: #818cf8;
+  border-color: var(--primary-light);
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
 }
 
 .assignment-form-container .question-type-badge {
-  background: #1e1e3f;
-  border: 1px solid #4a4a6e;
-  color: #b0b0d0;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-hover);
+  color: var(--text-muted);
 }
 
 .assignment-form-container .choice-tag {
-  background: #1e1e3f;
-  border: 1px solid #3a3a5e;
-  color: #b0b0d0;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-default);
+  color: var(--text-muted);
 }
 
 .assignment-form-container .choice-tag.correct {
@@ -164,29 +150,29 @@
 }
 
 .assignment-form-container .question-text {
-  color: #f0f0ff;
+  color: var(--text-primary);
 }
 
 .assignment-form-container .question-answer-info {
-  color: #b0b0d0;
+  color: var(--text-muted);
 }
 
 .assignment-form-container .order-number {
-  color: #f0f0ff;
+  color: var(--text-primary);
 }
 
 .assignment-form-container .question-count {
-  color: #f0f0ff;
+  color: var(--text-primary);
 }
 
 .assignment-form-container .total-points {
-  color: #818cf8;
+  color: var(--primary-light);
 }
 
 .assignment-form-container .question-list-empty {
   background: #252550 !important;
-  border: 1px dashed #4a4a6e !important;
-  color: #b0b0d0 !important;
+  border: 1px dashed var(--border-hover) !important;
+  color: var(--text-muted) !important;
 }
 
 /* Ensure form and all children inside card inherit dark background */
@@ -195,39 +181,39 @@
 }
 
 .assignment-form-container .question-points {
-  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
 }
 
 /* Question builder overrides */
 .assignment-form-container .question-builder {
   background: #252550;
-  border-color: #4a4a6e;
+  border-color: var(--border-hover);
 }
 
 .assignment-form-container .choices-section,
 .assignment-form-container .numerical-section,
 .assignment-form-container .text-response-notice {
-  background: #1e1e3f;
+  background: var(--bg-primary);
 }
 
 .assignment-form-container .question-builder-header h4 {
-  color: #f0f0ff;
+  color: var(--text-primary);
 }
 
 .assignment-form-container .choices-section > label {
-  color: #f0f0ff;
+  color: var(--text-primary);
 }
 
 .assignment-form-container .choices-section .form-hint {
-  color: #a0a0c0;
+  color: var(--text-subtle);
 }
 
 /* Loading Spinner */
 .loading-spinner-large {
   width: 48px;
   height: 48px;
-  border: 3px solid #e2e8f0;
-  border-top-color: #6366f1;
+  border: 3px solid var(--border-default);
+  border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -339,7 +325,7 @@
 .questions-section {
   margin-top: 30px;
   padding-top: 30px;
-  border-top: 1px solid #3a3a5e;
+  border-top: 1px solid var(--border-default);
   background: transparent !important;
 }
 
@@ -355,36 +341,36 @@
   margin: 0;
   font-size: 18px;
   font-weight: 600;
-  color: #f0f0ff !important;
+  color: var(--text-primary) !important;
 }
 
 @media (max-width: 768px) {
   .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .form-row-2 {
     grid-template-columns: 1fr;
   }
-  
+
   .form-row-3 {
     grid-template-columns: 1fr 1fr;
   }
-  
+
   .form-actions {
     flex-direction: column;
   }
-  
+
   .form-actions button {
     width: 100%;
   }
-  
+
   .section-header {
     flex-direction: column;
     gap: 15px;
     align-items: flex-start;
   }
-  
+
   .section-header button {
     width: 100%;
   }

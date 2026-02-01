@@ -1,6 +1,6 @@
 .course-sub-nav {
-  background: #1e1e3f;
-  border-right: 1px solid #3a3a5e;
+  background: var(--bg-primary);
+  border-right: 1px solid var(--border-default);
   padding: 1rem;
   position: fixed;
   left: var(--sidebar-width, 200px);
@@ -27,7 +27,7 @@
   background: transparent;
   border: none;
   border-radius: 4px;
-  color: #a0a0c0;
+  color: var(--text-subtle);
   font-family: 'DM Sans', sans-serif;
   font-size: 0.9rem;
   font-weight: 500;
@@ -39,13 +39,13 @@
 
 
 .sub-nav-item:hover {
-  background: #2a2a4e;
-  color: #f0f0ff;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .sub-nav-item.active {
   background: rgba(99, 102, 241, 0.2);
-  color: #818cf8;
+  color: var(--primary-light);
   font-weight: 600;
 }
 

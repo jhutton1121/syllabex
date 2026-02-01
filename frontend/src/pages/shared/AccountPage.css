@@ -1,8 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
-
 .account-page {
   min-height: 100vh;
-  background-color: #f8fafc;
+  background-color: var(--bg-page);
   padding: 2rem;
   font-family: 'DM Sans', sans-serif;
 }
@@ -15,30 +13,18 @@
 .account-title {
   font-size: 2rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   margin-bottom: 2rem;
   letter-spacing: -0.02em;
 }
 
 /* Alert Messages */
-.alert {
+.account-page .alert {
   padding: 1rem 1.25rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
   font-size: 0.95rem;
   font-weight: 500;
-}
-
-.alert-success {
-  background: #d1fae5;
-  color: #065f46;
-  border: 1px solid #10b981;
-}
-
-.alert-error {
-  background: #fee2e2;
-  color: #991b1b;
-  border: 1px solid #ef4444;
 }
 
 /* Account Grid */
@@ -49,25 +35,112 @@
 }
 
 .account-card {
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-default);
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px var(--shadow-light);
   transition: box-shadow 0.2s ease;
 }
 
 .account-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px var(--shadow-color);
 }
 
-.card-title {
+.account-card .card-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--text-primary);
   margin-bottom: 1.25rem;
   padding-bottom: 0.75rem;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 2px solid var(--border-default);
+}
+
+/* Theme Toggle Section */
+.theme-toggle-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.theme-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.theme-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.theme-description {
+  font-size: 0.85rem;
+  color: var(--text-subtle);
+}
+
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.theme-toggle-btn:hover {
+  border-color: var(--border-hover);
+}
+
+.toggle-icon {
+  font-size: 1.1rem;
+}
+
+.toggle-track {
+  width: 40px;
+  height: 22px;
+  background: var(--border-default);
+  border-radius: 11px;
+  position: relative;
+  transition: background 0.2s;
+}
+
+.theme-toggle-btn.light .toggle-track,
+.theme-toggle-btn.dark .toggle-track {
+  background: var(--primary);
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.theme-toggle-btn.light .toggle-thumb {
+  transform: translateX(18px);
+}
+
+.toggle-mode-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 /* Profile Picture Section */
@@ -101,14 +174,14 @@
 
 .info-text {
   font-size: 0.95rem;
-  color: #64748b;
+  color: var(--text-muted);
   margin-bottom: 0.5rem;
   line-height: 1.5;
 }
 
 .info-subtext {
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: var(--text-subtle);
   line-height: 1.4;
 }
 
@@ -119,45 +192,46 @@
   gap: 1.25rem;
 }
 
-.form-group {
+.account-page .form-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.form-group label {
+.account-page .form-group label {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--text-muted);
 }
 
 .form-input {
   padding: 0.75rem 1rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-default);
   border-radius: 8px;
   font-size: 0.95rem;
   font-family: 'DM Sans', sans-serif;
-  color: #0f172a;
+  color: var(--text-secondary);
+  background: var(--input-bg);
   transition: all 0.2s ease;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #6366f1;
+  border-color: var(--border-active);
   box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
 }
 
 .form-hint {
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--text-muted);
   margin-top: 0.25rem;
   font-style: italic;
 }
 
 /* Password Requirements */
 .password-requirements {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
   border-radius: 8px;
   padding: 1rem;
 }
@@ -165,7 +239,7 @@
 .requirements-title {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--text-primary);
   margin-bottom: 0.75rem;
 }
 
@@ -180,7 +254,7 @@
 
 .requirements-list li {
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--text-muted);
   padding-left: 1.5rem;
   position: relative;
 }
@@ -189,7 +263,7 @@
   content: '○';
   position: absolute;
   left: 0;
-  color: #cbd5e1;
+  color: var(--text-faint);
   font-size: 1rem;
 }
 
@@ -204,7 +278,7 @@
 }
 
 /* Buttons */
-.btn {
+.account-page .btn {
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 8px;
@@ -215,23 +289,22 @@
   transition: all 0.2s ease;
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+.account-page .btn-primary {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   color: white;
   box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
 }
 
-.btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+.account-page .btn-primary:hover:not(:disabled) {
   box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
   transform: translateY(-1px);
 }
 
-.btn-primary:active:not(:disabled) {
+.account-page .btn-primary:active:not(:disabled) {
   transform: translateY(0);
 }
 
-.btn-primary:disabled {
+.account-page .btn-primary:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -281,7 +354,12 @@
     padding: 1rem;
   }
 
-  .card-title {
+  .account-card .card-title {
     font-size: 1.1rem;
+  }
+
+  .theme-option {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

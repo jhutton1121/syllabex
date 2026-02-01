@@ -2,8 +2,8 @@
   max-width: 900px;
   margin: 0 auto;
   padding: 24px;
-  color: #e0e0e0;
-  background: #2a2a4e;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
   min-height: calc(100vh - 60px);
 }
 
@@ -14,7 +14,7 @@
   align-items: center;
   justify-content: center;
   padding: 60px 20px;
-  color: #f0f0ff;
+  color: var(--text-primary);
 }
 
 .page-view-error h2 {
@@ -32,7 +32,7 @@
 }
 
 .page-view-header .breadcrumb a {
-  color: #818cf8;
+  color: var(--primary-light);
   text-decoration: none;
 }
 
@@ -41,12 +41,12 @@
 }
 
 .page-view-header .breadcrumb .separator {
-  color: #6a6a8e;
+  color: var(--text-faint);
   margin: 0 8px;
 }
 
 .page-view-header .breadcrumb span:last-child {
-  color: #b0b0d0;
+  color: var(--text-muted);
 }
 
 .page-view-title-row {
@@ -59,7 +59,7 @@
 .page-view-title-info h1 {
   font-size: 28px;
   font-weight: 700;
-  color: #f0f0ff;
+  color: var(--text-primary);
   margin: 0 0 8px;
 }
 
@@ -78,7 +78,7 @@
 
 .page-updated {
   font-size: 13px;
-  color: #a0a0c0;
+  color: var(--text-subtle);
   margin: 0;
 }
 
@@ -121,14 +121,14 @@
 
 /* Page Body */
 .page-view-body {
-  background: #2a2a4e;
-  border: 1px solid #3a3a5e;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
   border-radius: 12px;
   padding: 32px;
 }
 
 .page-content {
-  color: #f0f0ff;
+  color: var(--text-primary);
   font-size: 15px;
   line-height: 1.6;
 }
@@ -136,21 +136,21 @@
 .page-content h1 {
   font-size: 28px;
   font-weight: 700;
-  color: #f0f0ff;
+  color: var(--text-primary);
   margin: 24px 0 12px;
 }
 
 .page-content h2 {
   font-size: 22px;
   font-weight: 700;
-  color: #f0f0ff;
+  color: var(--text-primary);
   margin: 20px 0 10px;
 }
 
 .page-content h3 {
   font-size: 18px;
   font-weight: 600;
-  color: #f0f0ff;
+  color: var(--text-primary);
   margin: 16px 0 8px;
 }
 
@@ -159,7 +159,7 @@
 }
 
 .page-content a {
-  color: #818cf8;
+  color: var(--primary-light);
   text-decoration: underline;
 }
 
@@ -178,16 +178,16 @@
 }
 
 .page-content blockquote {
-  border-left: 3px solid #6366f1;
+  border-left: 3px solid var(--primary);
   padding-left: 16px;
   margin: 12px 0;
-  color: #b0b0d0;
+  color: var(--text-muted);
   font-style: italic;
 }
 
 .page-content pre {
-  background: #12122b;
-  border: 1px solid #3a3a5e;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-default);
   border-radius: 8px;
   padding: 16px;
   overflow-x: auto;
@@ -207,7 +207,7 @@
 
 .page-content hr {
   border: none;
-  border-top: 1px solid #3a3a5e;
+  border-top: 1px solid var(--border-default);
   margin: 20px 0;
 }
 

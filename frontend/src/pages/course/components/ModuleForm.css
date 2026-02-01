@@ -1,17 +1,17 @@
 .module-form-card {
-  background: #1e1e3f;
-  border: 1px solid #2a2a4e;
+  background: var(--bg-primary);
+  border: 1px solid var(--bg-secondary);
   border-radius: 12px;
   padding: 24px;
   margin-bottom: 24px;
-  color: #e0e0e0;
+  color: var(--text-secondary);
 }
 
 .module-form-card h3 {
   margin: 0 0 20px;
   font-size: 18px;
   font-weight: 700;
-  color: #f0f0ff;
+  color: var(--text-primary);
 }
 
 .module-form-row {
@@ -36,9 +36,9 @@
 
 .module-form-group input,
 .module-form-group textarea {
-  background: #2a2a4e;
-  color: #e0e0e0;
-  border: 1px solid #3a3a5e;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 14px;
@@ -49,13 +49,13 @@
 .module-form-group input:focus,
 .module-form-group textarea:focus {
   outline: none;
-  border-color: #6366f1;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
 }
 
 .module-form-group input::placeholder,
 .module-form-group textarea::placeholder {
-  color: #6a6a8e;
+  color: var(--text-faint);
 }
 
 .module-form-group textarea {
@@ -65,7 +65,7 @@
 
 .module-form-hint {
   font-size: 12px;
-  color: #a0a0c0;
+  color: var(--text-subtle);
   font-style: italic;
   margin-top: 4px;
 }
@@ -74,8 +74,8 @@
 .assignment-checklist {
   max-height: 200px;
   overflow-y: auto;
-  background: #2a2a4e;
-  border: 1px solid #3a3a5e;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
   border-radius: 8px;
   padding: 8px;
 }
@@ -95,7 +95,7 @@
 }
 
 .assignment-check-item input[type="checkbox"] {
-  accent-color: #6366f1;
+  accent-color: var(--primary);
   width: 16px;
   height: 16px;
 }
@@ -103,21 +103,21 @@
 .assignment-check-item .check-label {
   flex: 1;
   font-size: 13px;
-  color: #e0e0e0;
+  color: var(--text-secondary);
 }
 
 .assignment-check-item .check-type {
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  color: #a0a0c0;
+  color: var(--text-subtle);
   padding: 2px 6px;
-  background: #1e1e3f;
+  background: var(--bg-primary);
   border-radius: 4px;
 }
 
 .no-assignments-hint {
-  color: #6a6a8e;
+  color: var(--text-faint);
   font-size: 13px;
   font-style: italic;
   padding: 8px;
@@ -153,9 +153,9 @@
 }
 
 .module-form-actions .btn-form-cancel {
-  background: #2a2a4e;
-  color: #e0e0e0;
-  border: 1px solid #3a3a5e;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
   padding: 10px 24px;
   border-radius: 8px;
   cursor: pointer;
@@ -165,7 +165,7 @@
 }
 
 .module-form-actions .btn-form-cancel:hover {
-  background: #3a3a5e;
+  background: var(--border-default);
 }
 
 @media (max-width: 768px) {
