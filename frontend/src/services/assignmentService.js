@@ -47,6 +47,12 @@ const assignmentService = {
     return response.data;
   },
 
+  // Bulk delete assignments
+  bulkDeleteAssignments: async (ids) => {
+    const response = await api.post('/assignments/bulk-delete/', { ids });
+    return response.data;
+  },
+
   // Submit assignment with question responses (Students only)
   submitAssignment: async (assignmentId, answer, responses = []) => {
     const response = await api.post(`/assignments/${assignmentId}/submit/`, {

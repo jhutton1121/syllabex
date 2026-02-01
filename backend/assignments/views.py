@@ -284,6 +284,33 @@ class AssignmentViewSet(viewsets.ModelViewSet):
             status='active'
         ).exists()
 
+    @action(detail=False, methods=['post'], url_path='bulk-delete')
+    def bulk_delete(self, request):
+        """Bulk delete assignments by IDs (Instructors only)"""
+        ids = request.data.get('ids', [])
+        if not ids:
+            return Response({'error': 'No assignment IDs provided.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        account = getattr(request, 'account', None)
+        assignments = Assignment.objects.filter(id__in=ids, course__account=account)
+
+        errors = []
+        to_delete = []
+        for assignment in assignments:
+            if not self._is_course_instructor(request.user, assignment.course):
+                errors.append(f'No permission to delete "{assignment.title}".')
+                continue
+            if not assignment.is_editable_by_teacher():
+                errors.append(f'"{assignment.title}" has already started and cannot be deleted.')
+                continue
+            to_delete.append(assignment.id)
+
+        deleted_count = Assignment.objects.filter(id__in=to_delete).delete()[0]
+        result = {'deleted': deleted_count}
+        if errors:
+            result['errors'] = errors
+        return Response(result, status=status.HTTP_200_OK)
+
 
 class QuestionViewSet(viewsets.ModelViewSet):
     """ViewSet for managing individual questions"""

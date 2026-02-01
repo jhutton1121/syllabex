@@ -282,6 +282,8 @@ class CourseModuleViewSet(viewsets.ModelViewSet):
         course = self._get_course()
         if not self._is_instructor(self.request.user, course):
             raise PermissionDenied('Only instructors can delete modules.')
+        # Cascade delete assignments in this module (pages remain via SET_NULL)
+        instance.assignments.all().delete()
         instance.delete()
 
     @action(detail=True, methods=['patch'], url_path='toggle-lock')
@@ -314,7 +316,10 @@ class CourseModuleViewSet(viewsets.ModelViewSet):
             assignments_data = m.pop('assignments', [])
 
             if action_type == 'delete' and module_id:
-                CourseModule.objects.filter(pk=module_id, course=course).delete()
+                module_qs = CourseModule.objects.filter(pk=module_id, course=course)
+                for mod in module_qs:
+                    mod.assignments.all().delete()
+                module_qs.delete()
                 continue
 
             if action_type == 'update' and module_id:
