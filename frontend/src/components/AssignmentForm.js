@@ -6,6 +6,7 @@ import QuestionBuilder from './QuestionBuilder';
 import RichTextEditor from './RichTextEditor';
 import QuestionList from './QuestionList';
 import AIChatPanel from './AIChatPanel';
+import RubricSelector from './RubricSelector';
 import './AssignmentForm.css';
 
 const AssignmentForm = ({ assignment = null, isEdit = false }) => {
@@ -62,6 +63,7 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
     module_id: assignment?.module || '',
   });
   const [modules, setModules] = useState([]);
+  const [selectedRubricId, setSelectedRubricId] = useState(assignment?.rubric || null);
   const [questions, setQuestions] = useState(assignment?.questions || []);
   const [originalQuestionIds, setOriginalQuestionIds] = useState([]);
   const [showQuestionBuilder, setShowQuestionBuilder] = useState(false);
@@ -253,6 +255,7 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
         points_possible: formData.points_possible,
         due_date: new Date(dueDateTimeString).toISOString(),
         module_id: formData.module_id || null,
+        rubric_id: selectedRubricId || null,
       };
 
       // Add start_date if provided
@@ -524,6 +527,24 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
                 </small>
               )}
             </div>
+          </div>
+
+          {/* Rubric Section */}
+          <div className="questions-section">
+            <div className="section-header">
+              <h3>Rubric</h3>
+            </div>
+            <RubricSelector
+              courseId={formData.course_id || courseId}
+              selectedRubricId={selectedRubricId}
+              onSelect={(rubricId) => setSelectedRubricId(rubricId)}
+              onClear={() => setSelectedRubricId(null)}
+              assignmentContext={{
+                title: formData.title,
+                type: formData.type,
+                points_possible: formData.points_possible,
+              }}
+            />
           </div>
 
           {/* Questions Section */}

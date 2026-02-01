@@ -1,0 +1,278 @@
+.rubric-builder {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.rubric-builder-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.rubric-builder-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.rubric-builder-total {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary-light);
+}
+
+.rubric-builder-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.rubric-builder-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rubric-builder-field label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.rubric-builder-field input,
+.rubric-builder-field textarea {
+  background: var(--input-bg);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.rubric-builder-field input:focus,
+.rubric-builder-field textarea:focus {
+  outline: none;
+  border-color: var(--border-active);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.rubric-builder-field input::placeholder,
+.rubric-builder-field textarea::placeholder {
+  color: var(--text-faint);
+}
+
+.rubric-builder-field .input-error {
+  border-color: var(--error);
+}
+
+.field-error {
+  font-size: 12px;
+  color: var(--error-light);
+}
+
+.rubric-builder-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.rubric-builder-checkbox input[type="checkbox"] {
+  accent-color: var(--primary);
+}
+
+.rubric-criteria-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.rubric-criterion-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.rubric-criterion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.rubric-criterion-num {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--primary-light);
+}
+
+.rubric-criterion-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.rubric-field-narrow {
+  max-width: 100px;
+}
+
+.rubric-criterion-fields input {
+  background: var(--input-bg);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.rubric-criterion-fields input:focus {
+  outline: none;
+  border-color: var(--border-active);
+}
+
+.rubric-criterion-fields input::placeholder {
+  color: var(--text-faint);
+}
+
+.rubric-ratings-section {
+  border-top: 1px solid var(--border-default);
+  padding-top: 12px;
+}
+
+.rubric-ratings-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.rubric-rating-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.rubric-rating-label-input {
+  width: 120px;
+  background: var(--input-bg);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.rubric-rating-desc-input {
+  flex: 1;
+  background: var(--input-bg);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.rubric-rating-points-input {
+  width: 60px;
+  background: var(--input-bg);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-align: center;
+}
+
+.rubric-rating-label-input:focus,
+.rubric-rating-desc-input:focus,
+.rubric-rating-points-input:focus {
+  outline: none;
+  border-color: var(--border-active);
+}
+
+.rubric-rating-label-input::placeholder,
+.rubric-rating-desc-input::placeholder {
+  color: var(--text-faint);
+}
+
+.rubric-rating-pts-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  width: 20px;
+}
+
+.rubric-add-rating-btn {
+  margin-top: 4px;
+  font-size: 12px;
+  padding: 4px 10px;
+}
+
+.rubric-add-criterion-btn {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+}
+
+.rubric-builder-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-default);
+}
+
+.btn-danger-text {
+  background: none;
+  border: none;
+  color: var(--error-light);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px 8px;
+}
+
+.btn-danger-text:hover {
+  color: var(--error);
+}
+
+.btn-icon-only {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+}
+
+@media (max-width: 768px) {
+  .rubric-criterion-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .rubric-rating-row {
+    flex-wrap: wrap;
+  }
+
+  .rubric-rating-label-input {
+    width: 100%;
+  }
+}

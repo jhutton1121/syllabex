@@ -37,6 +37,13 @@ class Assignment(models.Model):
     start_date = models.DateTimeField(db_index=True, null=True, blank=True)
     due_date = models.DateTimeField(db_index=True)
     points_possible = models.IntegerField(default=100)
+    rubric = models.ForeignKey(
+        'rubrics.Rubric',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assignments',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

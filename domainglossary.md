@@ -25,3 +25,8 @@
 | **Account Slug** | The short identifier for a tenant (e.g., "acme-university"). Used in the `X-Account-Slug` header and login flow. |
 | **Instructor** | A user with `role='instructor'` in a CourseMembership. Can create/edit assignments, grade submissions, manage modules and pages for that course. |
 | **Student** | A user with `role='student'` in a CourseMembership. Can view published content, take assignments, and view their own grades (after due date). |
+| **Rubric** | A reusable grading rubric attached to a course. Contains criteria with rating levels. Can be attached to one or more assignments. Has `is_reusable` flag and `created_by` instructor. |
+| **RubricCriterion** | A single assessment dimension within a rubric (e.g., "Thesis Clarity"). Has a title, description, order, and `points_possible`. Contains multiple RubricRatings. Unique per (rubric, order). |
+| **RubricRating** | A performance level within a criterion (e.g., "Excellent — 25pts"). Has a label, description, points value, and order. Unique per (criterion, order). |
+| **RubricAssessment** | An instructor's rubric-based evaluation of a submission. Links a submission to a rubric with a computed `total_score`. One per (submission, rubric). Contains RubricCriterionScores. |
+| **RubricCriterionScore** | The selected rating for a single criterion in an assessment. Links to a criterion and selected rating, with optional comments. One per (assessment, criterion). |

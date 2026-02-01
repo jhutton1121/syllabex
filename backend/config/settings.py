@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'gradebook',
     'ai_assistant',
     'pages',
+    'rubrics',
 ]
 
 MIDDLEWARE = [

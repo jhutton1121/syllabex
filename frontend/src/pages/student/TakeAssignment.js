@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import assignmentService from '../../services/assignmentService';
 import RichTextEditor from '../../components/RichTextEditor';
 import RichContent from '../../components/RichContent';
+import RubricDisplay from '../../components/RubricDisplay';
 import './TakeAssignment.css';
 
 const TakeAssignment = () => {
@@ -248,6 +249,13 @@ const TakeAssignment = () => {
           </div>
         )}
 
+        {assignment.rubric_info && !showGrades && (
+          <div className="sidebar-description">
+            <h4>Grading Rubric</h4>
+            <RubricDisplay rubric={assignment.rubric_info} />
+          </div>
+        )}
+
         <div className="sidebar-progress">
           <div className="progress-bar">
             <div 
@@ -344,6 +352,17 @@ const TakeAssignment = () => {
                 />
               ))}
             </div>
+
+            {assignment.rubric_info && submission.rubric_assessment && (
+              <div style={{ marginTop: '24px' }}>
+                <h3 style={{ marginBottom: '12px', color: 'var(--text-primary)' }}>Rubric Assessment</h3>
+                <RubricDisplay
+                  rubric={assignment.rubric_info}
+                  assessment={submission.rubric_assessment}
+                  showScores={true}
+                />
+              </div>
+            )}
           </div>
         )}
 
