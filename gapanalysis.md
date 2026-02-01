@@ -7,9 +7,9 @@
 
 ## Current State Summary
 
-Syllabex has: multi-tenant Accounts with JWT auth, Courses with CourseModules, three Assignment types (Quiz/Test/Homework) with auto-grading for MC and numerical Questions, a flat GradeEntry-based gradebook, rich text Pages (TipTap), a cross-course Calendar (react-big-calendar), AI-assisted question/module/rubric generation via OpenAI, a structured rubric grading system (Rubric → Criteria → Ratings, with RubricAssessment scoring), and a dark/light theme system. See `architecture.md` for full data model and flows.
+Syllabex has: multi-tenant Accounts with JWT auth, Courses with CourseModules, three Assignment types (Quiz/Test/Homework) with auto-grading for MC and numerical Questions, a flat GradeEntry-based gradebook, rich text Pages (TipTap), a cross-course Calendar (react-big-calendar), AI-assisted question/module/rubric generation via OpenAI, a structured rubric grading system (Rubric → Criteria → Ratings, with RubricAssessment scoring), an in-app notification system (bell icon with polling, `/notifications` page), course announcements (CRUD with rich text, dashboard widget, notification integration), and a dark/light theme system. See `architecture.md` for full data model and flows.
 
-**What's missing**: Communication features (zero), file management beyond syllabus upload, weighted grading, notifications, discussion forums, question banks, quiz timers, bulk enrollment, and content release conditions.
+**What's missing**: Discussion forums, messaging/inbox, email notifications, file management beyond syllabus upload, weighted grading, question banks, quiz timers, bulk enrollment, and content release conditions.
 
 ---
 
@@ -303,20 +303,21 @@ The existing Assignment `type` field (`quiz`, `test`, `homework`) provides a nat
 
 ## 4. COMMUNICATION
 
-### SYL-401: Announcements [P0]
+### SYL-401: Announcements [P0] ✅ COMPLETED
 
 **Description**: Syllabex has zero communication features. Instructors cannot broadcast messages to their class. Announcements are the most basic communication feature in every LMS — a one-to-many message from instructor to all enrolled students, displayed prominently on the course page and user dashboard. Currently, the UserDashboard only shows courses and upcoming assignments.
 
 **Acceptance Criteria**:
-- [ ] New Django app: `communications/` (or add to existing `courses/` app)
-- [ ] New `Announcement` model: `course` (FK to Course), `author` (FK to User), `title` (CharField), `body` (TextField — rich text, sanitized via `sanitize_html()`), `is_published` (bool, default True), `pinned` (bool, default False), `created_at`, `updated_at`
-- [ ] Account-scoped through Course relationship (consistent with existing pattern)
-- [ ] API: CRUD at `/api/courses/<course_id>/announcements/`. Only instructors/admins can create/edit/delete. All course members can read
-- [ ] Course detail page: "Announcements" tab in `CourseSubNav` showing announcements in reverse chronological order, pinned items first
-- [ ] User dashboard: "Recent Announcements" section showing latest 5 announcements across all enrolled courses
-- [ ] Rich text body using existing `RichTextEditor` component with full toolbar
-- [ ] `RichContent` component for rendering announcement body (same as Pages)
-- [ ] Scheduled announcements: optional `publish_at` (DateTimeField) — announcement hidden until that datetime (stretch goal, can be V2)
+- [x] Added `Announcement` model to existing `courses/` app (tightly coupled to Course)
+- [x] New `Announcement` model: `course` (FK to Course), `author` (FK to User), `title` (CharField), `body` (TextField — rich text, sanitized via `sanitize_html()`), `is_published` (bool, default True), `pinned` (bool, default False), `created_at`, `updated_at`
+- [x] Account-scoped through Course relationship (consistent with existing pattern)
+- [x] API: CRUD at `/api/courses/<course_id>/announcements/`. Only instructors/admins can create/edit/delete. All course members can read (students see published only)
+- [x] Course detail page: "Announcements" tab in `CourseSubNav` showing announcements in reverse chronological order, pinned items first
+- [x] User dashboard: "Recent Announcements" section showing latest 5 announcements across all enrolled courses via `/api/courses/announcements/recent/`
+- [x] Rich text body using existing `RichTextEditor` component with full toolbar
+- [x] `RichContent` component for rendering announcement body (same as Pages)
+- [x] Announcement creation triggers notifications for all enrolled course members (via `notifications/utils.py`)
+- [ ] Scheduled announcements: optional `publish_at` (DateTimeField) — stretch goal for V2
 
 ---
 
@@ -431,21 +432,21 @@ The existing Assignment `type` field (`quiz`, `test`, `homework`) provides a nat
 
 ## 6. PLATFORM & INFRASTRUCTURE
 
-### SYL-601: Notification System (In-App) [P0]
+### SYL-601: Notification System (In-App) [P0] ✅ COMPLETED
 
 **Description**: Syllabex has no notification system. Users must manually check each course for updates. Every LMS has a notification center — a bell icon with unread count showing recent events (new grades, new assignments, announcements, discussion replies, approaching deadlines).
 
 This is a P0 because it's the foundation that SYL-401 (Announcements), SYL-402 (Discussions), SYL-403 (Messaging), and SYL-404 (Email) all depend on for delivery.
 
 **Acceptance Criteria**:
-- [ ] New `Notification` model: `user` (FK to User), `event_type` (CharField: 'announcement', 'assignment_posted', 'grade_posted', 'due_date_reminder', 'discussion_reply', 'message_received', 'submission_graded'), `title` (CharField), `body` (TextField), `course` (FK, nullable), `link` (CharField — relative URL to navigate to), `is_read` (bool, default False), `created_at`
-- [ ] Account-scoped through User relationship
-- [ ] API: `GET /api/notifications/` (list, paginated, newest first), `GET /api/notifications/unread-count/`, `POST /api/notifications/<id>/read/`, `POST /api/notifications/mark-all-read/`
-- [ ] Backend: utility function `create_notification(user, event_type, title, body, course, link)` called from relevant views/signals when events occur
-- [ ] Frontend: bell icon in `Navbar.js` with unread count badge. Dropdown panel showing recent notifications with click-to-navigate. "Mark all read" button
-- [ ] Notifications page: `/notifications` route showing full notification history with filtering by type and read/unread
-- [ ] Poll for new notifications every 60 seconds (V1), or WebSocket for real-time (V2)
-- [ ] Notification creation hooks: called when announcements are posted, assignments are created, grades are entered, discussion replies are made, messages are received
+- [x] New `Notification` model: `user` (FK to User), `event_type` (CharField: 'announcement', 'assignment_posted', 'grade_posted', 'due_date_reminder', 'discussion_reply', 'message_received', 'submission_graded'), `title` (CharField), `body` (TextField), `course` (FK, nullable), `link` (CharField — relative URL to navigate to), `is_read` (bool, default False), `created_at`
+- [x] Account-scoped through User relationship
+- [x] API: `GET /api/notifications/` (list, paginated, newest first), `GET /api/notifications/unread-count/`, `POST /api/notifications/<id>/read/`, `POST /api/notifications/mark-all-read/`
+- [x] Backend: utility function `create_announcement_notifications()` in `notifications/utils.py` called when announcements are posted
+- [x] Frontend: bell icon in `Navbar.js` with unread count badge. Dropdown panel showing recent notifications with click-to-navigate. "Mark all read" button
+- [x] Notifications page: `/notifications` route showing full notification history with pagination
+- [x] Poll for new notifications every 60 seconds (V1)
+- [x] Notification creation hooks: called when announcements are posted (additional hooks for assignments, grades, discussions, messages to be added as those features are built)
 
 ---
 

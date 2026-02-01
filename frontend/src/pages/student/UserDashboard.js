@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import courseService from '../../services/courseService';
 import assignmentService from '../../services/assignmentService';
+import announcementService from '../../services/announcementService';
+import RichContent from '../../components/RichContent';
 import './UserDashboard.css';
 
 const UserDashboard = () => {
@@ -10,19 +12,22 @@ const UserDashboard = () => {
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [assignments, setAssignments] = useState([]);
+  const [recentAnnouncements, setRecentAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [coursesData, assignmentsData] = await Promise.all([
+        const [coursesData, assignmentsData, announcementsData] = await Promise.all([
           courseService.getCourses(),
           assignmentService.getAssignments(),
+          announcementService.getRecentAnnouncements().catch(() => []),
         ]);
-        
+
         setCourses(coursesData.results || coursesData);
         setAssignments(assignmentsData.results || assignmentsData);
+        setRecentAnnouncements(announcementsData.results || announcementsData);
       } catch (err) {
         setError('Failed to load dashboard data');
         console.error(err);
@@ -135,6 +140,39 @@ const UserDashboard = () => {
             </div>
           )}
         </section>
+
+        {/* Recent Announcements Section */}
+        {recentAnnouncements.length > 0 && (
+          <section className="announcements-section">
+            <div className="section-header">
+              <h2>Recent Announcements</h2>
+            </div>
+            <div className="dashboard-announcements-list">
+              {recentAnnouncements.map((a) => (
+                <Link
+                  key={a.id}
+                  to={`/courses/${a.course}?view=announcements`}
+                  className="dashboard-announcement-card"
+                >
+                  <div className="dashboard-announcement-header">
+                    <span className="dashboard-announcement-course">{a.course_code}</span>
+                    {a.pinned && <span className="dashboard-announcement-pin">Pinned</span>}
+                    <span className="dashboard-announcement-date">
+                      {new Date(a.created_at).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </span>
+                  </div>
+                  <h4 className="dashboard-announcement-title">{a.title}</h4>
+                  <div className="dashboard-announcement-body">
+                    <RichContent html={a.body} />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Assignments Section */}
         <section className="assignments-section">

@@ -29,6 +29,7 @@ import PageEditor from './pages/course/PageEditor';
 // Shared Pages
 import AccountPage from './pages/shared/AccountPage';
 import CalendarPage from './pages/shared/CalendarPage';
+import NotificationsPage from './pages/shared/NotificationsPage';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -77,6 +78,16 @@ function App() {
               element={
                 <PrivateRoute>
                   <CalendarPage />
+                </PrivateRoute>
+              }
+            />
+
+            {/* Notifications Page */}
+            <Route
+              path="/notifications"
+              element={
+                <PrivateRoute>
+                  <NotificationsPage />
                 </PrivateRoute>
               }
             />

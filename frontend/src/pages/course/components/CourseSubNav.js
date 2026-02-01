@@ -3,6 +3,7 @@ import './CourseSubNav.css';
 
 function CourseSubNav({ activeView, onViewChange, isInstructor, isStudent, mainSidebarWidth }) {
   const navItems = [
+    { id: 'announcements', label: 'Announcements', icon: '📢', visible: true },
     { id: 'modules', label: 'Modules', icon: '📦', visible: true },
     { id: 'pages', label: 'Pages', icon: '📄', visible: true },
     { id: 'syllabus', label: 'Syllabus', icon: '📚', visible: true },

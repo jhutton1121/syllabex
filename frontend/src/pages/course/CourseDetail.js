@@ -10,6 +10,7 @@ import CourseSyllabus from './components/CourseSyllabus';
 import CourseQuizzes from './components/CourseQuizzes';
 import CourseTests from './components/CourseTests';
 import CourseCourseCalendar from './components/CourseCourseCalendar';
+import CourseAnnouncements from './components/CourseAnnouncements';
 import CourseModules from './components/CourseModules';
 import CoursePages from './components/CoursePages';
 import RichContent from '../../components/RichContent';
@@ -291,6 +292,11 @@ const CourseDetail = () => {
         />
 
         <div className="course-main-content">
+          {/* Announcements View */}
+          {activeView === 'announcements' && (
+            <CourseAnnouncements courseId={courseId} isInstructor={isInstructor} />
+          )}
+
           {/* Modules View */}
           {activeView === 'modules' && (
             <CourseModules

@@ -4,10 +4,11 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from django.db.models import Q
-from .models import Course, CourseMembership, CourseModule
+from rest_framework import generics
+from .models import Course, CourseMembership, CourseModule, Announcement
 from .serializers import (
     CourseSerializer, CourseDetailSerializer, CourseMembershipSerializer,
-    CourseModuleSerializer,
+    CourseModuleSerializer, AnnouncementSerializer,
 )
 from users.models import User
 from users.permissions import IsAdmin, IsInstructorOrAdmin, IsCourseInstructorOrAdmin
@@ -373,3 +374,73 @@ class CourseMembershipViewSet(viewsets.ModelViewSet):
             return queryset
 
         return queryset.filter(user=user)
+
+
+class AnnouncementViewSet(viewsets.ModelViewSet):
+    """ViewSet for Announcement CRUD — nested under a course"""
+
+    serializer_class = AnnouncementSerializer
+
+    def get_permissions(self):
+        return [permissions.IsAuthenticated()]
+
+    def _get_course(self):
+        course_id = self.kwargs.get('course_id')
+        account = getattr(self.request, 'account', None)
+        try:
+            return Course.unscoped.get(pk=course_id, account=account)
+        except Course.DoesNotExist:
+            raise ValidationError('Course not found.')
+
+    def _is_instructor(self, user, course):
+        if hasattr(user, 'admin_profile') or user.is_account_admin():
+            return True
+        return course.memberships.filter(
+            user=user, role='instructor', status='active'
+        ).exists()
+
+    def get_queryset(self):
+        course = self._get_course()
+        qs = Announcement.objects.filter(course=course).select_related('author', 'course')
+        if not self._is_instructor(self.request.user, course):
+            qs = qs.filter(is_published=True)
+        return qs
+
+    def perform_create(self, serializer):
+        course = self._get_course()
+        if not self._is_instructor(self.request.user, course):
+            raise PermissionDenied('Only instructors can create announcements.')
+        announcement = serializer.save(course=course, author=self.request.user)
+        if announcement.is_published:
+            from notifications.utils import create_announcement_notifications
+            create_announcement_notifications(announcement)
+
+    def perform_update(self, serializer):
+        course = self._get_course()
+        if not self._is_instructor(self.request.user, course):
+            raise PermissionDenied('Only instructors can update announcements.')
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        course = self._get_course()
+        if not self._is_instructor(self.request.user, course):
+            raise PermissionDenied('Only instructors can delete announcements.')
+        instance.delete()
+
+
+class RecentAnnouncementsView(generics.ListAPIView):
+    """Latest 5 published announcements across all enrolled courses"""
+
+    serializer_class = AnnouncementSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        enrolled_courses = Course.unscoped.filter(
+            memberships__user=user,
+            memberships__status='active',
+        )
+        return Announcement.objects.filter(
+            course__in=enrolled_courses,
+            is_published=True,
+        ).select_related('author', 'course')[:5]

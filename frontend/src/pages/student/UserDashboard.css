@@ -487,3 +487,79 @@
     min-width: 80px;
   }
 }
+
+/* Recent Announcements Section */
+.announcements-section {
+  margin-bottom: 32px;
+}
+
+.dashboard-announcements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dashboard-announcement-card {
+  display: block;
+  background: var(--card-bg);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  padding: 16px 20px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s;
+}
+
+.dashboard-announcement-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: 0 4px 16px var(--shadow-light);
+  transform: translateY(-1px);
+}
+
+.dashboard-announcement-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.dashboard-announcement-course {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--primary-light);
+  background: rgba(99, 102, 241, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.dashboard-announcement-pin {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--warning-light);
+  background: rgba(245, 158, 11, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.dashboard-announcement-date {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.dashboard-announcement-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 6px;
+}
+
+.dashboard-announcement-body {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  max-height: 60px;
+  overflow: hidden;
+}
