@@ -22,6 +22,8 @@ import GradeSubmission from './pages/instructor/GradeSubmission';
 // Course Pages
 import CourseDetail from './pages/course/CourseDetail';
 import CreateCourse from './pages/course/CreateCourse';
+import PageView from './pages/course/PageView';
+import PageEditor from './pages/course/PageEditor';
 
 // Shared Pages
 import AccountPage from './pages/shared/AccountPage';
@@ -123,6 +125,32 @@ function App() {
               element={
                 <PrivateRoute>
                   <GradeSubmission />
+                </PrivateRoute>
+              }
+            />
+
+            {/* Page Routes */}
+            <Route
+              path="/courses/:courseId/pages/create"
+              element={
+                <PrivateRoute>
+                  <PageEditor />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/courses/:courseId/pages/:pageId/edit"
+              element={
+                <PrivateRoute>
+                  <PageEditor />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/courses/:courseId/pages/:pageId"
+              element={
+                <PrivateRoute>
+                  <PageView />
                 </PrivateRoute>
               }
             />

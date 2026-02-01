@@ -1,4 +1,5 @@
 import React from 'react';
+import RichContent from './RichContent';
 import './QuestionList.css';
 
 const QuestionList = ({ questions, onEdit, onDelete, onReorder }) => {
@@ -79,7 +80,7 @@ const QuestionList = ({ questions, onEdit, onDelete, onReorder }) => {
                 {getQuestionTypeLabel(question.question_type)}
               </div>
               
-              <div className="question-text">{question.text}</div>
+              <RichContent html={question.text} className="question-text" />
               
               {question.question_type === 'multiple_choice' && question.choices && (
                 <div className="question-choices">

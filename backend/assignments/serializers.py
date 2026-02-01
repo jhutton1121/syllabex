@@ -3,6 +3,7 @@ from rest_framework import serializers
 from .models import Assignment, Quiz, Test, Homework, AssignmentSubmission, Question, Choice, QuestionResponse
 from courses.models import Course
 from courses.serializers import CourseSerializer
+from courses.utils import sanitize_html
 from users.serializers import UserBasicSerializer
 
 
@@ -37,6 +38,9 @@ class QuestionSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'assignment']
     
+    def validate_text(self, value):
+        return sanitize_html(value)
+
     def create(self, validated_data):
         choices_data = validated_data.pop('choices', [])
         question = Question.objects.create(**validated_data)
@@ -106,9 +110,12 @@ class QuestionResponseStudentSerializer(serializers.ModelSerializer):
 
 class QuestionResponseSubmitSerializer(serializers.Serializer):
     """Serializer for submitting question responses"""
-    
+
     question_id = serializers.IntegerField()
     response_text = serializers.CharField(allow_blank=True)
+
+    def validate_response_text(self, value):
+        return sanitize_html(value)
 
 
 class AssignmentSerializer(serializers.ModelSerializer):
@@ -149,18 +156,21 @@ class AssignmentSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'course']
     
+    def validate_description(self, value):
+        return sanitize_html(value)
+
     def get_is_overdue(self, obj):
         """Check if assignment is past due date"""
         return obj.is_overdue()
-    
+
     def get_has_started(self, obj):
         """Check if assignment has started"""
         return obj.has_started()
-    
+
     def get_is_available(self, obj):
         """Check if assignment is available for students"""
         return obj.is_available_for_students()
-    
+
     def get_is_editable(self, obj):
         """Check if assignment can still be edited by teacher"""
         return obj.is_editable_by_teacher()

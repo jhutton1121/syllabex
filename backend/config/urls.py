@@ -55,6 +55,7 @@ urlpatterns = [
     path('api/assignments/', include('assignments.urls')),
     path('api/gradebook/', include('gradebook.urls')),
     path('api/ai/', include('ai_assistant.urls')),
+    path('api/pages/', include('pages.urls')),
 ]
 
 if settings.DEBUG:

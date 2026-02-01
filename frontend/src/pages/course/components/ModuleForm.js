@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import courseService from '../../../services/courseService';
 import assignmentService from '../../../services/assignmentService';
+import RichTextEditor from '../../../components/RichTextEditor';
 import './ModuleForm.css';
 
 function ModuleForm({ courseId, module, assignments: propAssignments, onSave, onCancel }) {
@@ -125,10 +126,9 @@ function ModuleForm({ courseId, module, assignments: propAssignments, onSave, on
 
         <div className="module-form-group">
           <label>Description</label>
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
+          <RichTextEditor
+            content={formData.description}
+            onChange={(html) => setFormData({ ...formData, description: html })}
             placeholder="Brief overview of what this module covers..."
           />
         </div>

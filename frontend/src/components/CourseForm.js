@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import courseService from '../services/courseService';
+import RichTextEditor from './RichTextEditor';
 import './AssignmentForm.css';
 
 const CourseForm = ({ course = null, isEdit = false }) => {
@@ -95,13 +96,10 @@ const CourseForm = ({ course = null, isEdit = false }) => {
 
           <div className="form-group">
             <label htmlFor="description">Description</label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
+            <RichTextEditor
+              content={formData.description}
+              onChange={(html) => setFormData({ ...formData, description: html })}
               placeholder="Enter course description"
-              rows="6"
             />
           </div>
 

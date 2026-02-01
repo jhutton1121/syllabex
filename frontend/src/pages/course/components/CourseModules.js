@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import courseService from '../../../services/courseService';
 import ModuleForm from './ModuleForm';
 import AIModuleChatPanel from '../../../components/AIModuleChatPanel';
+import RichContent from '../../../components/RichContent';
 import './CourseModules.css';
 
 function CourseModules({ courseId, modules, assignments, isInstructor, onModulesChange }) {
@@ -151,7 +152,7 @@ function CourseModules({ courseId, modules, assignments, isInstructor, onModules
 
                 <div className="module-card-body">
                   {mod.description && (
-                    <p className="module-description">{mod.description}</p>
+                    <RichContent html={mod.description} className="module-description" />
                   )}
 
                   {mod.zoom_link && (
@@ -201,8 +202,27 @@ function CourseModules({ courseId, modules, assignments, isInstructor, onModules
                             </div>
                           ))}
                         </>
-                      ) : (
-                        <p className="no-assignments-msg">No assignments in this module yet.</p>
+                      ) : null}
+
+                      {mod.pages && mod.pages.length > 0 && (
+                        <>
+                          <div className="module-assignments-label" style={{ marginTop: mod.assignments && mod.assignments.length > 0 ? '12px' : '0' }}>Pages</div>
+                          {mod.pages.map((p) => (
+                            <div key={p.id} className="module-assignment-chip-wrapper">
+                              <Link
+                                to={`/courses/${courseId}/pages/${p.id}`}
+                                className="module-assignment-chip"
+                              >
+                                <span className="chip-type-badge type-page">page</span>
+                                <span className="chip-title">{p.title}</span>
+                              </Link>
+                            </div>
+                          ))}
+                        </>
+                      )}
+
+                      {(!mod.assignments || mod.assignments.length === 0) && (!mod.pages || mod.pages.length === 0) && (
+                        <p className="no-assignments-msg">No content in this module yet.</p>
                       )}
                     </div>
                   )}

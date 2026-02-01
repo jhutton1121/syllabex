@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import courseService from '../../services/courseService';
 import userService from '../../services/userService';
+import RichTextEditor from '../../components/RichTextEditor';
 import './AdminPages.css';
 import './AdminCourseDetail.css';
 
@@ -276,10 +277,9 @@ const AdminCourseDetail = () => {
               
               <div className="form-group">
                 <label>Description</label>
-                <textarea
-                  value={editForm.description}
-                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                  rows={3}
+                <RichTextEditor
+                  content={editForm.description}
+                  onChange={(html) => setEditForm({ ...editForm, description: html })}
                 />
               </div>
               

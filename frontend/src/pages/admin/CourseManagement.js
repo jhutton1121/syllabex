@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import courseService from '../../services/courseService';
+import RichTextEditor from '../../components/RichTextEditor';
 import './AdminPages.css';
 
 const CourseManagement = () => {
@@ -205,13 +206,12 @@ const CourseManagement = () => {
                 </div>
                 <div className="form-group">
                   <label>Description</label>
-                  <textarea
-                    value={newCourse.description}
-                    onChange={(e) =>
-                      setNewCourse({ ...newCourse, description: e.target.value })
+                  <RichTextEditor
+                    content={newCourse.description}
+                    onChange={(html) =>
+                      setNewCourse({ ...newCourse, description: html })
                     }
                     placeholder="Course description..."
-                    rows={3}
                   />
                 </div>
                 <div className="form-row">

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import RichTextEditor from './RichTextEditor';
 import './QuestionBuilder.css';
 
 const QuestionBuilder = ({ question = null, onSave, onCancel, order = 0 }) => {
@@ -162,13 +163,10 @@ const QuestionBuilder = ({ question = null, onSave, onCancel, order = 0 }) => {
         
         <div className="form-group">
           <label htmlFor="text">Question Text *</label>
-          <textarea
-            id="text"
-            name="text"
-            value={formData.text}
-            onChange={handleChange}
+          <RichTextEditor
+            content={formData.text}
+            onChange={(html) => setFormData({ ...formData, text: html })}
             placeholder="Enter your question"
-            rows="3"
           />
         </div>
         

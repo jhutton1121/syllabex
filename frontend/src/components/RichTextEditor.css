@@ -1,0 +1,191 @@
+.rte-container {
+  border: 1px solid #3a3a5e;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #2a2a4e;
+  transition: border-color 0.2s;
+}
+
+.rte-container:focus-within {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.rte-container.rte-readonly {
+  border: none;
+  background: transparent;
+}
+
+/* Toolbar */
+.rte-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: #1e1e3f;
+  border-bottom: 1px solid #3a3a5e;
+  flex-wrap: wrap;
+}
+
+.rte-toolbar-group {
+  display: flex;
+  gap: 2px;
+}
+
+.rte-toolbar-divider {
+  width: 1px;
+  height: 24px;
+  background: #3a3a5e;
+  margin: 0 4px;
+}
+
+.rte-btn {
+  background: transparent;
+  border: none;
+  color: #b0b0d0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  transition: all 0.15s;
+  line-height: 1.4;
+}
+
+.rte-btn:hover {
+  background: rgba(99, 102, 241, 0.1);
+  color: #e0e0e0;
+}
+
+.rte-btn.active {
+  background: rgba(99, 102, 241, 0.2);
+  color: #818cf8;
+}
+
+/* Editor content area */
+.rte-content {
+  min-height: 200px;
+}
+
+.rte-content .tiptap,
+.rte-content .ProseMirror {
+  padding: 16px;
+  color: #f0f0ff;
+  font-size: 15px;
+  line-height: 1.6;
+  outline: none;
+  min-height: 200px;
+}
+
+.rte-content .tiptap p.is-editor-empty:first-child::before {
+  color: #6a6a8e;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Typography inside editor */
+.rte-content .tiptap h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #f0f0ff;
+  margin: 24px 0 12px;
+  line-height: 1.2;
+}
+
+.rte-content .tiptap h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #f0f0ff;
+  margin: 20px 0 10px;
+  line-height: 1.2;
+}
+
+.rte-content .tiptap h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #f0f0ff;
+  margin: 16px 0 8px;
+  line-height: 1.3;
+}
+
+.rte-content .tiptap p {
+  margin: 0 0 12px;
+}
+
+.rte-content .tiptap a {
+  color: #818cf8;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.rte-content .tiptap a:hover {
+  color: #a5b4fc;
+}
+
+.rte-content .tiptap ul,
+.rte-content .tiptap ol {
+  padding-left: 24px;
+  margin: 0 0 12px;
+}
+
+.rte-content .tiptap li {
+  margin-bottom: 4px;
+}
+
+.rte-content .tiptap blockquote {
+  border-left: 3px solid #6366f1;
+  padding-left: 16px;
+  margin: 12px 0;
+  color: #b0b0d0;
+  font-style: italic;
+}
+
+.rte-content .tiptap pre {
+  background: #12122b;
+  border: 1px solid #3a3a5e;
+  border-radius: 8px;
+  padding: 16px;
+  overflow-x: auto;
+  margin: 12px 0;
+}
+
+.rte-content .tiptap code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: #e0e0e0;
+}
+
+.rte-content .tiptap :not(pre) > code {
+  background: rgba(99, 102, 241, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.rte-content .tiptap hr {
+  border: none;
+  border-top: 1px solid #3a3a5e;
+  margin: 20px 0;
+}
+
+.rte-content .tiptap img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 12px 0;
+}
+
+.rte-content .tiptap strong {
+  font-weight: 700;
+}
+
+.rte-content .tiptap em {
+  font-style: italic;
+}
+
+.rte-content .tiptap s {
+  text-decoration: line-through;
+}

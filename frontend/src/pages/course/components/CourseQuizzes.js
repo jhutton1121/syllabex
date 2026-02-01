@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import RichContent from '../../../components/RichContent';
 
 function CourseQuizzes({ assignments, courseId, isInstructor }) {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ function CourseQuizzes({ assignments, courseId, isInstructor }) {
               </div>
               <h3 className="assignment-title">{quiz.title}</h3>
               {quiz.description && (
-                <p className="assignment-description">{quiz.description}</p>
+                <RichContent html={quiz.description} className="assignment-description" />
               )}
               <div className="assignment-footer">
                 <div className="assignment-meta">
