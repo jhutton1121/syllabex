@@ -420,6 +420,11 @@
   color: #fbbf24;
 }
 
+.chip-type-badge.type-page {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
 .chip-title {
   flex: 1;
   font-size: 13px;

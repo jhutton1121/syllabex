@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import assignmentService from '../../services/assignmentService';
+import RichTextEditor from '../../components/RichTextEditor';
+import RichContent from '../../components/RichContent';
 import './GradeSubmission.css';
 
 const GradeSubmission = () => {
@@ -305,9 +307,7 @@ const GradeSubmission = () => {
                     </div>
                   </div>
 
-                  <div className="question-text">
-                    {question.text}
-                  </div>
+                  <RichContent html={question.text} className="question-text" />
 
                   {/* Student's Response */}
                   <div className="student-response">
@@ -356,7 +356,11 @@ const GradeSubmission = () => {
                       </div>
                     ) : (
                       <div className="text-response">
-                        <p>{response.response_text || <em>No response provided</em>}</p>
+                        {response.response_text ? (
+                          <RichContent html={response.response_text} />
+                        ) : (
+                          <p><em>No response provided</em></p>
+                        )}
                       </div>
                     )}
                   </div>
@@ -398,12 +402,10 @@ const GradeSubmission = () => {
 
                     <div className="remarks-group">
                       <label>Teacher Remarks (Optional):</label>
-                      <textarea
-                        value={remarks[response.id] || ''}
-                        onChange={(e) => handleRemarksChange(response.id, e.target.value)}
+                      <RichTextEditor
+                        content={remarks[response.id] || ''}
+                        onChange={(html) => handleRemarksChange(response.id, html)}
                         placeholder="Add feedback for the student..."
-                        rows="3"
-                        className="remarks-input"
                       />
                     </div>
                   </div>

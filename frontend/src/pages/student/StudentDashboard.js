@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import courseService from '../../services/courseService';
 import assignmentService from '../../services/assignmentService';
+import RichContent from '../../components/RichContent';
 import './Dashboard.css';
 
 const StudentDashboard = () => {
@@ -60,7 +61,7 @@ const StudentDashboard = () => {
               {courses.map((course) => (
                 <div key={course.id} className="course-item">
                   <h3>{course.code} - {course.name}</h3>
-                  <p>{course.description}</p>
+                  <RichContent html={course.description} />
                   <p className="course-meta">
                     Teacher: {course.teacher_info?.user_email || 'N/A'}
                   </p>

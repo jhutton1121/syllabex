@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import courseService from '../services/courseService';
 import assignmentService from '../services/assignmentService';
 import QuestionBuilder from './QuestionBuilder';
+import RichTextEditor from './RichTextEditor';
 import QuestionList from './QuestionList';
 import AIChatPanel from './AIChatPanel';
 import './AssignmentForm.css';
@@ -409,13 +410,10 @@ const AssignmentForm = ({ assignment = null, isEdit = false }) => {
 
           <div className="form-group">
             <label htmlFor="description">Description</label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
+            <RichTextEditor
+              content={formData.description}
+              onChange={(html) => setFormData({ ...formData, description: html })}
               placeholder="Enter assignment description"
-              rows="4"
             />
           </div>
 

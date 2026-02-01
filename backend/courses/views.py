@@ -259,7 +259,7 @@ class CourseModuleViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         course = self._get_course()
-        return CourseModule.objects.filter(course=course).prefetch_related('assignments')
+        return CourseModule.objects.filter(course=course).prefetch_related('assignments', 'pages')
 
     def get_serializer_context(self):
         ctx = super().get_serializer_context()

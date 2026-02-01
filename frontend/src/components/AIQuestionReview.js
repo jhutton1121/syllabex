@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import QuestionBuilder from './QuestionBuilder';
+import RichContent from './RichContent';
 import './AIQuestionReview.css';
 
 const AIQuestionReview = ({ questions, onAccept, onClose }) => {
@@ -134,7 +135,7 @@ const AIQuestionReview = ({ questions, onAccept, onClose }) => {
                   </div>
 
                   <div className="ai-review-card-body">
-                    <p className="ai-review-q-text">{q.text}</p>
+                    <RichContent html={q.text} className="ai-review-q-text" />
 
                     {q.question_type === 'multiple_choice' && q.choices && (
                       <ul className="ai-review-choices">

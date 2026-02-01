@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import RichTextEditor from './RichTextEditor';
+import RichContent from './RichContent';
 import './AIModuleReview.css';
 
 const AIModuleReview = ({ modules, isEditMode, onAccept, onClose }) => {
@@ -156,7 +158,7 @@ const AIModuleReview = ({ modules, isEditMode, onAccept, onClose }) => {
                       {formatDate(m.start_date)} &mdash; {formatDate(m.end_date)}
                     </div>
                     {m.description && (
-                      <p className="module-review-desc">{m.description}</p>
+                      <RichContent html={m.description} className="module-review-desc" />
                     )}
 
                     {m.assignments && m.assignments.length > 0 && (
@@ -254,7 +256,10 @@ function ModuleEditForm({ module, onSave, onCancel }) {
       </div>
       <div className="module-edit-field">
         <label>Description</label>
-        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
+        <RichTextEditor
+          content={description}
+          onChange={(html) => setDescription(html)}
+        />
       </div>
       <div className="module-edit-row">
         <div className="module-edit-field">

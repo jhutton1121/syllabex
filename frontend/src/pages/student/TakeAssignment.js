@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import assignmentService from '../../services/assignmentService';
+import RichTextEditor from '../../components/RichTextEditor';
+import RichContent from '../../components/RichContent';
 import './TakeAssignment.css';
 
 const TakeAssignment = () => {
@@ -242,7 +244,7 @@ const TakeAssignment = () => {
         {assignment.description && (
           <div className="sidebar-description">
             <h4>Instructions</h4>
-            <p>{assignment.description}</p>
+            <RichContent html={assignment.description} />
           </div>
         )}
 
@@ -463,9 +465,7 @@ const GradedQuestionCard = ({ response, index }) => {
         </div>
       </div>
 
-      <div className="question-text">
-        {question.text}
-      </div>
+      <RichContent html={question.text} className="question-text" />
 
       <div className="question-answer graded-answer">
         <div className="your-answer">
@@ -475,7 +475,7 @@ const GradedQuestionCard = ({ response, index }) => {
               {question.choices?.map((choice, idx) => {
                 const isSelected = String(response.response_text) === String(choice.id);
                 const isCorrect = choice.is_correct;
-                
+
                 return isSelected ? (
                   <div key={choice.id} className={`selected-choice ${isCorrect ? 'correct' : 'incorrect'}`}>
                     <span className="choice-letter">{String.fromCharCode(65 + idx)}</span>
@@ -486,14 +486,14 @@ const GradedQuestionCard = ({ response, index }) => {
               })}
             </div>
           ) : (
-            <p className="response-text">{response.response_text || 'No answer'}</p>
+            <RichContent html={response.response_text || 'No answer'} className="response-text" />
           )}
         </div>
 
         {teacherRemarks && (
           <div className="teacher-remarks">
             <h4>Teacher's Feedback:</h4>
-            <p>{teacherRemarks}</p>
+            <RichContent html={teacherRemarks} />
           </div>
         )}
       </div>
@@ -535,9 +535,7 @@ const QuestionCard = ({ question, index, value, onChange, disabled }) => {
         </div>
       </div>
 
-      <div className="question-text">
-        {question.text}
-      </div>
+      <RichContent html={question.text} className="question-text" />
 
       <div className="question-answer">
         {question.question_type === 'multiple_choice' && (
@@ -630,14 +628,12 @@ const TextResponseInput = ({ value, onChange, disabled, questionId }) => {
       <label htmlFor={`text-${questionId}`} className="text-label">
         Write your answer below:
       </label>
-      <textarea
-        id={`text-${questionId}`}
-        className="text-response-input"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+      <RichTextEditor
+        content={value}
+        onChange={onChange}
         placeholder="Type your response here..."
-        rows="6"
-        disabled={disabled}
+        editable={!disabled}
+        toolbar="minimal"
       />
       <div className="text-response-footer">
         <span className="word-count">{wordCount} word{wordCount !== 1 ? 's' : ''}</span>

@@ -1,6 +1,7 @@
 """Serializers for courses app"""
 from rest_framework import serializers
 from .models import Course, CourseMembership, CourseModule
+from .utils import sanitize_html
 from users.models import User
 from users.serializers import UserBasicSerializer
 
@@ -83,6 +84,9 @@ class CourseSerializer(serializers.ModelSerializer):
             for m in instructors
         ]
     
+    def validate_description(self, value):
+        return sanitize_html(value)
+
     def get_user_role(self, obj):
         """Get the current user's role in this course"""
         request = self.context.get('request')
@@ -121,6 +125,7 @@ class CourseModuleSerializer(serializers.ModelSerializer):
     """Serializer for CourseModule model"""
 
     assignments = serializers.SerializerMethodField()
+    pages = serializers.SerializerMethodField()
     status = serializers.CharField(read_only=True)
     is_active = serializers.BooleanField(read_only=True)
 
@@ -129,9 +134,12 @@ class CourseModuleSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'course', 'title', 'description', 'order',
             'start_date', 'end_date', 'is_locked', 'zoom_link',
-            'created_at', 'updated_at', 'assignments', 'status', 'is_active',
+            'created_at', 'updated_at', 'assignments', 'pages', 'status', 'is_active',
         ]
         read_only_fields = ['id', 'course', 'created_at', 'updated_at']
+
+    def validate_description(self, value):
+        return sanitize_html(value)
 
     def get_assignments(self, obj):
         request = self.context.get('request')
@@ -144,6 +152,20 @@ class CourseModuleSerializer(serializers.ModelSerializer):
 
         qs = obj.assignments.order_by('due_date')
         return ModuleAssignmentSummarySerializer(qs, many=True).data
+
+    def get_pages(self, obj):
+        request = self.context.get('request')
+        user = request.user if request else None
+
+        if user and not self._is_instructor(user, obj.course):
+            if obj.is_locked:
+                return []
+            qs = obj.pages.filter(is_published=True).order_by('order')
+        else:
+            qs = obj.pages.order_by('order')
+
+        from pages.serializers import PageSummarySerializer
+        return PageSummarySerializer(qs, many=True).data
 
     def _is_instructor(self, user, course):
         if hasattr(user, 'admin_profile') or user.is_account_admin():

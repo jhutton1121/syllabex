@@ -11,6 +11,8 @@ import CourseQuizzes from './components/CourseQuizzes';
 import CourseTests from './components/CourseTests';
 import CourseCourseCalendar from './components/CourseCourseCalendar';
 import CourseModules from './components/CourseModules';
+import CoursePages from './components/CoursePages';
+import RichContent from '../../components/RichContent';
 import './CourseDetail.css';
 
 const CourseDetail = () => {
@@ -213,7 +215,7 @@ const CourseDetail = () => {
             )}
           </div>
           {course.description && (
-            <p className="course-description">{course.description}</p>
+            <RichContent html={course.description} className="course-description" />
           )}
           <div className="course-meta">
             <div className="meta-item">
@@ -295,6 +297,14 @@ const CourseDetail = () => {
                   setAssignments(aData.results || aData);
                 } catch (e) { console.error(e); }
               }}
+            />
+          )}
+
+          {/* Pages View */}
+          {activeView === 'pages' && (
+            <CoursePages
+              courseId={courseId}
+              isInstructor={isInstructor}
             />
           )}
 
@@ -380,7 +390,7 @@ const CourseDetail = () => {
                       <div className="assignment-card-body">
                         <h3>{assignment.title}</h3>
                         {assignment.description && (
-                          <p className="description">{assignment.description}</p>
+                          <RichContent html={assignment.description} className="description" />
                         )}
                       </div>
                       <div className="assignment-card-footer">
