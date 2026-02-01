@@ -30,11 +30,21 @@ class AISettingsSerializer(serializers.ModelSerializer):
 
 class CourseSyllabusSerializer(serializers.ModelSerializer):
     """Serializer for course syllabus uploads"""
+    char_count = serializers.SerializerMethodField()
+    preview = serializers.SerializerMethodField()
 
     class Meta:
         model = CourseSyllabus
-        fields = ['id', 'course', 'file', 'original_filename', 'uploaded_by', 'uploaded_at']
-        read_only_fields = ['id', 'original_filename', 'uploaded_by', 'uploaded_at']
+        fields = ['id', 'course', 'file', 'original_filename', 'uploaded_by', 'uploaded_at', 'char_count', 'preview']
+        read_only_fields = ['id', 'original_filename', 'uploaded_by', 'uploaded_at', 'char_count', 'preview']
+
+    def get_char_count(self, obj):
+        return len(obj.extracted_text) if obj.extracted_text else 0
+
+    def get_preview(self, obj):
+        if not obj.extracted_text:
+            return ''
+        return obj.extracted_text[:200]
 
 
 class AIGenerateRequestSerializer(serializers.Serializer):
@@ -47,3 +57,20 @@ class AIGenerateRequestSerializer(serializers.Serializer):
     )
     course_id = serializers.IntegerField()
     assignment_context = serializers.DictField(required=False, default=dict)
+
+
+class AIModuleGenerateRequestSerializer(serializers.Serializer):
+    """Validates the AI module generation request"""
+    prompt = serializers.CharField()
+    conversation_history = serializers.ListField(
+        child=serializers.DictField(),
+        required=False,
+        default=list
+    )
+    course_id = serializers.IntegerField()
+    existing_modules = serializers.ListField(
+        child=serializers.DictField(),
+        required=False,
+        default=list
+    )
+    mode = serializers.ChoiceField(choices=['create', 'edit'], default='create')

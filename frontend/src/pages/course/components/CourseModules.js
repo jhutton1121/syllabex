@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import courseService from '../../../services/courseService';
 import ModuleForm from './ModuleForm';
+import AIModuleChatPanel from '../../../components/AIModuleChatPanel';
 import './CourseModules.css';
 
 function CourseModules({ courseId, modules, assignments, isInstructor, onModulesChange }) {
@@ -9,6 +10,7 @@ function CourseModules({ courseId, modules, assignments, isInstructor, onModules
   const [editingModule, setEditingModule] = useState(null);
   const [lockConfirm, setLockConfirm] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [aiPanelOpen, setAiPanelOpen] = useState(false);
 
   const handleToggleLock = async (moduleId) => {
     try {
@@ -46,6 +48,15 @@ function CourseModules({ courseId, modules, assignments, isInstructor, onModules
     setShowForm(true);
   };
 
+  const handleAIModulesAccepted = async (approvedModules) => {
+    try {
+      await courseService.batchApplyModules(courseId, approvedModules);
+      onModulesChange();
+    } catch (err) {
+      console.error('Failed to apply AI modules:', err);
+    }
+  };
+
   const sortedModules = [...(modules || [])].sort(
     (a, b) => new Date(a.start_date) - new Date(b.start_date)
   );
@@ -56,131 +67,160 @@ function CourseModules({ courseId, modules, assignments, isInstructor, onModules
   };
 
   return (
-    <div className="modules-view">
-      <div className="modules-header">
-        <h2>Course Modules</h2>
-        {isInstructor && !showForm && (
-          <button className="btn-new-module" onClick={() => setShowForm(true)}>
-            + New Module
-          </button>
+    <div className={`modules-view ${aiPanelOpen ? 'ai-open' : ''}`}>
+      <div className="modules-content">
+        <div className="modules-header">
+          <h2>Course Modules</h2>
+          {isInstructor && !showForm && (
+            <div className="modules-header-actions">
+              <button className="btn-ai-modules" onClick={() => setAiPanelOpen(!aiPanelOpen)}>
+                {aiPanelOpen ? 'Close AI' : 'AI Assistant'}
+              </button>
+              <button className="btn-new-module" onClick={() => setShowForm(true)}>
+                + New Module
+              </button>
+            </div>
+          )}
+        </div>
+
+        {showForm && (
+          <ModuleForm
+            courseId={courseId}
+            module={editingModule}
+            assignments={assignments}
+            onSave={handleFormSave}
+            onCancel={handleFormCancel}
+          />
+        )}
+
+        {sortedModules.length === 0 && !showForm ? (
+          <div className="modules-empty-state">
+            <div className="empty-icon">📦</div>
+            <h3>No modules yet</h3>
+            <p>
+              {isInstructor
+                ? 'Create your first module to organize course content.'
+                : 'Your instructor hasn\'t created any modules yet.'}
+            </p>
+          </div>
+        ) : (
+          <div className="modules-timeline">
+            {sortedModules.map((mod) => (
+              <div
+                key={mod.id}
+                className={`module-card status-${mod.status} ${mod.is_locked ? 'is-locked' : ''}`}
+              >
+                <div className="module-card-header">
+                  <div className="module-title-area">
+                    <div className="module-title-row">
+                      <h3 className="module-title">{mod.title}</h3>
+                      <span className={`module-status-pill ${mod.status}`}>{mod.status}</span>
+                      {mod.is_locked && <span className="module-status-pill" style={{ background: 'rgba(245,158,11,0.15)', color: '#fbbf24' }}>Locked</span>}
+                    </div>
+                    <div className="module-date-range">
+                      {formatDate(mod.start_date)} &mdash; {formatDate(mod.end_date)}
+                    </div>
+                  </div>
+
+                  {isInstructor && (
+                    <div className="module-header-actions">
+                      <button
+                        className={`lock-btn ${mod.is_locked ? 'locked' : ''}`}
+                        title={mod.is_locked ? 'Unlock module' : 'Lock module'}
+                        onClick={() => setLockConfirm(mod)}
+                      >
+                        {mod.is_locked ? '🔒' : '🔓'}
+                      </button>
+                      <button
+                        className="edit-module-btn"
+                        title="Edit module"
+                        onClick={() => handleEdit(mod)}
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        className="delete-module-btn"
+                        title="Delete module"
+                        onClick={() => setDeleteConfirm(mod)}
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="module-card-body">
+                  {mod.description && (
+                    <p className="module-description">{mod.description}</p>
+                  )}
+
+                  {mod.zoom_link && (
+                    <a
+                      href={mod.zoom_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="module-zoom-link"
+                    >
+                      📹 Join Zoom Lecture
+                    </a>
+                  )}
+
+                  {!isInstructor && mod.is_locked ? (
+                    <p className="module-locked-notice">This module is currently locked by the instructor.</p>
+                  ) : (
+                    <div className="module-assignments">
+                      {mod.assignments && mod.assignments.length > 0 ? (
+                        <>
+                          <div className="module-assignments-label">Assignments</div>
+                          {mod.assignments.map((a) => (
+                            <div key={a.id} className="module-assignment-chip-wrapper">
+                              <Link
+                                to={isInstructor
+                                  ? `/courses/${courseId}/assignments/${a.id}/edit`
+                                  : `/courses/${courseId}/assignments/${a.id}`}
+                                className="module-assignment-chip"
+                              >
+                                <span className={`chip-type-badge type-${a.type}`}>{a.type}</span>
+                                <span className="chip-title">{a.title}</span>
+                                <div className="chip-meta">
+                                  <span className="chip-due">
+                                    Due {new Date(a.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                  </span>
+                                  <span className="chip-points">{a.points_possible} pts</span>
+                                </div>
+                              </Link>
+                              {isInstructor && (
+                                <Link
+                                  to={`/courses/${courseId}/assignments/${a.id}`}
+                                  className="chip-view-btn"
+                                  title="View as student"
+                                >
+                                  View
+                                </Link>
+                              )}
+                            </div>
+                          ))}
+                        </>
+                      ) : (
+                        <p className="no-assignments-msg">No assignments in this module yet.</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
-      {showForm && (
-        <ModuleForm
+      {isInstructor && aiPanelOpen && (
+        <AIModuleChatPanel
           courseId={courseId}
-          module={editingModule}
-          assignments={assignments}
-          onSave={handleFormSave}
-          onCancel={handleFormCancel}
+          existingModules={modules}
+          onModulesAccepted={handleAIModulesAccepted}
+          isOpen={aiPanelOpen}
+          onToggle={() => setAiPanelOpen(false)}
         />
-      )}
-
-      {sortedModules.length === 0 && !showForm ? (
-        <div className="modules-empty-state">
-          <div className="empty-icon">📦</div>
-          <h3>No modules yet</h3>
-          <p>
-            {isInstructor
-              ? 'Create your first module to organize course content.'
-              : 'Your instructor hasn\'t created any modules yet.'}
-          </p>
-        </div>
-      ) : (
-        <div className="modules-timeline">
-          {sortedModules.map((mod) => (
-            <div
-              key={mod.id}
-              className={`module-card status-${mod.status} ${mod.is_locked ? 'is-locked' : ''}`}
-            >
-              <div className="module-card-header">
-                <div className="module-title-area">
-                  <div className="module-title-row">
-                    <h3 className="module-title">{mod.title}</h3>
-                    <span className={`module-status-pill ${mod.status}`}>{mod.status}</span>
-                    {mod.is_locked && <span className="module-status-pill" style={{ background: 'rgba(245,158,11,0.15)', color: '#fbbf24' }}>Locked</span>}
-                  </div>
-                  <div className="module-date-range">
-                    {formatDate(mod.start_date)} &mdash; {formatDate(mod.end_date)}
-                  </div>
-                </div>
-
-                {isInstructor && (
-                  <div className="module-header-actions">
-                    <button
-                      className={`lock-btn ${mod.is_locked ? 'locked' : ''}`}
-                      title={mod.is_locked ? 'Unlock module' : 'Lock module'}
-                      onClick={() => setLockConfirm(mod)}
-                    >
-                      {mod.is_locked ? '🔒' : '🔓'}
-                    </button>
-                    <button
-                      className="edit-module-btn"
-                      title="Edit module"
-                      onClick={() => handleEdit(mod)}
-                    >
-                      ✏️
-                    </button>
-                    <button
-                      className="delete-module-btn"
-                      title="Delete module"
-                      onClick={() => setDeleteConfirm(mod)}
-                    >
-                      🗑️
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <div className="module-card-body">
-                {mod.description && (
-                  <p className="module-description">{mod.description}</p>
-                )}
-
-                {mod.zoom_link && (
-                  <a
-                    href={mod.zoom_link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="module-zoom-link"
-                  >
-                    📹 Join Zoom Lecture
-                  </a>
-                )}
-
-                {!isInstructor && mod.is_locked ? (
-                  <p className="module-locked-notice">This module is currently locked by the instructor.</p>
-                ) : (
-                  <div className="module-assignments">
-                    {mod.assignments && mod.assignments.length > 0 ? (
-                      <>
-                        <div className="module-assignments-label">Assignments</div>
-                        {mod.assignments.map((a) => (
-                          <Link
-                            key={a.id}
-                            to={`/courses/${courseId}/assignments/${a.id}`}
-                            className="module-assignment-chip"
-                          >
-                            <span className={`chip-type-badge type-${a.type}`}>{a.type}</span>
-                            <span className="chip-title">{a.title}</span>
-                            <div className="chip-meta">
-                              <span className="chip-due">
-                                Due {new Date(a.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                              </span>
-                              <span className="chip-points">{a.points_possible} pts</span>
-                            </div>
-                          </Link>
-                        ))}
-                      </>
-                    ) : (
-                      <p className="no-assignments-msg">No assignments in this module yet.</p>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
       )}
 
       {/* Lock Confirmation */}

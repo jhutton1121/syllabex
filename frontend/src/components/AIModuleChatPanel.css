@@ -1,0 +1,32 @@
+.ai-module-panel {
+  width: 400px;
+  min-width: 400px;
+  height: calc(100vh - 80px);
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--card-bg, #1e1e3f);
+  border: 1px solid var(--border-color, #2a2a4e);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+@media (max-width: 1200px) {
+  .ai-module-panel {
+    width: 340px;
+    min-width: 340px;
+  }
+}
+
+@media (max-width: 900px) {
+  .ai-module-panel {
+    position: fixed;
+    right: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 200;
+    border-radius: 12px 0 0 12px;
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.3);
+  }
+}

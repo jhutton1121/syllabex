@@ -56,12 +56,18 @@
 
 .syllabus-item {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 10px;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
   background: rgba(255, 255, 255, 0.03);
   border-radius: 6px;
   border: 1px solid var(--border-color, #2a2a4e);
+}
+
+.syllabus-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .syllabus-filename {
@@ -85,6 +91,38 @@
 
 .syllabus-delete-btn:hover {
   color: #ef4444;
+}
+
+.syllabus-warning {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.syllabus-extract-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.syllabus-char-count {
+  font-size: 11px;
+  color: #34d399;
+  font-weight: 500;
+}
+
+.syllabus-preview {
+  font-size: 11px;
+  color: var(--text-secondary, #a0a0c0);
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 .syllabus-empty {

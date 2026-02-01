@@ -146,40 +146,41 @@
 }
 
 .assignment-stats-cards .stat-card {
-  background: white;
-  border: 2px solid #e2e8f0;
+  background: #2a2a4e;
+  border: 1px solid #3a3a5e;
   border-radius: 12px;
   padding: 1.25rem;
   display: flex;
   align-items: center;
   gap: 1rem;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: none;
 }
 
 .assignment-stats-cards .stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-color: #4a4a6e;
 }
 
 .assignment-stats-cards .stat-card.stat-upcoming {
-  border-color: #10b981;
-  background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.1);
 }
 
 .assignment-stats-cards .stat-card.stat-completed {
-  border-color: #6366f1;
-  background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(99, 102, 241, 0.1);
 }
 
 .assignment-stats-cards .stat-card.stat-late {
-  border-color: #f59e0b;
-  background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
+  border-color: rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.1);
 }
 
 .assignment-stats-cards .stat-card.stat-pastdue {
-  border-color: #ef4444;
-  background: linear-gradient(135deg, #ffffff 0%, #fef2f2 100%);
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.1);
 }
 
 .assignment-stats-cards .stat-icon {
@@ -197,7 +198,7 @@
   font-weight: 700;
   line-height: 1;
   margin-bottom: 0.25rem;
-  color: #0f172a;
+  color: #f0f0ff;
 }
 
 .assignment-stats-cards .stat-label {
@@ -205,15 +206,15 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 500;
-  color: #64748b;
+  color: #a0a0c0;
 }
 
 /* Tabs */
 .course-tabs {
   display: flex;
   gap: 0;
-  background: white;
-  border-bottom: 1px solid #e2e8f0;
+  background: #1e1e3f;
+  border-bottom: 1px solid #3a3a5e;
   padding: 0 2rem;
   position: sticky;
   top: 0;
@@ -226,18 +227,18 @@
   border: none;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #64748b;
+  color: #a0a0c0;
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: all 0.2s;
 }
 
 .tab:hover {
-  color: #0f172a;
+  color: #f0f0ff;
 }
 
 .tab.active {
-  color: #6366f1;
+  color: #818cf8;
   border-bottom-color: #6366f1;
 }
 
@@ -246,12 +247,13 @@
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
+  background: #12122b;
 }
 
 /* Empty State */
 .empty-state {
-  background: #f8fafc;
-  border: 2px dashed #e2e8f0;
+  background: #2a2a4e;
+  border: 2px dashed #3a3a5e;
   border-radius: 16px;
   padding: 3rem 2rem;
   text-align: center;
@@ -264,13 +266,140 @@
 
 .empty-state h3 {
   font-size: 1.1rem;
-  color: #0f172a;
+  color: #f0f0ff;
   margin-bottom: 0.5rem;
 }
 
 .empty-state p {
-  color: #64748b;
+  color: #a0a0c0;
   font-size: 0.9rem;
+}
+
+/* Syllabus View */
+.course-syllabus h2 {
+  margin: 0 0 1rem;
+  font-size: 1.3rem;
+  color: #f0f0ff;
+}
+
+.syllabus-upload-section {
+  margin-bottom: 1.5rem;
+}
+
+.syllabus-upload-desc {
+  color: #a0a0c0;
+  font-size: 0.85rem;
+  margin: 0 0 12px;
+}
+
+.syllabus-upload-area {
+  display: inline-block;
+  background: rgba(99, 102, 241, 0.1);
+  color: #818cf8;
+  border: 1px dashed rgba(99, 102, 241, 0.4);
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.syllabus-upload-area:hover {
+  background: rgba(99, 102, 241, 0.2);
+}
+
+.syllabus-error-banner {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+}
+
+.syllabus-file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.syllabus-file-card {
+  background: #2a2a4e;
+  border: 1px solid #3a3a5e;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.syllabus-file-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.syllabus-file-icon {
+  font-size: 1.2rem;
+}
+
+.syllabus-file-name {
+  flex: 1;
+  font-weight: 600;
+  color: #f0f0ff;
+  font-size: 0.9rem;
+}
+
+.syllabus-download-btn {
+  color: #818cf8;
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.syllabus-download-btn:hover {
+  text-decoration: underline;
+}
+
+.syllabus-remove-btn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 1.2rem;
+  font-weight: 700;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.syllabus-extraction-warning {
+  margin-top: 8px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.syllabus-extraction-status {
+  margin-top: 8px;
+}
+
+.syllabus-extracted-chars {
+  font-size: 0.8rem;
+  color: #34d399;
+  font-weight: 500;
+}
+
+.syllabus-text-preview {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: #a0a0c0;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Assignments Grid */
@@ -281,8 +410,8 @@
 }
 
 .assignment-card {
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: #2a2a4e;
+  border: 1px solid #3a3a5e;
   border-radius: 12px;
   overflow: hidden;
   transition: box-shadow 0.2s;
@@ -291,11 +420,12 @@
 }
 
 .assignment-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  border-color: #4a4a6e;
 }
 
 .assignment-card.overdue {
-  border-color: #fecaca;
+  border-color: rgba(239, 68, 68, 0.4);
 }
 
 .assignment-card-header {
@@ -303,8 +433,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
+  background: #1e1e3f;
+  border-bottom: 1px solid #3a3a5e;
 }
 
 .header-badges {
@@ -323,23 +453,23 @@
 }
 
 .type-badge.type-quiz {
-  background: #dbeafe;
-  color: #2563eb;
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
 }
 
 .type-badge.type-test {
-  background: #ffedd5;
-  color: #ea580c;
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
 }
 
 .type-badge.type-homework {
-  background: #f3e8ff;
-  color: #9333ea;
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
 }
 
 .overdue-badge {
-  background: #fef2f2;
-  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
   padding: 0.3rem 0.6rem;
   border-radius: 6px;
   font-size: 0.7rem;
@@ -356,18 +486,18 @@
 }
 
 .availability-badge.not-started {
-  background: #fef3c7;
-  color: #d97706;
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
 }
 
 .availability-badge.open {
-  background: #d1fae5;
-  color: #059669;
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
 }
 
 .availability-badge.closed {
-  background: #fee2e2;
-  color: #dc2626;
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
 }
 
 .editable-badge {
@@ -375,13 +505,13 @@
   border-radius: 6px;
   font-size: 0.7rem;
   font-weight: 600;
-  background: #e0e7ff;
-  color: #4f46e5;
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
 }
 
 /* Assignment card states */
 .assignment-card.not-started {
-  border-color: #fef3c7;
+  border-color: rgba(245, 158, 11, 0.3);
 }
 
 .assignment-card-body {
@@ -392,13 +522,13 @@
 .assignment-card-body h3 {
   font-size: 1rem;
   font-weight: 600;
-  color: #0f172a;
+  color: #f0f0ff;
   margin-bottom: 0.5rem;
 }
 
 .assignment-card-body .description {
   font-size: 0.85rem;
-  color: #64748b;
+  color: #b0b0d0;
   line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -408,8 +538,8 @@
 
 .assignment-card-footer {
   padding: 1rem 1.25rem;
-  background: #fafafa;
-  border-top: 1px solid #f1f5f9;
+  background: #1e1e3f;
+  border-top: 1px solid #3a3a5e;
 }
 
 .assignment-stats {
@@ -425,7 +555,7 @@
 
 .assignment-stats .stat-label {
   font-size: 0.65rem;
-  color: #94a3b8;
+  color: #8080a8;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -433,7 +563,7 @@
 .assignment-stats .stat-value {
   font-size: 0.85rem;
   font-weight: 500;
-  color: #0f172a;
+  color: #e0e0e0;
 }
 
 .assignment-stats .stat-value.overdue {
@@ -452,10 +582,10 @@
 
 /* Students Table */
 .students-list {
-  background: white;
+  background: #2a2a4e;
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #3a3a5e;
 }
 
 .data-table {
@@ -468,18 +598,18 @@
   text-align: left;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #64748b;
+  color: #a0a0c0;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
+  background: #1e1e3f;
+  border-bottom: 1px solid #3a3a5e;
 }
 
 .data-table td {
   padding: 1rem;
   font-size: 0.9rem;
-  color: #0f172a;
-  border-bottom: 1px solid #f1f5f9;
+  color: #e0e0e0;
+  border-bottom: 1px solid #3a3a5e;
 }
 
 .data-table tr:last-child td {
@@ -487,7 +617,7 @@
 }
 
 .data-table tr:hover td {
-  background: #f8fafc;
+  background: #1e1e3f;
 }
 
 .student-name {
@@ -518,26 +648,26 @@
 }
 
 .status-badge.active {
-  background: #dcfce7;
-  color: #16a34a;
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
 }
 
 .status-badge.dropped {
-  background: #fef2f2;
-  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
 }
 
 .status-badge.completed {
-  background: #dbeafe;
-  color: #2563eb;
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
 }
 
 /* Gradebook Table */
 .gradebook-table-wrapper {
-  background: white;
+  background: #2a2a4e;
   border-radius: 12px;
   overflow: auto;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #3a3a5e;
 }
 
 .gradebook-table {
@@ -550,27 +680,27 @@
 .gradebook-table td {
   padding: 1rem;
   text-align: center;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid #3a3a5e;
 }
 
 .gradebook-table th {
-  background: #f8fafc;
+  background: #1e1e3f;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #64748b;
+  color: #a0a0c0;
 }
 
 .gradebook-table .sticky-col {
   position: sticky;
   left: 0;
-  background: white;
+  background: #2a2a4e;
   text-align: left;
   z-index: 1;
-  border-right: 1px solid #e2e8f0;
+  border-right: 1px solid #3a3a5e;
 }
 
 .gradebook-table th.sticky-col {
-  background: #f8fafc;
+  background: #1e1e3f;
 }
 
 .assignment-header {
@@ -582,12 +712,12 @@
 .assignment-title {
   font-weight: 600;
   font-size: 0.8rem;
-  color: #0f172a;
+  color: #f0f0ff;
 }
 
 .assignment-points {
   font-size: 0.7rem;
-  color: #94a3b8;
+  color: #8080a8;
 }
 
 .grade-cell .grade {
@@ -596,7 +726,7 @@
 }
 
 .grade-cell .no-grade {
-  color: #cbd5e1;
+  color: #6a6a8e;
 }
 
 .grade.A { color: #16a34a; }
@@ -617,21 +747,21 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.25rem;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: #2a2a4e;
+  border: 1px solid #3a3a5e;
   border-radius: 12px;
 }
 
 .grade-info h4 {
   font-size: 1rem;
   font-weight: 600;
-  color: #0f172a;
+  color: #f0f0ff;
   margin-bottom: 0.25rem;
 }
 
 .grade-info p {
   font-size: 0.85rem;
-  color: #64748b;
+  color: #a0a0c0;
   text-transform: capitalize;
 }
 
@@ -645,7 +775,7 @@
   font-family: 'JetBrains Mono', monospace;
   font-size: 1.1rem;
   font-weight: 600;
-  color: #0f172a;
+  color: #f0f0ff;
 }
 
 .letter-grade {
@@ -655,11 +785,11 @@
   font-size: 1.1rem;
 }
 
-.letter-grade.A { background: #dcfce7; color: #16a34a; }
-.letter-grade.B { background: #dbeafe; color: #2563eb; }
-.letter-grade.C { background: #fef3c7; color: #d97706; }
-.letter-grade.D { background: #ffedd5; color: #ea580c; }
-.letter-grade.F { background: #fef2f2; color: #ef4444; }
+.letter-grade.A { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+.letter-grade.B { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+.letter-grade.C { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+.letter-grade.D { background: rgba(234, 88, 12, 0.15); color: #fb923c; }
+.letter-grade.F { background: rgba(239, 68, 68, 0.15); color: #f87171; }
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -727,12 +857,11 @@
 
 /* Course Content Layout with Sub-Navigation */
 .course-content-layout {
-  margin-left: 450px; /* 200px main sidebar + 250px sub-nav */
   padding: 2rem;
   position: relative;
   transition: margin-left 0.3s ease;
-  display: flex;
-  justify-content: center;
+  background: #12122b;
+  min-height: calc(100vh - 64px);
 }
 
 .course-main-content {
@@ -744,13 +873,13 @@
 .overview-view h2 {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #f0f0ff;
   margin-bottom: 1.5rem;
 }
 
 .overview-section {
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: #2a2a4e;
+  border: 1px solid #3a3a5e;
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -759,25 +888,25 @@
 .overview-section h3 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #0f172a;
+  color: #f0f0ff;
   margin-bottom: 1rem;
 }
 
 .overview-section p {
-  color: #64748b;
+  color: #b0b0d0;
   line-height: 1.6;
 }
 
 .overview-info {
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: #2a2a4e;
+  border: 1px solid #3a3a5e;
   border-radius: 12px;
   padding: 1.5rem;
   margin-top: 1rem;
 }
 
 .overview-info p {
-  color: #64748b;
+  color: #b0b0d0;
   line-height: 1.6;
   margin: 0;
 }
@@ -790,8 +919,8 @@
 }
 
 .stat-card {
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: #2a2a4e;
+  border: 1px solid #3a3a5e;
   border-radius: 12px;
   padding: 1.5rem;
   display: flex;
@@ -801,18 +930,18 @@
 }
 
 .stat-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transform: translateY(-2px);
 }
 
 .stat-card.stat-upcoming {
-  border-color: #10b981;
-  background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.1);
 }
 
 .stat-card.stat-pastdue {
-  border-color: #ef4444;
-  background: linear-gradient(135deg, #ffffff 0%, #fef2f2 100%);
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.1);
 }
 
 .stat-icon {
@@ -827,7 +956,7 @@
 .stat-number {
   font-size: 2rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #f0f0ff;
   font-family: 'JetBrains Mono', monospace;
 }
 
@@ -841,7 +970,7 @@
 
 .stat-label {
   font-size: 0.85rem;
-  color: #64748b;
+  color: #a0a0c0;
   font-weight: 500;
 }
 
@@ -849,7 +978,7 @@
 .assignments-view h2 {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #f0f0ff;
   margin-bottom: 1.5rem;
 }
 
@@ -859,8 +988,8 @@
 }
 
 .calendar-placeholder {
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: #2a2a4e;
+  border: 1px solid #3a3a5e;
   border-radius: 12px;
   padding: 3rem 2rem;
   text-align: center;
@@ -875,25 +1004,25 @@
 .calendar-placeholder h3 {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #0f172a;
+  color: #f0f0ff;
   margin-bottom: 0.75rem;
 }
 
 .calendar-placeholder p {
-  color: #64748b;
+  color: #b0b0d0;
   font-size: 1rem;
   margin-bottom: 0.5rem;
 }
 
 .calendar-placeholder .info-subtext {
-  color: #94a3b8;
+  color: #8080a8;
   font-size: 0.9rem;
   font-style: italic;
 }
 
 .upcoming-section {
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: #2a2a4e;
+  border: 1px solid #3a3a5e;
   border-radius: 12px;
   padding: 1.5rem;
 }
@@ -901,7 +1030,7 @@
 .upcoming-section h3 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #0f172a;
+  color: #f0f0ff;
   margin-bottom: 1rem;
 }
 
@@ -916,14 +1045,14 @@
   align-items: center;
   gap: 1rem;
   padding: 0.75rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #3a3a5e;
   border-radius: 8px;
   transition: all 0.2s ease;
 }
 
 .upcoming-item:hover {
   border-color: #6366f1;
-  background: #f8fafc;
+  background: #1e1e3f;
 }
 
 .type-indicator {
@@ -953,7 +1082,7 @@
 .upcoming-title {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #0f172a;
+  color: #f0f0ff;
   margin-bottom: 0.25rem;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -962,7 +1091,7 @@
 
 .upcoming-type {
   font-size: 0.75rem;
-  color: #64748b;
+  color: #a0a0c0;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
