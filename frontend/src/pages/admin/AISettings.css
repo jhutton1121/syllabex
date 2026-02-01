@@ -18,6 +18,7 @@
   gap: 10px;
   cursor: pointer;
   font-size: 14px;
+  color: var(--text-secondary);
 }
 
 .toggle-label input[type="checkbox"] {

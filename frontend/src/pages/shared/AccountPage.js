@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import userService from '../../services/userService';
 import './AccountPage.css';
 
 function AccountPage() {
   const { user, login } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
@@ -119,6 +121,34 @@ function AccountPage() {
         )}
 
         <div className="account-grid">
+          {/* Appearance Section */}
+          <div className="account-card">
+            <h2 className="card-title">Appearance</h2>
+            <div className="theme-toggle-section">
+              <div className="theme-option">
+                <div className="theme-info">
+                  <span className="theme-label">Theme</span>
+                  <span className="theme-description">
+                    Switch between dark and light mode
+                  </span>
+                </div>
+                <button
+                  className={`theme-toggle-btn ${theme}`}
+                  onClick={toggleTheme}
+                  aria-label="Toggle theme"
+                >
+                  <span className="toggle-icon">{theme === 'dark' ? '🌙' : '☀️'}</span>
+                  <span className="toggle-track">
+                    <span className="toggle-thumb" />
+                  </span>
+                  <span className="toggle-mode-label">
+                    {theme === 'dark' ? 'Dark' : 'Light'}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* Profile Picture Section (Placeholder) */}
           <div className="account-card">
             <h2 className="card-title">Profile Picture</h2>

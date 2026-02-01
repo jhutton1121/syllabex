@@ -1,5 +1,5 @@
 .rich-content {
-  color: #f0f0ff;
+  color: var(--text-primary);
   font-size: 15px;
   line-height: 1.6;
   white-space: pre-wrap;
@@ -31,7 +31,7 @@
 }
 
 .rich-content a {
-  color: #818cf8;
+  color: var(--primary-light);
   text-decoration: underline;
 }
 
@@ -50,16 +50,16 @@
 }
 
 .rich-content blockquote {
-  border-left: 3px solid #6366f1;
+  border-left: 3px solid var(--primary);
   padding-left: 16px;
   margin: 12px 0;
-  color: #b0b0d0;
+  color: var(--text-muted);
   font-style: italic;
 }
 
 .rich-content pre {
-  background: #12122b;
-  border: 1px solid #3a3a5e;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-default);
   border-radius: 8px;
   padding: 16px;
   overflow-x: auto;
@@ -69,7 +69,7 @@
 .rich-content code {
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
-  color: #e0e0e0;
+  color: var(--text-secondary);
 }
 
 .rich-content :not(pre) > code {
@@ -80,7 +80,7 @@
 
 .rich-content hr {
   border: none;
-  border-top: 1px solid #3a3a5e;
+  border-top: 1px solid var(--border-default);
   margin: 20px 0;
 }
 

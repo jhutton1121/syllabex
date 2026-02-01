@@ -14,7 +14,7 @@
   align-items: center;
   justify-content: center;
   min-height: 60vh;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .course-error h2 {
@@ -107,7 +107,7 @@
 }
 
 .course-actions .btn-primary:hover {
-  background: #f1f5f9;
+  background: var(--bg-tertiary);
 }
 
 .course-meta {
@@ -146,8 +146,8 @@
 }
 
 .assignment-stats-cards .stat-card {
-  background: #2a2a4e;
-  border: 1px solid #3a3a5e;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
   border-radius: 12px;
   padding: 1.25rem;
   display: flex;
@@ -160,7 +160,7 @@
 .assignment-stats-cards .stat-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  border-color: #4a4a6e;
+  border-color: var(--border-hover);
 }
 
 .assignment-stats-cards .stat-card.stat-upcoming {
@@ -198,7 +198,7 @@
   font-weight: 700;
   line-height: 1;
   margin-bottom: 0.25rem;
-  color: #f0f0ff;
+  color: var(--text-primary);
 }
 
 .assignment-stats-cards .stat-label {
@@ -206,15 +206,15 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 500;
-  color: #a0a0c0;
+  color: var(--text-subtle);
 }
 
 /* Tabs */
 .course-tabs {
   display: flex;
   gap: 0;
-  background: #1e1e3f;
-  border-bottom: 1px solid #3a3a5e;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-default);
   padding: 0 2rem;
   position: sticky;
   top: 0;
@@ -227,14 +227,14 @@
   border: none;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #a0a0c0;
+  color: var(--text-subtle);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: all 0.2s;
 }
 
 .tab:hover {
-  color: #f0f0ff;
+  color: var(--text-primary);
 }
 
 .tab.active {
@@ -247,13 +247,13 @@
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  background: #12122b;
+  background: var(--bg-tertiary);
 }
 
 /* Empty State */
 .empty-state {
-  background: #2a2a4e;
-  border: 2px dashed #3a3a5e;
+  background: var(--bg-secondary);
+  border: 2px dashed var(--border-default);
   border-radius: 16px;
   padding: 3rem 2rem;
   text-align: center;
@@ -266,12 +266,12 @@
 
 .empty-state h3 {
   font-size: 1.1rem;
-  color: #f0f0ff;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
 }
 
 .empty-state p {
-  color: #a0a0c0;
+  color: var(--text-subtle);
   font-size: 0.9rem;
 }
 
@@ -279,7 +279,7 @@
 .course-syllabus h2 {
   margin: 0 0 1rem;
   font-size: 1.3rem;
-  color: #f0f0ff;
+  color: var(--text-primary);
 }
 
 .syllabus-upload-section {
@@ -287,7 +287,7 @@
 }
 
 .syllabus-upload-desc {
-  color: #a0a0c0;
+  color: var(--text-subtle);
   font-size: 0.85rem;
   margin: 0 0 12px;
 }
@@ -326,8 +326,8 @@
 }
 
 .syllabus-file-card {
-  background: #2a2a4e;
-  border: 1px solid #3a3a5e;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
   border-radius: 10px;
   padding: 14px 16px;
 }
@@ -345,7 +345,7 @@
 .syllabus-file-name {
   flex: 1;
   font-weight: 600;
-  color: #f0f0ff;
+  color: var(--text-primary);
   font-size: 0.9rem;
 }
 
@@ -395,7 +395,7 @@
 .syllabus-text-preview {
   margin: 4px 0 0;
   font-size: 0.8rem;
-  color: #a0a0c0;
+  color: var(--text-subtle);
   line-height: 1.4;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -410,8 +410,8 @@
 }
 
 .assignment-card {
-  background: #2a2a4e;
-  border: 1px solid #3a3a5e;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
   border-radius: 12px;
   overflow: hidden;
   transition: box-shadow 0.2s;
@@ -421,7 +421,7 @@
 
 .assignment-card:hover {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  border-color: #4a4a6e;
+  border-color: var(--border-hover);
 }
 
 .assignment-card.overdue {
@@ -433,8 +433,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background: #1e1e3f;
-  border-bottom: 1px solid #3a3a5e;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-default);
 }
 
 .header-badges {
@@ -522,13 +522,13 @@
 .assignment-card-body h3 {
   font-size: 1rem;
   font-weight: 600;
-  color: #f0f0ff;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
 }
 
 .assignment-card-body .description {
   font-size: 0.85rem;
-  color: #b0b0d0;
+  color: var(--text-muted);
   line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -538,8 +538,8 @@
 
 .assignment-card-footer {
   padding: 1rem 1.25rem;
-  background: #1e1e3f;
-  border-top: 1px solid #3a3a5e;
+  background: var(--bg-primary);
+  border-top: 1px solid var(--border-default);
 }
 
 .assignment-stats {
@@ -555,7 +555,7 @@
 
 .assignment-stats .stat-label {
   font-size: 0.65rem;
-  color: #8080a8;
+  color: var(--text-disabled);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -563,7 +563,7 @@
 .assignment-stats .stat-value {
   font-size: 0.85rem;
   font-weight: 500;
-  color: #e0e0e0;
+  color: var(--text-secondary);
 }
 
 .assignment-stats .stat-value.overdue {
@@ -582,10 +582,10 @@
 
 /* Students Table */
 .students-list {
-  background: #2a2a4e;
+  background: var(--bg-secondary);
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid #3a3a5e;
+  border: 1px solid var(--border-default);
 }
 
 .data-table {
@@ -598,18 +598,18 @@
   text-align: left;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #a0a0c0;
+  color: var(--text-subtle);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background: #1e1e3f;
-  border-bottom: 1px solid #3a3a5e;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-default);
 }
 
 .data-table td {
   padding: 1rem;
   font-size: 0.9rem;
-  color: #e0e0e0;
-  border-bottom: 1px solid #3a3a5e;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-default);
 }
 
 .data-table tr:last-child td {
@@ -617,7 +617,7 @@
 }
 
 .data-table tr:hover td {
-  background: #1e1e3f;
+  background: var(--bg-primary);
 }
 
 .student-name {
@@ -664,10 +664,10 @@
 
 /* Gradebook Table */
 .gradebook-table-wrapper {
-  background: #2a2a4e;
+  background: var(--bg-secondary);
   border-radius: 12px;
   overflow: auto;
-  border: 1px solid #3a3a5e;
+  border: 1px solid var(--border-default);
 }
 
 .gradebook-table {
@@ -680,27 +680,27 @@
 .gradebook-table td {
   padding: 1rem;
   text-align: center;
-  border-bottom: 1px solid #3a3a5e;
+  border-bottom: 1px solid var(--border-default);
 }
 
 .gradebook-table th {
-  background: #1e1e3f;
+  background: var(--bg-primary);
   font-size: 0.75rem;
   font-weight: 600;
-  color: #a0a0c0;
+  color: var(--text-subtle);
 }
 
 .gradebook-table .sticky-col {
   position: sticky;
   left: 0;
-  background: #2a2a4e;
+  background: var(--bg-secondary);
   text-align: left;
   z-index: 1;
-  border-right: 1px solid #3a3a5e;
+  border-right: 1px solid var(--border-default);
 }
 
 .gradebook-table th.sticky-col {
-  background: #1e1e3f;
+  background: var(--bg-primary);
 }
 
 .assignment-header {
@@ -712,12 +712,12 @@
 .assignment-title {
   font-weight: 600;
   font-size: 0.8rem;
-  color: #f0f0ff;
+  color: var(--text-primary);
 }
 
 .assignment-points {
   font-size: 0.7rem;
-  color: #8080a8;
+  color: var(--text-disabled);
 }
 
 .grade-cell .grade {
@@ -726,7 +726,7 @@
 }
 
 .grade-cell .no-grade {
-  color: #6a6a8e;
+  color: var(--text-faint);
 }
 
 .grade.A { color: #16a34a; }
@@ -747,21 +747,21 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.25rem;
-  background: #2a2a4e;
-  border: 1px solid #3a3a5e;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
   border-radius: 12px;
 }
 
 .grade-info h4 {
   font-size: 1rem;
   font-weight: 600;
-  color: #f0f0ff;
+  color: var(--text-primary);
   margin-bottom: 0.25rem;
 }
 
 .grade-info p {
   font-size: 0.85rem;
-  color: #a0a0c0;
+  color: var(--text-subtle);
   text-transform: capitalize;
 }
 
@@ -775,7 +775,7 @@
   font-family: 'JetBrains Mono', monospace;
   font-size: 1.1rem;
   font-weight: 600;
-  color: #f0f0ff;
+  color: var(--text-primary);
 }
 
 .letter-grade {
@@ -860,7 +860,7 @@
   padding: 2rem;
   position: relative;
   transition: margin-left 0.3s ease;
-  background: #12122b;
+  background: var(--bg-tertiary);
   min-height: calc(100vh - 64px);
 }
 
@@ -873,13 +873,13 @@
 .overview-view h2 {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #f0f0ff;
+  color: var(--text-primary);
   margin-bottom: 1.5rem;
 }
 
 .overview-section {
-  background: #2a2a4e;
-  border: 1px solid #3a3a5e;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -888,25 +888,25 @@
 .overview-section h3 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #f0f0ff;
+  color: var(--text-primary);
   margin-bottom: 1rem;
 }
 
 .overview-section p {
-  color: #b0b0d0;
+  color: var(--text-muted);
   line-height: 1.6;
 }
 
 .overview-info {
-  background: #2a2a4e;
-  border: 1px solid #3a3a5e;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
   border-radius: 12px;
   padding: 1.5rem;
   margin-top: 1rem;
 }
 
 .overview-info p {
-  color: #b0b0d0;
+  color: var(--text-muted);
   line-height: 1.6;
   margin: 0;
 }
@@ -919,8 +919,8 @@
 }
 
 .stat-card {
-  background: #2a2a4e;
-  border: 1px solid #3a3a5e;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
   border-radius: 12px;
   padding: 1.5rem;
   display: flex;
@@ -956,7 +956,7 @@
 .stat-number {
   font-size: 2rem;
   font-weight: 700;
-  color: #f0f0ff;
+  color: var(--text-primary);
   font-family: 'JetBrains Mono', monospace;
 }
 
@@ -970,7 +970,7 @@
 
 .stat-label {
   font-size: 0.85rem;
-  color: #a0a0c0;
+  color: var(--text-subtle);
   font-weight: 500;
 }
 
@@ -978,7 +978,7 @@
 .assignments-view h2 {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #f0f0ff;
+  color: var(--text-primary);
   margin-bottom: 1.5rem;
 }
 
@@ -988,8 +988,8 @@
 }
 
 .calendar-placeholder {
-  background: #2a2a4e;
-  border: 1px solid #3a3a5e;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
   border-radius: 12px;
   padding: 3rem 2rem;
   text-align: center;
@@ -1004,25 +1004,25 @@
 .calendar-placeholder h3 {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #f0f0ff;
+  color: var(--text-primary);
   margin-bottom: 0.75rem;
 }
 
 .calendar-placeholder p {
-  color: #b0b0d0;
+  color: var(--text-muted);
   font-size: 1rem;
   margin-bottom: 0.5rem;
 }
 
 .calendar-placeholder .info-subtext {
-  color: #8080a8;
+  color: var(--text-disabled);
   font-size: 0.9rem;
   font-style: italic;
 }
 
 .upcoming-section {
-  background: #2a2a4e;
-  border: 1px solid #3a3a5e;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
   border-radius: 12px;
   padding: 1.5rem;
 }
@@ -1030,7 +1030,7 @@
 .upcoming-section h3 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #f0f0ff;
+  color: var(--text-primary);
   margin-bottom: 1rem;
 }
 
@@ -1045,14 +1045,14 @@
   align-items: center;
   gap: 1rem;
   padding: 0.75rem;
-  border: 1px solid #3a3a5e;
+  border: 1px solid var(--border-default);
   border-radius: 8px;
   transition: all 0.2s ease;
 }
 
 .upcoming-item:hover {
   border-color: #6366f1;
-  background: #1e1e3f;
+  background: var(--bg-primary);
 }
 
 .type-indicator {
@@ -1082,7 +1082,7 @@
 .upcoming-title {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #f0f0ff;
+  color: var(--text-primary);
   margin-bottom: 0.25rem;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1091,7 +1091,7 @@
 
 .upcoming-type {
   font-size: 0.75rem;
-  color: #a0a0c0;
+  color: var(--text-subtle);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }

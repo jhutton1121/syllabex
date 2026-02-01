@@ -35,8 +35,8 @@
   min-height: calc(100vh - 80px);
   display: flex;
   flex-direction: column;
-  background: var(--card-bg, #1e1e3f);
-  border-left: 1px solid var(--border-color, #2a2a4e);
+  background: var(--bg-primary);
+  border-left: 1px solid var(--bg-secondary);
   border-radius: 12px 0 0 12px;
   overflow: hidden;
 }
@@ -118,8 +118,8 @@
 }
 
 .ai-message-assistant {
-  background: var(--input-bg, #2a2a4e);
-  color: var(--text-primary, #e0e0e0);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   align-self: flex-start;
   border-bottom-left-radius: 3px;
 }
@@ -127,7 +127,7 @@
 .ai-message-system {
   background: rgba(99, 102, 241, 0.1);
   border: 1px solid rgba(99, 102, 241, 0.2);
-  color: var(--text-secondary, #a0a0c0);
+  color: var(--text-subtle);
   align-self: center;
   text-align: center;
   max-width: 100%;
@@ -161,7 +161,7 @@
 .ai-typing-indicator span {
   width: 6px;
   height: 6px;
-  background: var(--text-secondary, #a0a0c0);
+  background: var(--text-subtle);
   border-radius: 50%;
   animation: ai-bounce 1.2s infinite;
 }
@@ -182,7 +182,7 @@
 /* Input area */
 .ai-input-area {
   padding: 12px 16px;
-  border-top: 1px solid var(--border-color, #2a2a4e);
+  border-top: 1px solid var(--bg-secondary);
   display: flex;
   gap: 8px;
   align-items: flex-end;
@@ -191,9 +191,9 @@
 
 .ai-input {
   flex: 1;
-  background: var(--input-bg, #2a2a4e);
-  color: var(--text-primary, #e0e0e0);
-  border: 1px solid var(--border-color, #3a3a5e);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
   border-radius: 8px;
   padding: 8px 12px;
   font-size: 13px;
@@ -206,11 +206,11 @@
 
 .ai-input:focus {
   outline: none;
-  border-color: #6366f1;
+  border-color: var(--primary);
 }
 
 .ai-input::placeholder {
-  color: var(--text-secondary, #666);
+  color: var(--text-faint);
 }
 
 .ai-send-btn {
@@ -240,7 +240,7 @@
 .ai-metadata-field {
   font-size: 12px;
   line-height: 1.5;
-  color: var(--text-primary, #e0e0e0);
+  color: var(--text-primary);
   margin-bottom: 2px;
 }
 
