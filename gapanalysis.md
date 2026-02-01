@@ -7,9 +7,9 @@
 
 ## Current State Summary
 
-Syllabex has: multi-tenant Accounts with JWT auth, Courses with CourseModules, three Assignment types (Quiz/Test/Homework) with auto-grading for MC and numerical Questions, a flat GradeEntry-based gradebook, rich text Pages (TipTap), a cross-course Calendar (react-big-calendar), AI-assisted question/module generation via OpenAI, and a dark/light theme system. See `architecture.md` for full data model and flows.
+Syllabex has: multi-tenant Accounts with JWT auth, Courses with CourseModules, three Assignment types (Quiz/Test/Homework) with auto-grading for MC and numerical Questions, a flat GradeEntry-based gradebook, rich text Pages (TipTap), a cross-course Calendar (react-big-calendar), AI-assisted question/module/rubric generation via OpenAI, a structured rubric grading system (Rubric → Criteria → Ratings, with RubricAssessment scoring), and a dark/light theme system. See `architecture.md` for full data model and flows.
 
-**What's missing**: Communication features (zero), file management beyond syllabus upload, rubrics, weighted grading, notifications, discussion forums, question banks, quiz timers, bulk enrollment, and content release conditions.
+**What's missing**: Communication features (zero), file management beyond syllabus upload, weighted grading, notifications, discussion forums, question banks, quiz timers, bulk enrollment, and content release conditions.
 
 ---
 
@@ -22,22 +22,23 @@ Syllabex has: multi-tenant Accounts with JWT auth, Courses with CourseModules, t
 
 ## 1. ASSIGNMENTS & ASSESSMENTS
 
-### SYL-101: Rubric System [P0]
+### SYL-101: Rubric System [P0] ✅ COMPLETED
 
 **Description**: Syllabex currently grades assignments through individual QuestionResponse scoring (points_earned per question) and a single numeric GradeEntry. There is no structured rubric system. In Canvas, Moodle, and Blackboard, rubrics are a foundational grading tool — instructors define criteria (e.g., "Thesis Clarity", "Evidence Quality") with performance levels (e.g., Excellent/Good/Needs Work) and point values. Rubrics attach to assignments and are used during grading to ensure consistency and provide structured feedback. Students see the rubric before submission (as a guide) and after grading (as feedback).
 
 This is especially critical for `text_response` Questions and the upcoming file upload submissions (SYL-102), where grading is subjective and needs structure.
 
 **Acceptance Criteria**:
-- [ ] New `Rubric` model with fields: `course` (FK to Course), `title`, `reusable` (bool). New `RubricCriterion` model: `rubric` (FK), `title`, `description`, `order`, `points_possible`. New `RubricRating` model: `criterion` (FK), `label`, `description`, `points`, `order`
-- [ ] Rubrics are Account-scoped (through their Course relationship, consistent with existing pattern)
-- [ ] API endpoints: CRUD rubrics at `/api/courses/<course_id>/rubrics/`, attach rubric to Assignment via `rubric` FK on Assignment model
-- [ ] When grading a submission, instructor selects a rating per criterion. Store as `RubricAssessment` (FK to Submission) with `RubricCriterionScore` entries
-- [ ] Total rubric score auto-calculated from selected ratings and written to `QuestionResponse.points_earned` or `GradeEntry.grade`
-- [ ] Student view: rubric criteria visible on assignment page before submission; rubric scores and selected ratings visible after grading (respecting existing due_date visibility rule)
-- [ ] Instructor view: rubric selection UI in `GradeSubmission.js` page alongside existing per-question grading
-- [ ] Rubrics are reusable across assignments within same course
-- [ ] Frontend components follow existing CSS variable system and component patterns per `CLAUDE.md`
+- [x] New `Rubric` model with fields: `course` (FK to Course), `title`, `reusable` (bool). New `RubricCriterion` model: `rubric` (FK), `title`, `description`, `order`, `points_possible`. New `RubricRating` model: `criterion` (FK), `label`, `description`, `points`, `order`
+- [x] Rubrics are Account-scoped (through their Course relationship, consistent with existing pattern)
+- [x] API endpoints: CRUD rubrics at `/api/courses/<course_id>/rubrics/`, attach rubric to Assignment via `rubric` FK on Assignment model
+- [x] When grading a submission, instructor selects a rating per criterion. Store as `RubricAssessment` (FK to Submission) with `RubricCriterionScore` entries
+- [x] Total rubric score auto-calculated from selected ratings and written to `QuestionResponse.points_earned` or `GradeEntry.grade`
+- [x] Student view: rubric criteria visible on assignment page before submission; rubric scores and selected ratings visible after grading (respecting existing due_date visibility rule)
+- [x] Instructor view: rubric selection UI in `GradeSubmission.js` page alongside existing per-question grading
+- [x] Rubrics are reusable across assignments within same course
+- [x] Frontend components follow existing CSS variable system and component patterns per `CLAUDE.md`
+- [x] **Bonus**: AI rubric generator — multi-turn chat with syllabus context, review modal with per-criterion approve/reject/edit, following existing agentic pattern (`AIRubricChatPanel`, `AIRubricReview`)
 
 ---
 
