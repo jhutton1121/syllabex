@@ -33,6 +33,15 @@ const CourseDetail = () => {
   const isInstructor = course?.user_role === 'instructor';
   const isStudent = course?.user_role === 'student';
 
+  const refreshAssignments = async () => {
+    try {
+      const data = await assignmentService.getAssignments(courseId);
+      setAssignments(data.results || data);
+    } catch (err) {
+      console.error('Failed to refresh assignments:', err);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -319,6 +328,7 @@ const CourseDetail = () => {
               assignments={assignments}
               courseId={courseId}
               isInstructor={isInstructor}
+              onAssignmentsChange={refreshAssignments}
             />
           )}
 
@@ -328,6 +338,7 @@ const CourseDetail = () => {
               assignments={assignments}
               courseId={courseId}
               isInstructor={isInstructor}
+              onAssignmentsChange={refreshAssignments}
             />
           )}
 
@@ -452,6 +463,21 @@ const CourseDetail = () => {
                               >
                                 Submissions
                               </Link>
+                              <button
+                                className="btn btn-danger btn-sm"
+                                onClick={async () => {
+                                  if (window.confirm(`Delete "${assignment.title}"? This action cannot be undone.`)) {
+                                    try {
+                                      await assignmentService.deleteAssignment(assignment.id);
+                                      refreshAssignments();
+                                    } catch (err) {
+                                      console.error('Failed to delete assignment:', err);
+                                    }
+                                  }
+                                }}
+                              >
+                                Delete
+                              </button>
                             </>
                           )}
                         </div>

@@ -267,7 +267,7 @@ function CourseModules({ courseId, modules, assignments, isInstructor, onModules
         <div className="delete-confirm-overlay" onClick={() => setDeleteConfirm(null)}>
           <div className="delete-confirm-popover" onClick={(e) => e.stopPropagation()}>
             <p>
-              Delete "{deleteConfirm.title}"? This will remove the module but not its assignments.
+              Delete "{deleteConfirm.title}"? This will remove the module and all its assignments. Pages will be kept.
             </p>
             <div className="delete-confirm-actions">
               <button className="btn-cancel" onClick={() => setDeleteConfirm(null)}>Cancel</button>
